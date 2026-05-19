@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#04060f">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hōkū Palapala — The Star Record</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --black: #04060f;
+  --ocean: #070d1a;
+  --gold: #e8b84b;
+  --teal: #4ab5a0;
+  --blue-star: #9dc8f0;
+  --red-star: #f08060;
+  --pale: #e8e0d0;
+  --dim: #6a7080;
+  --panel: rgba(8,16,38,0.92);
+  --border: rgba(232,184,75,0.18);
+  --teal-border: rgba(74,181,160,0.25);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--black);color:var(--pale);font-family:'EB Garamond',serif;overflow-x:hidden}
+
+#bg-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+
+.wrap{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:0 20px 80px}
+
+/* NAV TABS */
+nav{position:sticky;top:0;z-index:100;background:rgba(4,6,15,0.97);border-bottom:1px solid var(--border);backdrop-filter:blur(12px)}
+.nav-inner{display:flex;align-items:center;gap:0;overflow-x:auto;max-width:1280px;margin:0 auto;padding:0 20px}
+.nav-title{font-family:'Cinzel',serif;font-size:0.85rem;color:var(--gold);letter-spacing:0.1em;margin-right:24px;white-space:nowrap;padding:16px 0}
+.tab{font-family:'Space Mono',monospace;font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;padding:16px 18px;cursor:pointer;color:var(--dim);border-bottom:2px solid transparent;transition:all 0.25s;white-space:nowrap;background:none;border-left:none;border-right:none;border-top:none}
+.tab:hover,.tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+
+/* SECTIONS */
+.section{display:none;padding:40px 0}
+.section.active{display:block}
+
+/* HEADER HERO */
+.hero{text-align:center;padding:56px 20px 40px;border-bottom:1px solid var(--border)}
+.hero-title{font-family:'Cinzel',serif;font-size:clamp(2rem,6vw,3.5rem);font-weight:700;color:var(--gold);letter-spacing:0.08em;text-shadow:0 0 60px rgba(232,184,75,0.35);line-height:1.1}
+.hero-sub{font-style:italic;font-size:clamp(0.9rem,2.5vw,1.15rem);color:var(--dim);margin-top:10px}
+.hero-tags{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin-top:20px}
+.tag{font-family:'Space Mono',monospace;font-size:0.6rem;padding:4px 14px;border-radius:20px;letter-spacing:0.08em;text-transform:uppercase}
+.tag.teal{color:var(--teal);border:1px solid var(--teal-border)}
+.tag.gold{color:var(--gold);border:1px solid var(--border)}
+
+/* SECTION HEADINGS */
+.sec-head{font-family:'Cinzel',serif;font-size:1.1rem;color:var(--gold);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:20px;display:flex;align-items:center;gap:14px}
+.sec-head::after{content:'';flex:1;height:1px;background:linear-gradient(to right,rgba(232,184,75,0.3),transparent)}
+
+/* GRID LAYOUTS */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px}
+@media(max-width:900px){.two-col,.three-col{grid-template-columns:1fr}}
+.sky-grid{display:grid;grid-template-columns:1fr 360px;gap:28px;align-items:start}
+@media(max-width:860px){.sky-grid{grid-template-columns:1fr}}
+
+/* PANELS */
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:24px;backdrop-filter:blur(8px)}
+.panel.teal-border{border-color:var(--teal-border)}
+
+/* SKY DOME */
+.dome-wrap{position:relative;background:radial-gradient(ellipse at center,#0b1535 0%,#020408 75%);border-radius:50%;aspect-ratio:1;max-width:500px;margin:0 auto;border:1px solid var(--border);box-shadow:0 0 100px rgba(5,15,40,0.9),inset 0 0 60px rgba(0,0,0,0.5);overflow:hidden}
+.dome-wrap::before{content:'';position:absolute;inset:0;border-radius:50%;background:radial-gradient(ellipse at 30% 20%,rgba(30,60,120,0.12),transparent 60%);pointer-events:none}
+#sky-svg{width:100%;height:100%}
+.dome-label{position:absolute;font-family:'Space Mono',monospace;font-size:0.55rem;color:rgba(232,184,75,0.4);letter-spacing:0.1em;text-transform:uppercase}
+.dome-label.n{top:8px;left:50%;transform:translateX(-50%)}
+.dome-label.s{bottom:20px;left:50%;transform:translateX(-50%)}
+.dome-label.e{right:8px;top:50%;transform:translateY(-50%)}
+.dome-label.w{left:8px;top:50%;transform:translateY(-50%)}
+
+/* CONTROLS */
+.ctrl-group{display:flex;flex-direction:column;gap:8px;margin-bottom:18px}
+.ctrl-label{font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--teal);letter-spacing:0.1em;text-transform:uppercase}
+.ctrl-input{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:var(--pale);font-family:'Space Mono',monospace;font-size:0.75rem;padding:8px 12px;border-radius:3px;width:100%;transition:border-color 0.2s}
+.ctrl-input:focus{outline:none;border-color:var(--teal)}
+.ctrl-input option{background:#0a1020}
+.btn{font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;padding:10px 20px;border-radius:3px;cursor:pointer;transition:all 0.25s;border:none}
+.btn.primary{background:rgba(74,181,160,0.15);border:1px solid var(--teal);color:var(--teal)}
+.btn.primary:hover{background:rgba(74,181,160,0.25)}
+.btn.gold{background:rgba(232,184,75,0.12);border:1px solid var(--gold);color:var(--gold)}
+.btn.gold:hover{background:rgba(232,184,75,0.22)}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+
+/* STAR DETAIL */
+.star-name-h{font-family:'Cinzel',serif;font-size:1.4rem;color:var(--gold);margin-bottom:3px}
+.star-name-w{font-family:'Space Mono',monospace;font-size:0.65rem;color:var(--blue-star);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:16px}
+.star-meaning{font-style:italic;font-size:1rem;color:var(--pale);border-left:2px solid var(--gold);padding-left:12px;margin-bottom:18px;line-height:1.6}
+.data-sec{font-family:'Space Mono',monospace;font-size:0.58rem;color:var(--teal);letter-spacing:0.12em;text-transform:uppercase;margin:16px 0 6px;padding-bottom:4px;border-bottom:1px solid rgba(74,181,160,0.2)}
+.data-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.82rem}
+.dl{color:var(--dim);font-family:'Space Mono',monospace;font-size:0.6rem}
+.dv{color:var(--pale);font-family:'Space Mono',monospace;font-size:0.65rem;text-align:right}
+.dv.hi{color:var(--gold)}
+.nav-badge{display:inline-block;margin-top:12px;padding:4px 12px;border-radius:2px;font-family:'Space Mono',monospace;font-size:0.58rem;letter-spacing:0.08em;text-transform:uppercase}
+.nav-badge.primary{background:rgba(232,130,58,0.12);border:1px solid rgba(232,130,58,0.4);color:#e8823a}
+.nav-badge.seasonal{background:rgba(74,181,160,0.1);border:1px solid var(--teal-border);color:var(--teal)}
+
+/* BORTLE CALCULATOR */
+.bortle-scale{display:grid;grid-template-columns:repeat(9,1fr);gap:4px;margin:16px 0}
+.bortle-cell{text-align:center;padding:10px 4px;border-radius:3px;cursor:pointer;transition:all 0.2s;border:1px solid transparent}
+.bortle-cell.active{border-color:var(--gold)}
+.bortle-val{font-family:'Space Mono',monospace;font-size:0.8rem;font-weight:700}
+.bortle-lbl{font-size:0.55rem;margin-top:3px;opacity:0.7}
+.nelm-display{font-family:'Space Mono',monospace;font-size:2.5rem;color:var(--gold);text-align:center;margin:20px 0;text-shadow:0 0 30px rgba(232,184,75,0.4)}
+.nelm-label{text-align:center;font-size:0.75rem;color:var(--dim);margin-top:-14px;font-style:italic}
+.visibility-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+.vis-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:3px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02)}
+.vis-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.vis-name{font-family:'Cinzel',serif;font-size:0.8rem}
+.vis-status{font-family:'Space Mono',monospace;font-size:0.58rem;margin-left:auto}
+
+/* SUBMISSION FORM */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+@media(max-width:600px){.form-row{grid-template-columns:1fr}}
+.form-field{display:flex;flex-direction:column;gap:6px}
+.form-label{font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--teal);letter-spacing:0.08em;text-transform:uppercase}
+.submissions-list{max-height:320px;overflow-y:auto;margin-top:20px}
+.submission-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:3px;padding:12px 16px;margin-bottom:8px;font-size:0.82rem}
+.sub-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.sub-site{font-family:'Cinzel',serif;color:var(--gold);font-size:0.9rem}
+.sub-time{font-family:'Space Mono',monospace;font-size:0.58rem;color:var(--dim)}
+.sub-stars{color:var(--teal);font-size:0.78rem;margin-top:4px}
+.sub-bortle{font-family:'Space Mono',monospace;font-size:0.7rem;color:var(--pale)}
+.star-checkbox-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px;margin-top:8px}
+.star-check{display:flex;align-items:center;gap:8px;font-size:0.82rem;cursor:pointer;padding:4px 8px;border-radius:3px;border:1px solid transparent;transition:border-color 0.2s}
+.star-check:hover{border-color:var(--border)}
+.star-check input{accent-color:var(--gold)}
+
+/* ISLAND MAP */
+#map-container{height:480px;border-radius:4px;overflow:hidden;border:1px solid var(--border);position:relative;background:#06101e}
+.map-legend{position:absolute;bottom:16px;left:16px;background:rgba(4,6,15,0.9);border:1px solid var(--border);border-radius:4px;padding:14px;z-index:10;font-size:0.78rem}
+.legend-title{font-family:'Space Mono',monospace;font-size:0.58rem;color:var(--teal);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px}
+.legend-row{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+#map-svg{width:100%;height:100%}
+
+/* STATS BAR */
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:24px 0}
+@media(max-width:700px){.stats-bar{grid-template-columns:repeat(2,1fr)}}
+.stat-card{background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:20px;text-align:center}
+.stat-num{font-family:'Cinzel',serif;font-size:2rem;color:var(--gold);line-height:1}
+.stat-lbl{font-family:'Space Mono',monospace;font-size:0.58rem;color:var(--dim);letter-spacing:0.08em;text-transform:uppercase;margin-top:6px}
+
+/* KAULANA MAHINA */
+.moon-calendar{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-top:16px}
+.moon-phase{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:3px;padding:14px 10px;text-align:center;cursor:pointer;transition:all 0.25s}
+.moon-phase:hover,.moon-phase.active{border-color:var(--gold);background:rgba(232,184,75,0.06)}
+.moon-symbol{font-size:1.6rem;display:block;margin-bottom:4px}
+.moon-name{font-family:'Cinzel',serif;font-size:0.75rem;color:var(--gold)}
+.moon-meaning{font-size:0.7rem;color:var(--dim);font-style:italic;margin-top:3px}
+.moon-nav{font-family:'Space Mono',monospace;font-size:0.58rem;color:var(--teal);margin-top:6px}
+
+/* TOOLTIP */
+#tip{position:fixed;pointer-events:none;background:rgba(2,4,14,0.97);border:1px solid rgba(232,184,75,0.5);padding:10px 14px;border-radius:3px;font-family:'Space Mono',monospace;font-size:0.62rem;color:var(--pale);z-index:9999;display:none;max-width:220px;line-height:1.6;box-shadow:0 4px 24px rgba(0,0,0,0.6)}
+#tip .tn{color:var(--gold);font-size:0.72rem;display:block;margin-bottom:2px}
+
+/* PULSE */
+@keyframes starPulse{0%,100%{opacity:1}50%{opacity:0.45}}
+.sp{animation:starPulse 3s ease-in-out infinite}
+
+/* FADE */
+@keyframes fi{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.fi{animation:fi 0.6s ease forwards}
+
+/* SUCCESS MESSAGE */
+.success-msg{background:rgba(74,181,160,0.1);border:1px solid var(--teal-border);color:var(--teal);padding:12px 16px;border-radius:3px;font-family:'Space Mono',monospace;font-size:0.7rem;margin-top:12px;display:none}
+</style>
+</head>
+<body>
+<canvas id="bg-canvas"></canvas>
+<div id="tip"><span class="tn"></span><span class="tw"></span></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <div class="nav-title">Hōkū Palapala</div>
+    <button class="tab active" onclick="showTab('sky')">Sky Dome</button>
+    <button class="tab" onclick="showTab('bortle')">Sky Brightness</button>
+    <button class="tab" onclick="showTab('mahina')">Kaulana Mahina</button>
+    <button class="tab" onclick="showTab('submit')">Submit Reading</button>
+    <button class="tab" onclick="showTab('map')">Island Map</button>
+    <button class="tab" onclick="showTab('about')">About</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="wrap">
+<div class="hero">
+  <div class="hero-title">Hōkū Palapala</div>
+  <div class="hero-title" style="font-size:clamp(1rem,3vw,1.6rem);font-weight:400;margin-top:4px;">The Star Record</div>
+  <div class="hero-sub">A citizen-science sky brightness &amp; cultural astronomy archive — Hawaiʻi Island</div>
+  <div class="hero-tags">
+    <span class="tag teal">Dark Sky Science</span>
+    <span class="tag gold">Cultural Astronomy</span>
+    <span class="tag teal">Maunakea Stewardship</span>
+    <span class="tag gold">Polynesian Navigation</span>
+    <span class="tag teal">Citizen Science</span>
+  </div>
+</div>
+
+<!-- ══ SKY DOME TAB ══ -->
+<div class="section active" id="tab-sky">
+  <div style="margin-top:32px">
+    <div class="sec-head">Interactive Sky Dome — 20°N Latitude, Hawaiʻi</div>
+    <div class="sky-grid">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:14px">
+        <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
+          <div class="ctrl-group" style="width:160px">
+            <div class="ctrl-label">Date</div>
+            <input class="ctrl-input" type="date" id="obs-date" onchange="updateSky()">
+          </div>
+          <div class="ctrl-group" style="width:120px">
+            <div class="ctrl-label">Hour (HST)</div>
+            <select class="ctrl-input" id="obs-hour" onchange="updateSky()">
+              <option value="20">8 PM</option><option value="21">9 PM</option>
+              <option value="22" selected>10 PM</option><option value="23">11 PM</option>
+              <option value="0">Midnight</option><option value="1">1 AM</option>
+              <option value="2">2 AM</option><option value="3">3 AM</option>
+            </select>
+          </div>
+          <div class="ctrl-group" style="width:160px">
+            <div class="ctrl-label">Show Layer</div>
+            <select class="ctrl-input" id="sky-layer" onchange="updateSky()">
+              <option value="all">All Stars</option>
+              <option value="nav">Navigation Stars Only</option>
+              <option value="seasonal">Seasonal Markers</option>
+            </select>
+          </div>
+        </div>
+        <div class="dome-wrap">
+          <svg id="sky-svg" viewBox="0 0 500 500"></svg>
+          <div class="dome-label n">N — Hōkūpaʻa</div>
+          <div class="dome-label s">S — Nā Leo</div>
+          <div class="dome-label e">E — Koʻolau</div>
+          <div class="dome-label w">W — Kona</div>
+        </div>
+        <div id="sky-info" style="font-family:'Space Mono',monospace;font-size:0.62rem;color:var(--dim);text-align:center"></div>
+      </div>
+      <div class="panel fi" id="star-detail">
+        <div style="text-align:center;padding:40px 0;color:var(--dim);font-style:italic">
+          <div style="font-size:1.4rem;margin-bottom:10px">✦</div>
+          Click any star to explore its Hawaiian name, navigation role, and astrophysics data.
+          <div style="font-family:'Space Mono',monospace;font-size:0.58rem;color:rgba(232,184,75,0.3);margin-top:12px;letter-spacing:0.1em;text-transform:uppercase">↑ Click a glowing point above</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ BORTLE TAB ══ -->
+<div class="section" id="tab-bortle">
+  <div style="margin-top:32px">
+    <div class="sec-head">Sky Brightness Calculator</div>
+    <div class="two-col">
+      <div>
+        <div class="panel">
+          <div class="ctrl-label" style="margin-bottom:12px">Select your Bortle Scale reading (1=darkest, 9=city)</div>
+          <div class="bortle-scale" id="bortle-scale"></div>
+          <div class="nelm-display" id="nelm-val">6.5</div>
+          <div class="nelm-label">Naked-Eye Limiting Magnitude (NELM)</div>
+          <div style="margin-top:20px">
+            <div class="data-row"><span class="dl">Sky Quality (SQM equiv.)</span><span class="dv hi" id="sqm-val">21.6 mag/arcsec²</span></div>
+            <div class="data-row"><span class="dl">Bortle Class</span><span class="dv" id="bortle-class">Rural Sky</span></div>
+            <div class="data-row"><span class="dl">Milky Way</span><span class="dv" id="mw-vis">Clearly visible, complex structure</span></div>
+            <div class="data-row"><span class="dl">Maunakea Threat Level</span><span class="dv" id="threat-level">Low</span></div>
+            <div class="data-row"><span class="dl">Zodiacal Light</span><span class="dv" id="zodiacal">Visible in spring/fall</span></div>
+          </div>
+          <div class="btn-row">
+            <button class="btn primary" onclick="useReadingInSubmission()">Use This Reading →</button>
+          </div>
+        </div>
+        <div class="panel teal-border" style="margin-top:20px">
+          <div class="ctrl-label" style="margin-bottom:10px">How to take a NELM reading</div>
+          <div style="font-size:0.88rem;color:#a0aabb;line-height:1.7">
+            <strong style="color:var(--pale)">1.</strong> Let your eyes adapt to darkness for 20 minutes — no phone screens.<br>
+            <strong style="color:var(--pale)">2.</strong> Look toward a known star field (the Pleiades/Makaliʻi area works well).<br>
+            <strong style="color:var(--pale)">3.</strong> Note the faintest star you can clearly see without averted vision.<br>
+            <strong style="color:var(--pale)">4.</strong> Match that magnitude to the Bortle scale above.<br>
+            <strong style="color:var(--pale)">5.</strong> Submit your reading with your location on the Submit tab.
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="panel">
+          <div class="ctrl-label" style="margin-bottom:14px">Navigation Star Visibility at This Brightness</div>
+          <div class="visibility-grid" id="vis-grid"></div>
+        </div>
+        <div class="panel" style="margin-top:20px">
+          <div class="ctrl-label" style="margin-bottom:12px">Bortle → NELM Conversion Formula</div>
+          <div style="background:rgba(74,181,160,0.06);border:1px solid var(--teal-border);border-radius:3px;padding:16px;font-family:'Space Mono',monospace;font-size:0.72rem;line-height:2;color:#a0c0b0">
+            NELM = 7.93 − 5 × log₁₀(10^(4.316−(Bortle×0.4)) + 1)<br>
+            SQM ≈ NELM + 0.79 × (NELM − 7.0) + 8.89<br>
+            <span style="color:var(--dim);font-size:0.62rem">— Adapted from Schaefer (1990) &amp; Cinzano (2000)</span>
+          </div>
+          <div class="ctrl-label" style="margin:16px 0 10px">Star Visibility Threshold</div>
+          <div style="font-size:0.85rem;color:#a0aabb;line-height:1.7">A star is visible to the naked eye when its apparent magnitude is less than or equal to the NELM. Stars near the horizon lose ~0.5 mag to atmospheric extinction. Navigation stars near zenith have no extinction penalty.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ KAULANA MAHINA TAB ══ -->
+<div class="section" id="tab-mahina">
+  <div style="margin-top:32px">
+    <div class="sec-head">Kaulana Mahina — The Hawaiian Lunar Calendar</div>
+    <div class="two-col">
+      <div>
+        <div class="panel" style="margin-bottom:20px">
+          <div style="font-size:0.92rem;color:#b0bac8;line-height:1.75;margin-bottom:16px">
+            The Hawaiian lunar calendar divides each month into 30 nights, each with a name, a ruling deity, and traditional guidance for fishing, planting, and navigation. <strong style="color:var(--pale)">Makahiki</strong> — the Hawaiian new year — begins when <strong style="color:var(--gold)">Makaliʻi (the Pleiades)</strong> rises on the eastern horizon at sunset, typically in mid-November.
+          </div>
+          <div class="ctrl-label" style="margin-bottom:10px">Current Phase Calculator</div>
+          <div class="form-row">
+            <div class="form-field">
+              <div class="form-label">Date</div>
+              <input class="ctrl-input" type="date" id="mahina-date" onchange="calcMahina()">
+            </div>
+          </div>
+          <div class="panel teal-border" id="mahina-result" style="margin-top:16px">
+            <div style="text-align:center;color:var(--dim);font-style:italic">Select a date to see the Hawaiian lunar phase</div>
+          </div>
+        </div>
+        <div class="panel teal-border">
+          <div class="ctrl-label" style="margin-bottom:10px">Makahiki Calendar — Key Navigation Nights</div>
+          <div style="font-size:0.85rem;color:#9099aa;line-height:1.7">
+            During <strong style="color:var(--pale)">Hoʻoilo</strong> (the wet season, roughly November–April), Makaliʻi is visible all night and the Milky Way arches overhead — prime navigation season for long voyages. During <strong style="color:var(--pale)">Kau</strong> (the dry season), the Great Fishhook of Māui (Scorpius) dominates the southern sky, and shorter coastal voyages were preferred.
+          </div>
+          <div style="margin-top:14px;font-family:'Space Mono',monospace;font-size:0.65rem;color:var(--gold)">
+            ⟡ Makahiki begins: ~Nov 18 (Pleiades/Makaliʻi rises at sunset)<br>
+            ⟡ Makahiki ends: ~Feb (four-month festival period)<br>
+            ⟡ Best navigation season: Dec–March (Hoʻoilo)
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="ctrl-label" style="margin-bottom:12px">Key Nights of the Month</div>
+        <div class="moon-calendar" id="moon-calendar"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SUBMIT TAB ══ -->
+<div class="section" id="tab-submit">
+  <div style="margin-top:32px">
+    <div class="sec-head">Submit a Sky Brightness Reading</div>
+    <div class="two-col">
+      <div>
+        <div class="panel">
+          <div style="font-size:0.88rem;color:#9099aa;line-height:1.65;margin-bottom:20px">
+            Your reading contributes to a permanent archive documenting dark-sky conditions across Hawaiʻi Island. Data is used by the <strong style="color:var(--pale)">Center for Maunakea Stewardship</strong> and to track whether ancestral navigation stars remain visible from traditional Hawaiian sites.
+          </div>
+          <div class="form-row">
+            <div class="form-field">
+              <div class="form-label">Observer Name (optional)</div>
+              <input class="ctrl-input" type="text" id="f-name" placeholder="Your name or initials">
+            </div>
+            <div class="form-field">
+              <div class="form-label">Date of Observation</div>
+              <input class="ctrl-input" type="date" id="f-date">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-field">
+              <div class="form-label">Bortle Scale (1–9)</div>
+              <select class="ctrl-input" id="f-bortle">
+                <option value="">Select...</option>
+                <option value="1">1 — Perfectly dark</option>
+                <option value="2">2 — Truly dark</option>
+                <option value="3">3 — Rural sky</option>
+                <option value="4">4 — Rural/suburban transition</option>
+                <option value="5">5 — Suburban sky</option>
+                <option value="6">6 — Bright suburban</option>
+                <option value="7">7 — Suburban/urban</option>
+                <option value="8">8 — City sky</option>
+                <option value="9">9 — Inner city</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <div class="form-label">Observation Site</div>
+              <select class="ctrl-input" id="f-site">
+                <option value="">Select location...</option>
+                <option value="Maunakea Summit (4,207m)">Maunakea Summit (4,207m)</option>
+                <option value="Maunakea VIS (2,800m)">Maunakea VIS (2,800m)</option>
+                <option value="Hilo — Waiākea">Hilo — Waiākea</option>
+                <option value="Hilo — Leleiwi Beach">Hilo — Leleiwi Beach (Voyaging Site)</option>
+                <option value="Kailua-Kona">Kailua-Kona</option>
+                <option value="South Point / Ka Lae">South Point / Ka Lae (Traditional Site)</option>
+                <option value="Waipio Valley">Waipio Valley</option>
+                <option value="Kohala Coast">Kohala Coast</option>
+                <option value="Kawaihae Harbor">Kawaihae Harbor (Voyaging Launch Site)</option>
+                <option value="Other">Other — specify in notes</option>
+              </select>
+            </div>
+          </div>
+          <div class="ctrl-label" style="margin-bottom:8px">Navigation Stars Visible</div>
+          <div class="star-checkbox-grid" id="star-checkboxes"></div>
+          <div class="form-field" style="margin-top:16px">
+            <div class="form-label">Notes (optional)</div>
+            <input class="ctrl-input" type="text" id="f-notes" placeholder="Moon phase, clouds, seeing conditions, traditional place name...">
+          </div>
+          <div class="btn-row">
+            <button class="btn primary" onclick="submitReading()">Submit Reading</button>
+            <button class="btn gold" onclick="clearForm()">Clear</button>
+          </div>
+          <div class="success-msg" id="success-msg">✓ Reading submitted! It will appear in the archive and island map below.</div>
+        </div>
+      </div>
+      <div>
+        <div class="panel" style="margin-bottom:20px">
+          <div class="ctrl-label" style="margin-bottom:12px">Community Archive — Recent Readings</div>
+          <div class="stats-bar" style="grid-template-columns:repeat(2,1fr);margin:0 0 16px">
+            <div class="stat-card" style="padding:14px">
+              <div class="stat-num" id="total-readings" style="font-size:1.6rem">0</div>
+              <div class="stat-lbl">Total Readings</div>
+            </div>
+            <div class="stat-card" style="padding:14px">
+              <div class="stat-num" id="avg-bortle" style="font-size:1.6rem">—</div>
+              <div class="stat-lbl">Avg Bortle</div>
+            </div>
+          </div>
+          <div class="submissions-list" id="submissions-list">
+            <div style="text-align:center;color:var(--dim);font-style:italic;padding:30px 0;font-size:0.88rem">No readings yet. Be the first to submit!</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MAP TAB ══ -->
+<div class="section" id="tab-map">
+  <div style="margin-top:32px">
+    <div class="sec-head">Hawaiʻi Island — Sky Brightness &amp; Cultural Sites</div>
+    <div id="map-container">
+      <svg id="map-svg" viewBox="0 0 800 600"></svg>
+      <div class="map-legend">
+        <div class="legend-title">Legend</div>
+        <div class="legend-row"><div class="legend-dot" style="background:#4ab5a0"></div><span style="font-size:0.72rem;color:#a0b0b8">Community reading</span></div>
+        <div class="legend-row"><div class="legend-dot" style="background:#e8b84b;border:2px solid #fff3"></div><span style="font-size:0.72rem;color:#a0b0b8">Traditional voyaging site</span></div>
+        <div class="legend-row"><div class="legend-dot" style="background:#9dc8f0"></div><span style="font-size:0.72rem;color:#a0b0b8">Observatory</span></div>
+        <div class="legend-row"><div class="legend-dot" style="background:rgba(232,130,58,0.7)"></div><span style="font-size:0.72rem;color:#a0b0b8">Light pollution concern</span></div>
+      </div>
+    </div>
+    <div class="three-col" style="margin-top:24px">
+      <div class="panel teal-border">
+        <div class="ctrl-label" style="margin-bottom:8px">Traditional Voyaging Sites</div>
+        <div style="font-size:0.82rem;color:#9099aa;line-height:1.65">Key launch points historically used by Polynesian voyagers to depart or arrive at Hawaiʻi Island. These sites anchor the cultural layer of the sky brightness archive.</div>
+      </div>
+      <div class="panel">
+        <div class="ctrl-label" style="margin-bottom:8px">Observatories</div>
+        <div style="font-size:0.82rem;color:#9099aa;line-height:1.65">Maunakea summit (4,207m) hosts 10 active observatories. The Daniel K. Inouye Solar Telescope sits on Haleakalā, Maui. Both depend on dark skies this map helps protect.</div>
+      </div>
+      <div class="panel">
+        <div class="ctrl-label" style="margin-bottom:8px">Light Pollution Zones</div>
+        <div style="font-size:0.82rem;color:#9099aa;line-height:1.65">Kona and Hilo metro areas produce the most light pollution. Readings from these zones track whether observatory-grade dark skies on the summit are threatened by expanding development.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ABOUT TAB ══ -->
+<div class="section" id="tab-about">
+  <div style="margin-top:32px">
+    <div class="sec-head">About Hōkū Palapala</div>
+    <div class="two-col">
+      <div>
+        <div class="panel" style="margin-bottom:20px">
+          <div class="star-name-h" style="margin-bottom:6px">Hōkū Palapala</div>
+          <div style="font-style:italic;color:var(--dim);font-size:0.9rem;margin-bottom:16px">"The Star Record" — a living archive of dark skies and ancestral stars</div>
+          <div style="font-size:0.9rem;color:#b0bac8;line-height:1.75">
+            Hōkū Palapala started with a simple question: can the stars that guided Polynesian voyagers across the Pacific still be seen from the places they once launched from?<br><br>
+            This tool is my attempt to find out — and to build something that lets other people on Hawaiʻi Island ask the same question from their own backyard, beach, or ahupuaʻa.<br><b></b>
+            It sits alongside the work of Maunakea's observatories, not in competition with it. The observatories measure the universe. This measures something smaller and closer — whether the night sky above our own communities is still dark enough to see the stars our ancestors named.
+            Built by <strong style="color:var(--pale)">Reese Reilly</strong>, as part of a passion project that brings together all my interests.
+          </div>
+          </div>
+        </div>
+        <div class="panel teal-border">
+          <div class="ctrl-label" style="margin-bottom:10px">Stewardship Partners</div>
+          <div style="font-size:0.85rem;color:#9099aa;line-height:1.75;font-style:italic">
+          Community partnerships currently in development.
+        </div>
+        </div>
+      </div>
+      <div>
+<div class="panel" style="margin-bottom:20px">
+  <div class="ctrl-label" style="margin-bottom:10px">About the Builder</div>
+  <div style="font-size:0.88rem;color:#9099aa;line-height:1.75">
+    <strong style="color:var(--pale)">Reese Reilly</strong> — Hello! I am a student from Mid-Pacific Institute on Oahu with a passion for astronomy, coding, and the cultural heritage of the Pacific. Hōkū Palapala grew out of a desire to build something that belongs to the community — a tool that uses computational methods to serve Hawaiian ways of knowing the sky, not the other way around.<br><br>
+    This project combines four things I care about deeply:
+  </div>
+  <div style="margin-top:14px">
+    <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px">
+      <span style="color:var(--gold);font-family:'Space Mono',monospace;font-size:0.7rem;margin-top:2px;flex-shrink:0">01</span>
+      <div><strong style="color:var(--pale)">Cultural Astronomy</strong><div style="font-size:0.82rem;color:#9099aa">Hawaiian star names, navigation lore, the star compass, and the Kaulana Mahina lunar calendar</div></div>
+    </div>
+    <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px">
+      <span style="color:var(--gold);font-family:'Space Mono',monospace;font-size:0.7rem;margin-top:2px;flex-shrink:0">02</span>
+      <div><strong style="color:var(--pale)">Astrophysics</strong><div style="font-size:0.82rem;color:#9099aa">I am hoping to major in astrophysics in college — I used real math for sky brightness physics, NELM and Bortle scale conversions, and spherical astronomy</div></div>
+    </div>
+    <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px">
+      <span style="color:var(--gold);font-family:'Space Mono',monospace;font-size:0.7rem;margin-top:2px;flex-shrink:0">03</span>
+      <div><strong style="color:var(--pale)">Coding</strong><div style="font-size:0.82rem;color:#9099aa">Vanilla JavaScript, HTML, CSS — built from scratch without frameworks</div></div>
+    </div>
+    <div style="display:flex;align-items:flex-start;gap:12px">
+      <span style="color:var(--gold);font-family:'Space Mono',monospace;font-size:0.7rem;margin-top:2px;flex-shrink:0">04</span>
+      <div><strong style="color:var(--pale)">Community Stewardship</strong><div style="font-size:0.82rem;color:#9099aa">Ahupuaʻa geography, traditional voyaging sites, and the belief that data should serve the people it comes from</div></div>
+    </div>
+  </div>
+</div>
+        </div>
+        <div class="panel">
+          <div class="ctrl-label" style="margin-bottom:10px">Key Sources</div>
+          <div style="font-size:0.78rem;color:#9099aa;line-height:1.8;font-family:'Space Mono',monospace">
+            Nā Inoa Hōkū — Johnson &amp; Mahelona<br>
+            Polynesian Voyaging Society / Nainoa Thompson<br>
+            IfA Hawaiʻi — ifa.hawaii.edu<br>
+            maunakeaobservatories.org<br>
+            Globe at Night (NOIRLab) — for NELM calibration<br>
+            NOAA Atmospheric Data<br>
+            Office of Hawaiian Affairs GIS<br>
+            ʻImiloa Astronomy Center, Hilo
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- .wrap -->
+
+<script>
+// ══════════════════════════════════════════
+// BACKGROUND STARS
+// ══════════════════════════════════════════
+const cv = document.getElementById('bg-canvas');
+const cx = cv.getContext('2d');
+let bgs = [];
+function resizeCV() { cv.width = innerWidth; cv.height = innerHeight; }
+function initBG() {
+  bgs = Array.from({length:250},()=>({
+    x:Math.random()*cv.width, y:Math.random()*cv.height,
+    r:Math.random()*1.1+0.2, a:Math.random()*0.5+0.1,
+    tw:Math.random()*Math.PI*2, sp:Math.random()*0.018+0.005
+  }));
+}
+function drawBG() {
+  cx.clearRect(0,0,cv.width,cv.height);
+  bgs.forEach(s=>{
+    s.tw+=s.sp;
+    cx.beginPath();cx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    cx.fillStyle=`rgba(220,228,255,${s.a*(0.7+0.3*Math.sin(s.tw))})`;cx.fill();
+  });
+  requestAnimationFrame(drawBG);
+}
+resizeCV(); window.addEventListener('resize',()=>{resizeCV();initBG();});
+initBG(); requestAnimationFrame(drawBG);
+
+// ══════════════════════════════════════════
+// TAB NAVIGATION
+// ══════════════════════════════════════════
+function showTab(t) {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+t).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ══════════════════════════════════════════
+// STAR DATA
+// ══════════════════════════════════════════
+const STARS = [
+  { id:'hokulea', h:'Hōkūleʻa', w:'Arcturus (α Bootis)', meaning:'"Star of Gladness" — zenith star of Hawaiʻi at 21°N', type:'nav', color:'#f4a050', mag:-0.05, dist:36.7, spec:'K1.5 III (Orange Giant)', rsun:25.7, navRole:'Tahitian navigators sailed north following Hōkūleʻa to reach Hawaiʻi. It passes directly overhead at 21°N — the latitude of the islands. The voyaging canoe Hōkūleʻa is named for it.', riseHouse:'ʻĀina Koʻolau (NE)', setHouse:'ʻĀina Kona (NW)', obsNote:'Tracked by UH 2.2m & Keck; spectral data in IRTF Maunakea archives.', skyX:250, skyY:155, months:[3,4,5,6,7,8,9] },
+  { id:'hokupaa', h:'Hōkūpaʻa', w:'Polaris (α UMi)', meaning:'"Fixed Star" — the unmoving anchor of the northern sky', type:'nav', color:'#c8e0ff', mag:1.97, dist:433, spec:'F7 Ib-IIa Supergiant', rsun:37.5, navRole:'The North Star. Kept astern when sailing south from Hawaiʻi to Tahiti. When it disappears below the horizon, you have crossed the equator — switch to the Southern Cross.', riseHouse:'Circumpolar (never sets at Hawaiʻi)', obsNote:'Used as a calibration reference star for Maunakea telescope pointing.', skyX:250, skyY:48, months:[0,1,2,3,4,5,6,7,8,9,10,11] },
+  { id:'aa', h:'Aʻā', w:'Sirius (α CMa)', meaning:'"Glowing / Burning" — also Kāululaʻau', type:'nav', color:'#aad4ff', mag:-1.46, dist:8.6, spec:'A1 V Blue-White Main Sequence', rsun:1.71, navRole:'Brightest star in the Hawaiian sky. Passes directly over Tahiti — used to navigate the return voyage south. Part of the Ke Ka o Makaliʻi star line.', riseHouse:'Lā (Due East, seasonal)', obsNote:'One of the nearest stars. Extensively studied at Keck for stellar atmosphere properties.', skyX:130, skyY:300, months:[11,0,1,2,3] },
+  { id:'makali_i', h:'Makaliʻi', w:'Pleiades (M45)', meaning:'"Eyes of the Chief" — marks the start of Makahiki (Hawaiian New Year)', type:'seasonal', color:'#b0c8f8', mag:1.6, dist:444, spec:'Open cluster, ~1000 stars, B-type', navRole:'Rising of Makaliʻi at sunset marks the start of Makahiki. Critical seasonal marker. Gives its name to the star line Ke Ka o Makaliʻi.', riseHouse:'Koʻolau (NNE)', obsNote:'Extensively imaged by Subaru Telescope, Maunakea. Part of UKIRT infrared surveys.', skyX:185, skyY:215, months:[10,11,0,1] },
+  { id:'maui_hook', h:'Ka Makau Nui o Māui', w:'Scorpius (incl. Antares)', meaning:'"The Great Fishhook of Māui" — he fished up the islands with this hook', type:'cultural', color:'#f06868', mag:1.06, dist:550, spec:'M1 Iab+ Red Supergiant (Antares)', rsun:700, navRole:'The entire constellation serves as a southern meridian pointer. When the fishhook is high in the south, the navigator knows true south. The heart (Antares/Lehua) confirms the bearing.', riseHouse:'Lā (South of East)', obsNote:'Antares monitored by Keck for stellar mass loss. UKIRT infrared tracks dust shells around this supergiant.', skyX:340, skyY:365, months:[4,5,6,7,8] },
+  { id:'puana', h:'Puana', w:'Procyon (α CMi)', meaning:'"Blossom" — flowering before the Dog Star rises', type:'nav', color:'#ffe8a0', mag:0.34, dist:11.46, spec:'F5 IV-V Yellow-White Subgiant', rsun:2.05, navRole:'Part of the Ke Ka o Makaliʻi arc. Rises before Sirius and helps track the curvature of this key star group across the sky.', riseHouse:'ʻĀina Koʻolau (NE)', obsNote:'High-resolution spectroscopy at Keck I, Maunakea.', skyX:170, skyY:255, months:[11,0,1,2,3] },
+  { id:'cross', h:'Hanaiakamalama', w:'Southern Cross (Crux)', meaning:'"Cared for by the Moon" — a child of the Moon', type:'nav', color:'#c0f0e0', mag:0.77, dist:321, spec:'B0.5 III Blue Giant (Acrux)', rsun:7.8, navRole:'Used south of the equator when Hōkūpaʻa disappears. Two pointer stars indicate south. Ka Iwikuamoʻo (the Backbone) runs from Polaris to the Southern Cross.', riseHouse:'Nā Leo (South)', obsNote:'Low-elevation from Maunakea. CFHT archive includes Crux region southern sky surveys.', skyX:300, skyY:418, months:[2,3,4,5,6] },
+  { id:'hokulei', h:'Hōkūleī', w:'Capella (α Aur)', meaning:'"Star Wreath" — northernmost star of the Makaliʻi arc', type:'nav', color:'#fff0a0', mag:0.08, dist:42.9, spec:'G8 III + G0 III Binary', rsun:11.87, navRole:'Northernmost star of the Ke Ka o Makaliʻi arc. Helps the navigator track the full curvature of this key star line from north to south.', riseHouse:'ʻĀina Koʻolau (NNE)', obsNote:'Binary resolved with Keck interferometry at Maunakea.', skyX:210, skyY:128, months:[10,11,0,1,2] },
+];
+
+// ══════════════════════════════════════════
+// SKY DOME
+// ══════════════════════════════════════════
+let currentMonth = new Date().getMonth();
+
+function updateSky() {
+  const dateVal = document.getElementById('obs-date').value;
+  if (dateVal) currentMonth = new Date(dateVal).getMonth();
+  const hour = parseInt(document.getElementById('obs-hour').value);
+  const layer = document.getElementById('sky-layer').value;
+  const infoEl = document.getElementById('sky-info');
+  const moonPhase = calcMoonPhaseRaw(dateVal ? new Date(dateVal) : new Date());
+  infoEl.textContent = `Moon Phase: ${moonPhase.name} (${moonPhase.illumination}% illuminated) — ${moonPhase.illumination > 60 ? '⚠ Bright moon may reduce visibility' : '✓ Good for navigation stars'}`;
+  renderSkyDome(currentMonth, layer);
+}
+
+function calcMoonPhaseRaw(date) {
+  const lun = 29.53058867;
+  const known = new Date('2000-01-06T18:14:00Z');
+  const diff = (date - known) / (1000*60*60*24);
+  const phase = ((diff % lun) + lun) % lun;
+  const ill = Math.round(50*(1-Math.cos(phase/lun*2*Math.PI)));
+  const names = ['New Moon','Waxing Crescent','First Quarter','Waxing Gibbous','Full Moon','Waning Gibbous','Last Quarter','Waning Crescent'];
+  const idx = Math.floor(phase/lun*8);
+  return { name: names[idx], illumination: ill, phase };
+}
+
+function renderSkyDome(month, layer) {
+  const svg = document.getElementById('sky-svg');
+  svg.innerHTML = '';
+  const CX=250,CY=250,R=240;
+
+  const defs = mkEl('defs');
+  const g = mkGrad('dG','50%','40%','60%',[[0,'#0b1535'],[100,'#020408']]);
+  defs.appendChild(g);
+  ['gold','blue'].forEach(c=>{
+    const f=mkEl('filter');f.setAttribute('id','glow-'+c);
+    f.setAttribute('x','-50%');f.setAttribute('y','-50%');
+    f.setAttribute('width','200%');f.setAttribute('height','200%');
+    const b=mkEl('feGaussianBlur');b.setAttribute('stdDeviation','3.5');b.setAttribute('result','blur');
+    const m=mkEl('feMerge');
+    const n1=mkEl('feMergeNode');n1.setAttribute('in','blur');
+    const n2=mkEl('feMergeNode');n2.setAttribute('in','SourceGraphic');
+    m.appendChild(n1);m.appendChild(n2);f.appendChild(b);f.appendChild(m);defs.appendChild(f);
+  });
+  const clip=mkEl('clipPath');clip.setAttribute('id','dc');
+  const cc=mkEl('circle');cc.setAttribute('cx',CX);cc.setAttribute('cy',CY);cc.setAttribute('r',R-2);
+  clip.appendChild(cc);defs.appendChild(clip);
+  svg.appendChild(defs);
+
+  const bg=mkEl('circle');bg.setAttribute('cx',CX);bg.setAttribute('cy',CY);bg.setAttribute('r',R);bg.setAttribute('fill','url(#dG)');svg.appendChild(bg);
+  const mw=mkEl('ellipse');mw.setAttribute('cx',CX+20);mw.setAttribute('cy',CY);mw.setAttribute('rx',28);mw.setAttribute('ry',215);mw.setAttribute('fill','rgba(180,200,255,0.035)');mw.setAttribute('transform',`rotate(-22,${CX},${CY})`);svg.appendChild(mw);
+
+  [0.28,0.52,0.76].forEach(f=>{
+    const r=mkEl('circle');r.setAttribute('cx',CX);r.setAttribute('cy',CY);r.setAttribute('r',R*f);
+    r.setAttribute('fill','none');r.setAttribute('stroke','rgba(232,184,75,0.055)');r.setAttribute('stroke-width','1');svg.appendChild(r);
+  });
+  ['M10,250L490,250','M250,10L250,490'].forEach(d=>{
+    const l=mkEl('path');l.setAttribute('d',d);l.setAttribute('stroke','rgba(232,184,75,0.055)');l.setAttribute('stroke-width','1');l.setAttribute('clip-path','url(#dc)');svg.appendChild(l);
+  });
+
+  for(let i=0;i<55;i++){
+    const a=Math.random()*Math.PI*2,d=Math.random()*(R-12);
+    const bs=mkEl('circle');bs.setAttribute('cx',CX+Math.cos(a)*d);bs.setAttribute('cy',CY+Math.sin(a)*d);
+    bs.setAttribute('r',Math.random()*0.75+0.25);bs.setAttribute('fill',`rgba(200,215,255,${Math.random()*0.35+0.08})`);bs.setAttribute('clip-path','url(#dc)');svg.appendChild(bs);
+  }
+
+  const visible = STARS.filter(s=>{
+    if(!s.months.includes(month)) return false;
+    if(layer==='nav' && s.type!=='nav') return false;
+    if(layer==='seasonal' && s.type!=='seasonal') return false;
+    return true;
+  });
+
+  visible.forEach(star=>{
+    const px=star.skyX,py=star.skyY;
+    const dx=px-CX,dy=py-CY;
+    if(Math.sqrt(dx*dx+dy*dy)>R-5) return;
+
+    const h=mkEl('circle');h.setAttribute('cx',px);h.setAttribute('cy',py);
+    h.setAttribute('r',star.type==='nav'?15:11);h.setAttribute('fill',star.color);h.setAttribute('opacity','0.07');h.setAttribute('clip-path','url(#dc)');svg.appendChild(h);
+
+    const dot=mkEl('circle');dot.setAttribute('cx',px);dot.setAttribute('cy',py);
+    dot.setAttribute('r',star.type==='nav'?5.5:star.type==='seasonal'?6:4);
+    dot.setAttribute('fill',star.color);dot.setAttribute('stroke','rgba(255,255,255,0.25)');dot.setAttribute('stroke-width','0.5');
+    dot.setAttribute('clip-path','url(#dc)');
+    if(star.type==='nav') dot.classList.add('sp');
+    svg.appendChild(dot);
+
+    const lbl=mkEl('text');lbl.setAttribute('x',px+8);lbl.setAttribute('y',py+4);
+    lbl.setAttribute('fill',star.color);lbl.setAttribute('opacity','0.82');
+    lbl.setAttribute('font-size','8');lbl.setAttribute('font-family','Cinzel, serif');
+    lbl.setAttribute('clip-path','url(#dc)');lbl.textContent=star.h;svg.appendChild(lbl);
+
+    const hit=mkEl('circle');hit.setAttribute('cx',px);hit.setAttribute('cy',py);hit.setAttribute('r',20);
+    hit.setAttribute('fill','transparent');hit.setAttribute('cursor','pointer');hit.setAttribute('clip-path','url(#dc)');
+    hit.addEventListener('click',()=>selectStar(star));
+    hit.addEventListener('mouseenter',e=>showTip(e,star));
+    hit.addEventListener('mouseleave',hideTip);
+    svg.appendChild(hit);
+  });
+
+  const z=mkEl('circle');z.setAttribute('cx',CX);z.setAttribute('cy',CY);z.setAttribute('r',3);z.setAttribute('fill','rgba(232,184,75,0.3)');svg.appendChild(z);
+}
+
+function mkEl(tag){return document.createElementNS('http://www.w3.org/2000/svg',tag)}
+function mkGrad(id,cx,cy,r,stops){
+  const g=mkEl('radialGradient');g.setAttribute('id',id);g.setAttribute('cx',cx);g.setAttribute('cy',cy);g.setAttribute('r',r);
+  stops.forEach(([o,c])=>{const s=mkEl('stop');s.setAttribute('offset',o+'%');s.setAttribute('stop-color',c);g.appendChild(s);});
+  return g;
+}
+
+function selectStar(star) {
+  const p = document.getElementById('star-detail');
+  p.innerHTML = `
+    <div class="star-name-h">${star.h}</div>
+    <div class="star-name-w">✦ ${star.w}</div>
+    <div class="star-meaning">${star.meaning}</div>
+    <div class="data-sec">Navigation Role</div>
+    <div style="font-size:0.88rem;color:#a0aabb;line-height:1.7;margin-bottom:12px">${star.navRole}</div>
+    <div class="data-sec">Astrophysics — Maunakea Observatory Data</div>
+    <div class="data-row"><span class="dl">Apparent Magnitude</span><span class="dv hi">${star.mag}</span></div>
+    <div class="data-row"><span class="dl">Distance from Earth</span><span class="dv">${star.dist} light-years</span></div>
+    <div class="data-row"><span class="dl">Spectral Type</span><span class="dv">${star.spec}</span></div>
+    ${star.rsun?`<div class="data-row"><span class="dl">Radius (Solar)</span><span class="dv">${star.rsun} R☉</span></div>`:''}
+    <div class="data-row"><span class="dl">Rise House</span><span class="dv">${star.riseHouse}</span></div>
+    ${star.setHouse?`<div class="data-row"><span class="dl">Set House</span><span class="dv">${star.setHouse}</span></div>`:''}
+    <div class="data-sec">Observatory Connection</div>
+    <div style="font-size:0.82rem;color:#9099aa;line-height:1.6;margin-bottom:10px">${star.obsNote}</div>
+    <span class="nav-badge ${star.type==='nav'?'primary':'seasonal'}">${star.type==='nav'?'⛵ Primary Navigation Star':star.type==='seasonal'?'📅 Seasonal Marker':'🌟 Cultural Constellation'}</span>
+  `;
+}
+
+const tip = document.getElementById('tip');
+function showTip(e,star){tip.querySelector('.tn').textContent=star.h;tip.querySelector('.tw').textContent=star.w;tip.style.display='block';moveTip(e);}
+function hideTip(){tip.style.display='none';}
+document.addEventListener('mousemove',e=>{if(tip.style.display==='block')moveTip(e);});
+function moveTip(e){tip.style.left=(e.clientX+14)+'px';tip.style.top=(e.clientY-10)+'px';}
+
+// ══════════════════════════════════════════
+// BORTLE CALCULATOR
+// ══════════════════════════════════════════
+const BORTLE_DATA = [
+  {b:1,color:'#0a0a2e',label:'Perfect',nelm:7.6,sqm:21.9,mw:'Faint airglow, M33 naked eye',threat:'None',zodiacal:'Brilliant cone'},
+  {b:2,color:'#0f1a3a',label:'Truly Dark',nelm:7.1,sqm:21.5,mw:'M33 easy, zodiacal clearly seen',threat:'None',zodiacal:'Bright, obvious'},
+  {b:3,color:'#1a2d4a',label:'Rural',nelm:6.6,sqm:21.0,mw:'Complex, detailed structure',threat:'Low',zodiacal:'Visible spring/fall'},
+  {b:4,color:'#2a3d5a',label:'Rural/Sub',nelm:6.3,sqm:20.4,mw:'Clearly visible, some detail',threat:'Low',zodiacal:'Detectable'},
+  {b:5,color:'#3a4d6a',label:'Suburban',nelm:5.6,sqm:19.5,mw:'Washed out center visible',threat:'Moderate',zodiacal:'Not visible'},
+  {b:6,color:'#5a5040',label:'Bright Sub',nelm:5.1,sqm:18.5,mw:'Faint band only',threat:'High',zodiacal:'Not visible'},
+  {b:7,color:'#7a5030',label:'Sub/Urban',nelm:4.5,sqm:17.0,mw:'Barely visible',threat:'Very High',zodiacal:'Not visible'},
+  {b:8,color:'#8a4020',label:'City',nelm:3.5,sqm:15.5,mw:'Not visible',threat:'Critical',zodiacal:'Not visible'},
+  {b:9,color:'#9a3010',label:'Inner City',nelm:2.5,sqm:14.0,mw:'Not visible',threat:'Critical',zodiacal:'Not visible'},
+];
+
+let selectedBortle = 3;
+
+function renderBortleScale() {
+  const el = document.getElementById('bortle-scale');
+  el.innerHTML = BORTLE_DATA.map(d=>`
+    <div class="bortle-cell ${d.b===selectedBortle?'active':''}" style="background:${d.color}" onclick="selectBortle(${d.b})">
+      <div class="bortle-val" style="color:${d.b<=4?'#e8e0d0':'#f0d0a0'}">${d.b}</div>
+      <div class="bortle-lbl" style="color:${d.b<=4?'#a0b0c0':'#c09060'}">${d.label}</div>
+    </div>
+  `).join('');
+}
+
+function selectBortle(b) {
+  selectedBortle = b;
+  renderBortleScale();
+  const d = BORTLE_DATA[b-1];
+  document.getElementById('nelm-val').textContent = d.nelm.toFixed(1);
+  document.getElementById('sqm-val').textContent = d.sqm.toFixed(1)+' mag/arcsec²';
+  document.getElementById('bortle-class').textContent = d.label+' Sky (Class '+b+')';
+  document.getElementById('mw-vis').textContent = d.mw;
+  document.getElementById('threat-level').textContent = d.threat;
+  document.getElementById('zodiacal').textContent = d.zodiacal;
+  updateVisibilityGrid(d.nelm);
+}
+
+function updateVisibilityGrid(nelm) {
+  const grid = document.getElementById('vis-grid');
+  const allStars = [...STARS, {h:'Milky Way Core',mag:3.5,color:'#c0d0ff'},{h:'Zodiacal Light',mag:4.8,color:'#e0c880'},{h:'Andromeda (M31)',mag:3.4,color:'#d0c0f0'}];
+  grid.innerHTML = allStars.map(s=>{
+    const vis = s.mag <= nelm;
+    return `<div class="vis-item">
+      <div class="vis-dot" style="background:${s.color};box-shadow:0 0 6px ${s.color}40"></div>
+      <div class="vis-name">${s.h}</div>
+      <div class="vis-status" style="color:${vis?'#4ab5a0':'#f06868'}">${vis?'✓ Visible':'✗ Hidden'}</div>
+    </div>`;
+  }).join('');
+}
+
+function useReadingInSubmission() {
+  document.getElementById('f-bortle').value = selectedBortle;
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab')[4].classList.add('active');
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('tab-submit').classList.add('active');
+}
+
+// ══════════════════════════════════════════
+// KAULANA MAHINA
+// ══════════════════════════════════════════
+const MOON_PHASES = [
+  {name:'Hilo',sym:'🌑',meaning:'New moon — beginning',nav:'Begin voyage planning'},
+  {name:'Hoʻonui',sym:'🌒',meaning:'Growing — canoe preparation',nav:'Prepare provisions'},
+  {name:'Māhealani',sym:'🌕',meaning:'Full moon — maximum light',nav:'Night sailing by moonlight'},
+  {name:'Kūkahi',sym:'🌗',meaning:'Standing — transition',nav:'Assess conditions'},
+  {name:'Oleʻkū',sym:'🌘',meaning:'Waning — rest period',nav:'Rest and repair'},
+  {name:'Kāne',sym:'🌙',meaning:'God Kāne — sacred night',nav:'Sacred — no voyaging'},
+  {name:'Lono',sym:'⭐',meaning:'God Lono — Makahiki',nav:'Makahiki season begins'},
+  {name:'Muku',sym:'🌑',meaning:'Ending — cycle closes',nav:'Complete the voyage'},
+];
+
+function renderMoonCalendar() {
+  document.getElementById('moon-calendar').innerHTML = MOON_PHASES.map((p,i)=>`
+    <div class="moon-phase" onclick="this.classList.toggle('active')">
+      <span class="moon-symbol">${p.sym}</span>
+      <div class="moon-name">${p.name}</div>
+      <div class="moon-meaning">${p.meaning}</div>
+      <div class="moon-nav">${p.nav}</div>
+    </div>
+  `).join('');
+}
+
+function calcMahina() {
+  const dateStr = document.getElementById('mahina-date').value;
+  if (!dateStr) return;
+  const date = new Date(dateStr);
+  const mp = calcMoonPhaseRaw(date);
+  const month = date.getMonth();
+  const isMakahikiSeason = [10,11,0,1].includes(month);
+  const makaliVisible = [10,11,0,1].includes(month);
+  document.getElementById('mahina-result').innerHTML = `
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:12px">
+      <div style="font-size:2.5rem">${mp.illumination<10?'🌑':mp.illumination<40?'🌒':mp.illumination<60?'🌓':mp.illumination<85?'🌔':'🌕'}</div>
+      <div>
+        <div style="font-family:'Cinzel',serif;font-size:1.1rem;color:var(--gold)">${mp.name}</div>
+        <div style="font-family:'Space Mono',monospace;font-size:0.65rem;color:var(--dim)">${mp.illumination}% illuminated · Phase day ${Math.round(mp.phase)}/29.5</div>
+      </div>
+    </div>
+    <div class="data-row"><span class="dl">Makahiki Season</span><span class="dv ${isMakahikiSeason?'hi':''}">${isMakahikiSeason?'✓ Yes — Hoʻoilo (wet season)':'Not yet — Kau (dry season)'}</span></div>
+    <div class="data-row"><span class="dl">Makaliʻi (Pleiades)</span><span class="dv ${makaliVisible?'hi':''}">${makaliVisible?'✓ Visible at night':'Not visible this month'}</span></div>
+    <div class="data-row"><span class="dl">Navigation Guidance</span><span class="dv">${mp.illumination>70?'Moonlight aids night sailing':'Dark sky — star navigation optimal'}</span></div>
+    <div class="data-row"><span class="dl">Moon Effect on NELM</span><span class="dv">${mp.illumination>80?'−2.5 mag (bright moon reduces visible stars)':mp.illumination>40?'−1.0 mag (moderate reduction)':'Minimal — good night for readings'}</span></div>
+  `;
+}
+
+// ══════════════════════════════════════════
+// SUBMISSION FORM
+// ══════════════════════════════════════════
+let submissions = [];
+
+function renderStarCheckboxes() {
+  document.getElementById('star-checkboxes').innerHTML = STARS.map(s=>`
+    <label class="star-check">
+      <input type="checkbox" name="stars" value="${s.h}">
+      <span style="color:${s.color}">${s.h}</span>
+    </label>
+  `).join('');
+}
+
+function submitReading() {
+  const bortle = document.getElementById('f-bortle').value;
+  const site = document.getElementById('f-site').value;
+  const date = document.getElementById('f-date').value;
+  if (!bortle || !site || !date) { alert('Please fill in Date, Bortle reading, and Site.'); return; }
+  const checkedStars = [...document.querySelectorAll('input[name="stars"]:checked')].map(c=>c.value);
+  const sub = {
+    name: document.getElementById('f-name').value || 'Anonymous',
+    date, bortle: parseInt(bortle), site,
+    stars: checkedStars,
+    notes: document.getElementById('f-notes').value,
+    id: Date.now()
+  };
+  submissions.unshift(sub);
+  // Also persist to localStorage so readings survive a refresh
+  try { localStorage.setItem('hoku_submissions', JSON.stringify(submissions)); } catch(e) {}
+  renderSubmissions();
+  renderMapReadings();
+  document.getElementById('success-msg').style.display = 'block';
+  setTimeout(()=>document.getElementById('success-msg').style.display='none', 3000);
+  clearForm();
+}
+
+function clearForm() {
+  ['f-name','f-date','f-bortle','f-site','f-notes'].forEach(id=>document.getElementById(id).value='');
+  document.querySelectorAll('input[name="stars"]').forEach(c=>c.checked=false);
+}
+
+function renderSubmissions() {
+  const list = document.getElementById('submissions-list');
+  if (!submissions.length) { list.innerHTML='<div style="text-align:center;color:var(--dim);font-style:italic;padding:30px 0;font-size:0.88rem">No readings yet. Be the first to submit!</div>'; return; }
+  list.innerHTML = submissions.map(s=>`
+    <div class="submission-card">
+      <div class="sub-header">
+        <span class="sub-site">${s.site}</span>
+        <span class="sub-time">${s.date} · ${s.name}</span>
+      </div>
+      <div class="sub-bortle">Bortle ${s.bortle} · NELM ${BORTLE_DATA[s.bortle-1].nelm}</div>
+      ${s.stars.length?`<div class="sub-stars">Stars visible: ${s.stars.join(', ')}</div>`:''}
+      ${s.notes?`<div style="font-size:0.78rem;color:var(--dim);margin-top:4px;font-style:italic">${s.notes}</div>`:''}
+    </div>
+  `).join('');
+  document.getElementById('total-readings').textContent = submissions.length;
+  const avg = (submissions.reduce((a,s)=>a+s.bortle,0)/submissions.length).toFixed(1);
+  document.getElementById('avg-bortle').textContent = avg;
+}
+
+// ══════════════════════════════════════════
+// ISLAND MAP
+// ══════════════════════════════════════════
+const TRAD_SITES = [
+  {name:'Kawaihae Harbor',x:230,y:165,type:'voyaging',note:'Primary voyaging launch site — Hōkūleʻa departed from here'},
+  {name:'Ka Lae / South Point',x:310,y:490,type:'voyaging',note:'Southernmost point — first landfall for some Polynesian voyagers'},
+  {name:'Waipio Valley',x:200,y:135,type:'voyaging',note:'Sacred valley — traditional launching and arrival point'},
+  {name:'Kealakekua Bay',x:215,y:340,type:'voyaging',note:'Historic anchorage — western coastal navigation site'},
+  {name:'Leleiwi Beach, Hilo',x:445,y:240,type:'voyaging',note:'Eastern coastal traditional gathering and fishing site'},
+];
+
+const LIGHT_ZONES = [
+  {name:'Kailua-Kona',x:210,y:320,r:40,note:'Major light pollution source — Bortle 5-6'},
+  {name:'Hilo Metro',x:430,y:220,r:35,note:'Bortle 5-6 — eastern light dome'},
+  {name:'Waimea',x:260,y:175,r:22,note:'Bortle 4 — moderate suburban'},
+];
+
+function renderMap() {
+  const svg = document.getElementById('map-svg');
+  let html = `
+    <defs>
+      <radialGradient id="mgLight" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="rgba(232,130,58,0.35)"/>
+        <stop offset="100%" stop-color="rgba(232,130,58,0)"/>
+      </radialGradient>
+    </defs>
+    <rect width="800" height="600" fill="#060e1e"/>
+  `;
+  for (let i=0;i<80;i++) {
+    const x=Math.random()*800,y=Math.random()*600;
+    html+=`<circle cx="${x}" cy="${y}" r="${Math.random()*1.5+0.3}" fill="rgba(74,120,181,${Math.random()*0.12+0.04})"/>`;
+  }
+  html += `<polygon points="
+    200,120 220,110 250,108 280,112 310,108 340,115 370,125 400,140 430,155 455,170
+    470,195 475,220 468,245 455,265 440,280 420,295 405,315 390,335 370,360
+    350,385 340,410 325,435 315,455 308,475 305,495 300,510 295,490 288,465
+    278,445 268,425 260,405 250,385 238,365 225,345 215,325 207,305 200,280
+    192,255 188,230 190,205 195,180 198,155 200,135 200,120
+  " fill="#0f1e10" stroke="#2a4a2a" stroke-width="1.5"/>`;
+
+  LIGHT_ZONES.forEach(z=>{
+    html+=`<circle cx="${z.x}" cy="${z.y}" r="${z.r*1.8}" fill="rgba(232,130,58,0.08)"/>`;
+    html+=`<circle cx="${z.x}" cy="${z.y}" r="${z.r}" fill="rgba(232,130,58,0.14)"/>`;
+    html+=`<text x="${z.x}" y="${z.y+z.r+14}" text-anchor="middle" fill="rgba(232,130,58,0.5)" font-size="9" font-family="Space Mono">${z.name}</text>`;
+  });
+
+  html+=`<circle cx="310" cy="210" r="18" fill="none" stroke="rgba(157,200,240,0.2)" stroke-width="1" stroke-dasharray="3,3"/>`;
+  html+=`<circle cx="310" cy="210" r="8" fill="rgba(157,200,240,0.15)" stroke="rgba(157,200,240,0.5)" stroke-width="1.5"/>`;
+  html+=`<text x="330" y="208" fill="#9dc8f0" font-size="9.5" font-family="Cinzel">Maunakea</text>`;
+  html+=`<text x="330" y="220" fill="rgba(157,200,240,0.5)" font-size="8" font-family="Space Mono">4,207m · 10 observatories</text>`;
+
+  TRAD_SITES.forEach(s=>{
+    html+=`<circle cx="${s.x}" cy="${s.y}" r="7" fill="rgba(232,184,75,0.15)" stroke="#e8b84b" stroke-width="1.5"/>`;
+    html+=`<circle cx="${s.x}" cy="${s.y}" r="3" fill="#e8b84b"/>`;
+    html+=`<text x="${s.x+10}" y="${s.y+4}" fill="rgba(232,184,75,0.8)" font-size="8.5" font-family="Cinzel">${s.name}</text>`;
+  });
+
+  renderMapReadings(svg, html);
+}
+
+let mapSVGBase = '';
+function renderMapReadings(svgEl, base) {
+  const svg = svgEl || document.getElementById('map-svg');
+  let html = base || mapSVGBase;
+  if (!base) { html = svg.innerHTML; }
+  submissions.forEach(s=>{
+    const siteMap = {
+      'Maunakea Summit (4,207m)':{x:310,y:210},
+      'Maunakea VIS (2,800m)':{x:305,y:245},
+      'Hilo — Waiākea':{x:430,y:220},
+      'Hilo — Leleiwi Beach':{x:445,y:240},
+      'Kailua-Kona':{x:210,y:320},
+      'South Point / Ka Lae':{x:310,y:490},
+      'Waipio Valley':{x:200,y:135},
+      'Kohala Coast':{x:235,y:150},
+      'Kawaihae Harbor':{x:230,y:165},
+    };
+    const pos = siteMap[s.site] || {x:310,y:300};
+    const col = s.bortle<=3?'#4ab5a0':s.bortle<=5?'#e8b84b':'#f06868';
+    html+=`<circle cx="${pos.x}" cy="${pos.y}" r="9" fill="${col}" opacity="0.7" stroke="white" stroke-width="0.8"/>`;
+    html+=`<text x="${pos.x}" y="${pos.y+4}" text-anchor="middle" fill="white" font-size="7.5" font-family="Space Mono" font-weight="bold">${s.bortle}</text>`;
+  });
+  svg.innerHTML = html;
+  mapSVGBase = mapSVGBase || html;
+}
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+document.getElementById('obs-date').value = new Date().toISOString().split('T')[0];
+document.getElementById('mahina-date').value = new Date().toISOString().split('T')[0];
+document.getElementById('f-date').value = new Date().toISOString().split('T')[0];
+
+// Restore saved submissions from localStorage
+try {
+  const saved = localStorage.getItem('hoku_submissions');
+  if (saved) submissions = JSON.parse(saved);
+} catch(e) {}
+
+renderSkyDome(currentMonth, 'all');
+updateSky();
+renderBortleScale();
+selectBortle(3);
+renderMoonCalendar();
+renderStarCheckboxes();
+renderSubmissions();
+renderMap();
+
+setTimeout(()=>{mapSVGBase = document.getElementById('map-svg').innerHTML;},100);
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js')
+      .then(() => console.log('Service Worker registered'))
+      .catch(err => console.log('SW error:', err));
+  }
+</script>
+</body>
+</html>

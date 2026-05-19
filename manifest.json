@@ -1,0 +1,24 @@
+{
+    "name": "Hōkū Palapala",
+    "short_name": "Hōkū",
+    "description": "An interactive cultural astronomy platform that helps explore the traditional hawaiian wayfinding stars, the visibilty in the skies, and the environmental factors affectign what can still be seen from Hawai'i",
+    "start_url": "/index.html",
+    "display": "standalone",
+    "background_color": "#04060f",
+    "theme_color": "#04060f",
+    "orientation": "portrait-primary",
+    "icons": [
+      {
+        "src": "hokusmallicon.png",
+        "sizes": "192x192",
+        "type": "image/png",
+        "purpose": "any"
+      },
+      {
+        "src": "hokubigicon.png",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "any"
+      }
+    ]
+  }
