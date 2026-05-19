@@ -683,9 +683,7 @@ function renderSkyDome(month, layer) {
 
     const hit=mkEl('circle');hit.setAttribute('cx',px);hit.setAttribute('cy',py);hit.setAttribute('r',20);
     hit.setAttribute('fill','transparent');hit.setAttribute('cursor','pointer');hit.setAttribute('clip-path','url(#dc)');
-    hit.addEventListener('click',()=>selectStar(star));
-    hit.addEventListener('mouseenter',e=>showTip(e,star));
-    hit.addEventListener('mouseleave',hideTip);
+    bindStarHitArea(hit, star);
     svg.appendChild(hit);
   });
 
@@ -721,8 +719,25 @@ function selectStar(star) {
 }
 
 const tip = document.getElementById('tip');
+function isCoarsePointerDevice() {
+  return window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+}
 function showTip(e,star){tip.querySelector('.tn').textContent=star.h;tip.querySelector('.tw').textContent=star.w;tip.style.display='block';moveTip(e);}
 function hideTip(){tip.style.display='none';}
+function bindStarHitArea(hit, star) {
+  hit.addEventListener('click', () => selectStar(star));
+  hit.addEventListener('mouseenter', e => {
+    if (!isCoarsePointerDevice()) showTip(e, star);
+  });
+  hit.addEventListener('mouseleave', () => {
+    if (!isCoarsePointerDevice()) hideTip();
+  });
+  hit.addEventListener('touchstart', e => {
+    if (!isCoarsePointerDevice()) return;
+    selectStar(star);
+    hideTip();
+  }, { passive: true });
+}
 document.addEventListener('mousemove',e=>{if(tip.style.display==='block')moveTip(e);});
 function moveTip(e){tip.style.left=(e.clientX+14)+'px';tip.style.top=(e.clientY-10)+'px';}
 
