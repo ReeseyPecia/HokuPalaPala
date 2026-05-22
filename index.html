@@ -99,6 +99,10 @@ nav{position:sticky;top:0;z-index:100;background:rgba(4,6,15,0.97);border-bottom
 .nav-badge{display:inline-block;margin-top:12px;padding:4px 12px;border-radius:2px;font-family:'Space Mono',monospace;font-size:0.58rem;letter-spacing:0.08em;text-transform:uppercase}
 .nav-badge.primary{background:rgba(232,130,58,0.12);border:1px solid rgba(232,130,58,0.4);color:#e8823a}
 .nav-badge.seasonal{background:rgba(74,181,160,0.1);border:1px solid var(--teal-border);color:var(--teal)}
+.alt-names-row{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 16px}
+.alt-name-badge{display:inline-flex;align-items:baseline;gap:6px;padding:4px 10px;border-radius:2px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);font-family:'Space Mono',monospace;font-size:0.6rem;line-height:1.4}
+.alt-name-badge .alt-src{color:var(--dim);letter-spacing:0.06em;text-transform:uppercase}
+.alt-name-badge .alt-val{color:var(--pale)}
 
 /* BORTLE CALCULATOR */
 .bortle-scale{display:grid;grid-template-columns:repeat(9,1fr);gap:4px;margin:16px 0}
@@ -907,6 +911,19 @@ function mkGrad(id,cx,cy,r,stops){
   return g;
 }
 
+function renderAltNamesHtml(altNames) {
+  if (!altNames || !altNames.length) return '';
+  const badges = altNames.map(a => {
+    const src = a.source || a.label || 'Other';
+    const name = a.name || '';
+    return `<span class="alt-name-badge"><span class="alt-src">${src}</span><span class="alt-val">${name}</span></span>`;
+  }).join('');
+  return `
+    <div class="data-sec">Names Across the Pacific</div>
+    <div class="alt-names-row">${badges}</div>
+  `;
+}
+
 function selectStar(star) {
   const p = document.getElementById('star-detail');
   const isPlanet = star.type === 'planet';
@@ -924,25 +941,26 @@ function selectStar(star) {
     ? (isPlanet ? `${star.dist} light-years (approx.)` : `${star.dist} light-years`)
     : '—';
   p.innerHTML = `
-    <motion class="star-name-h">${star.h}</motion>
-    <motion class="star-name-w">✦ ${star.w}</motion>
-    <motion class="star-meaning">${star.meaning}</motion>
-    <motion class="data-sec">Navigation Role</motion>
-    <motion style="font-size:0.88rem;color:#a0aabb;line-height:1.7;margin-bottom:12px">${star.navRole}</motion>
-    ${star.starLine ? `<motion class="data-row"><span class="dl">Hawaiian Star Line</span><span class="dv hi">${star.starLine}</span></motion>` : ''}
-    <motion class="data-sec">${astroTitle}</motion>
-    ${star.mag != null ? `<motion class="data-row"><span class="dl">Apparent Magnitude</span><span class="dv hi">${star.mag}</span></motion>` : ''}
-    ${star.dist != null ? `<motion class="data-row"><span class="dl">Distance from Earth</span><span class="dv">${distVal}</span></motion>` : ''}
-    <motion class="data-row"><span class="dl">Spectral Type</span><span class="dv">${star.spec}</span></motion>
-    ${star.rsun ? `<motion class="data-row"><span class="dl">Radius (Solar)</span><span class="dv">${star.rsun} R☉</span></motion>` : ''}
-    ${star.ra && star.ra !== 'varies' ? `<motion class="data-row"><span class="dl">Right Ascension</span><span class="dv">${star.ra}</span></motion>` : ''}
-    ${star.dec && star.dec !== 'varies' ? `<motion class="data-row"><span class="dl">Declination</span><span class="dv">${star.dec}</span></motion>` : ''}
-    <motion class="data-row"><span class="dl">Rise House</span><span class="dv">${star.riseHouse}</span></motion>
-    ${star.setHouse ? `<motion class="data-row"><span class="dl">Set House</span><span class="dv">${star.setHouse}</span></motion>` : ''}
-    <motion class="data-sec">${obsLabel}</motion>
-    <motion style="font-size:0.82rem;color:#9099aa;line-height:1.6;margin-bottom:10px">${star.obsNote}</motion>
+    <div class="star-name-h">${star.h}</div>
+    <div class="star-name-w">✦ ${star.w}</div>
+    ${renderAltNamesHtml(star.altNames)}
+    <div class="star-meaning">${star.meaning}</div>
+    <div class="data-sec">Navigation Role</div>
+    <div style="font-size:0.88rem;color:#a0aabb;line-height:1.7;margin-bottom:12px">${star.navRole}</div>
+    ${star.starLine ? `<div class="data-row"><span class="dl">Hawaiian Star Line</span><span class="dv hi">${star.starLine}</span></div>` : ''}
+    <div class="data-sec">${astroTitle}</div>
+    ${star.mag != null ? `<div class="data-row"><span class="dl">Apparent Magnitude</span><span class="dv hi">${star.mag}</span></div>` : ''}
+    ${star.dist != null ? `<div class="data-row"><span class="dl">Distance from Earth</span><span class="dv">${distVal}</span></div>` : ''}
+    <div class="data-row"><span class="dl">Spectral Type</span><span class="dv">${star.spec}</span></div>
+    ${star.rsun ? `<div class="data-row"><span class="dl">Radius (Solar)</span><span class="dv">${star.rsun} R☉</span></div>` : ''}
+    ${star.ra && star.ra !== 'varies' ? `<div class="data-row"><span class="dl">Right Ascension</span><span class="dv">${star.ra}</span></div>` : ''}
+    ${star.dec && star.dec !== 'varies' ? `<div class="data-row"><span class="dl">Declination</span><span class="dv">${star.dec}</span></div>` : ''}
+    <div class="data-row"><span class="dl">Rise House</span><span class="dv">${star.riseHouse}</span></div>
+    ${star.setHouse ? `<div class="data-row"><span class="dl">Set House</span><span class="dv">${star.setHouse}</span></div>` : ''}
+    <div class="data-sec">${obsLabel}</div>
+    <div style="font-size:0.82rem;color:#9099aa;line-height:1.6;margin-bottom:10px">${star.obsNote}</div>
     <span class="nav-badge ${badgeClass}">${badgeLabel}</span>
-  `.replace('<motion', '<div').replace('</motion>', '</div>');
+  `;
 }
 
 const tip = document.getElementById('tip');

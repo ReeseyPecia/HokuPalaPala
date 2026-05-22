@@ -154,7 +154,17 @@
       "skyX": 250,
       "skyY": 155,
       "constellationGroup": "bootes",
-      "constellationLabel": "Boötes"
+      "constellationLabel": "Boötes",
+      "altNames": [
+        {
+          "source": "Tahitian",
+          "name": "Hōkūleʻa"
+        },
+        {
+          "source": "Marquesan",
+          "name": "Hōkūleʻa"
+        }
+      ]
     },
     {
       "id": "hokupaa",
@@ -191,7 +201,17 @@
       "skyX": 250,
       "skyY": 48,
       "constellationGroup": "ursa_minor",
-      "constellationLabel": "Ursa Minor"
+      "constellationLabel": "Ursa Minor",
+      "altNames": [
+        {
+          "source": "Tahitian",
+          "name": "Hōkūpaʻa"
+        },
+        {
+          "source": "Marquesan",
+          "name": "Hōkūpaʻa"
+        }
+      ]
     },
     {
       "id": "aa",
@@ -221,7 +241,21 @@
       "skyX": 130,
       "skyY": 300,
       "constellationGroup": "canis_major",
-      "constellationLabel": "Canis Major"
+      "constellationLabel": "Canis Major",
+      "altNames": [
+        {
+          "source": "Tahitian",
+          "name": "Taʻurua"
+        },
+        {
+          "source": "Marquesan",
+          "name": "Tauʻuru"
+        },
+        {
+          "source": "Johnson & Mahelona",
+          "name": "Kāululaʻau"
+        }
+      ]
     },
     {
       "id": "makali_i",
@@ -250,7 +284,17 @@
       "skyX": 185,
       "skyY": 215,
       "constellationGroup": "pleiades",
-      "constellationLabel": "Pleiades"
+      "constellationLabel": "Pleiades",
+      "altNames": [
+        {
+          "source": "Tahitian",
+          "name": "Matariki"
+        },
+        {
+          "source": "Marquesan",
+          "name": "Mataiki"
+        }
+      ]
     },
     {
       "id": "maui_hook",
@@ -280,7 +324,13 @@
       "skyX": 340,
       "skyY": 365,
       "constellationGroup": "scorpius",
-      "constellationLabel": "Scorpius"
+      "constellationLabel": "Scorpius",
+      "altNames": [
+        {
+          "source": "Tahitian",
+          "name": "Māui fishhook"
+        }
+      ]
     },
     {
       "id": "puana",
@@ -310,7 +360,13 @@
       "skyX": 170,
       "skyY": 255,
       "constellationGroup": "canis_minor",
-      "constellationLabel": "Canis Minor"
+      "constellationLabel": "Canis Minor",
+      "altNames": [
+        {
+          "source": "Tahitian",
+          "name": "Puana"
+        }
+      ]
     },
     {
       "id": "cross",
@@ -340,7 +396,17 @@
       "skyX": 300,
       "skyY": 418,
       "constellationGroup": "crux",
-      "constellationLabel": "Southern Cross"
+      "constellationLabel": "Southern Cross",
+      "altNames": [
+        {
+          "source": "Tahitian",
+          "name": "Te Pitau"
+        },
+        {
+          "source": "Marquesan",
+          "name": "Te Pito"
+        }
+      ]
     },
     {
       "id": "hokulei",
@@ -370,7 +436,13 @@
       "skyX": 210,
       "skyY": 128,
       "constellationGroup": "auriga",
-      "constellationLabel": "Auriga"
+      "constellationLabel": "Auriga",
+      "altNames": [
+        {
+          "source": "Tahitian",
+          "name": "Hōkūleʻi"
+        }
+      ]
     },
     {
       "id": "kawelo",
@@ -401,7 +473,13 @@
       "skyX": 340,
       "skyY": 120,
       "constellationGroup": "summer_triangle",
-      "constellationLabel": "Summer Triangle"
+      "constellationLabel": "Summer Triangle",
+      "altNames": [
+        {
+          "source": "Tahitian",
+          "name": "Kāwelo"
+        }
+      ]
     },
     {
       "id": "kekaookalani",
@@ -493,7 +571,17 @@
       "skyX": 155,
       "skyY": 175,
       "constellationGroup": "gemini",
-      "constellationLabel": "Gemini"
+      "constellationLabel": "Gemini",
+      "altNames": [
+        {
+          "source": "Tahitian",
+          "name": "Nana-hope"
+        },
+        {
+          "source": "Johnson & Mahelona",
+          "name": "Na Mahoe (last)"
+        }
+      ]
     },
     {
       "id": "naale_a",
@@ -523,7 +611,17 @@
       "skyX": 148,
       "skyY": 162,
       "constellationGroup": "gemini",
-      "constellationLabel": "Gemini"
+      "constellationLabel": "Gemini",
+      "altNames": [
+        {
+          "source": "Tahitian",
+          "name": "Nana-mua"
+        },
+        {
+          "source": "Johnson & Mahelona",
+          "name": "Na Mahoe (first)"
+        }
+      ]
     },
     {
       "id": "manaiakalani",
@@ -553,7 +651,17 @@
       "skyX": 295,
       "skyY": 295,
       "constellationGroup": "virgo",
-      "constellationLabel": "Virgo"
+      "constellationLabel": "Virgo",
+      "altNames": [
+        {
+          "source": "Tahitian",
+          "name": "Mānaiakalani"
+        },
+        {
+          "source": "Marquesan",
+          "name": "Zenith star (Marquesas)"
+        }
+      ]
     },
     {
       "id": "hina_i_ele_ele",
@@ -640,7 +748,17 @@
       "skyX": 270,
       "skyY": 450,
       "constellationGroup": "carina",
-      "constellationLabel": "Carina"
+      "constellationLabel": "Carina",
+      "altNames": [
+        {
+          "source": "Tahitian",
+          "name": "Aveiʻa"
+        },
+        {
+          "source": "Marquesan",
+          "name": "Miloliʻi"
+        }
+      ]
     },
     {
       "id": "haamea",
@@ -670,7 +788,13 @@
       "skyX": 315,
       "skyY": 440,
       "constellationGroup": "centaurus",
-      "constellationLabel": "Centaurus"
+      "constellationLabel": "Centaurus",
+      "altNames": [
+        {
+          "source": "Tahitian",
+          "name": "Anaʻa (pointer)"
+        }
+      ]
     },
     {
       "id": "na_hiku",
@@ -737,7 +861,13 @@
       "skyX": 355,
       "skyY": 355,
       "constellationGroup": "scorpius",
-      "constellationLabel": "Scorpius"
+      "constellationLabel": "Scorpius",
+      "altNames": [
+        {
+          "source": "Tahitian",
+          "name": "Lehua"
+        }
+      ]
     },
     {
       "id": "ke_ka_o_makali_i",
@@ -894,7 +1024,17 @@
         11
       ],
       "skyX": 200,
-      "skyY": 380
+      "skyY": 380,
+      "altNames": [
+        {
+          "source": "Tahitian",
+          "name": "Taʻurua-fau-aba"
+        },
+        {
+          "source": "Marquesan",
+          "name": "Taʻurua"
+        }
+      ]
     },
     {
       "id": "jupiter",
