@@ -671,11 +671,14 @@ function starMatchesLayer(star, layer) {
   return true;
 }
 
-function starDotRadius(type) {
-  if (type === 'nav') return 5.5;
-  if (type === 'seasonal' || type === 'planet') return 6;
-  if (type === 'cultural') return 4.5;
-  return 4;
+/** Bishop Museum star map key: dot size by apparent magnitude */
+function starDotRadius(mag) {
+  if (mag == null) return 2;
+  if (mag < 0) return 7;
+  if (mag < 1) return 5.5;
+  if (mag < 2) return 4;
+  if (mag < 3) return 3;
+  return 2;
 }
 
 // ══════════════════════════════════════════
@@ -858,16 +861,17 @@ function renderSkyDome(month, layer, hourHST) {
 
   placed.forEach(({ star, x: px, y: py }) => {
     if (star.type !== 'starline') {
+      const dotR = starDotRadius(star.mag);
       const halo = mkEl('circle');
       halo.setAttribute('cx', px); halo.setAttribute('cy', py);
-      halo.setAttribute('r', star.type === 'nav' || star.type === 'planet' ? 15 : 11);
+      halo.setAttribute('r', dotR * 2.15);
       halo.setAttribute('fill', star.color); halo.setAttribute('opacity', '0.07');
       halo.setAttribute('clip-path', 'url(#dc)');
       svg.appendChild(halo);
 
       const dot = mkEl('circle');
       dot.setAttribute('cx', px); dot.setAttribute('cy', py);
-      dot.setAttribute('r', starDotRadius(star.type));
+      dot.setAttribute('r', dotR);
       dot.setAttribute('fill', star.color);
       dot.setAttribute('stroke', 'rgba(255,255,255,0.25)');
       dot.setAttribute('stroke-width', '0.5');
