@@ -103,6 +103,8 @@ nav{position:sticky;top:0;z-index:100;background:rgba(4,6,15,0.97);border-bottom
 .alt-name-badge{display:inline-flex;align-items:baseline;gap:6px;padding:4px 10px;border-radius:2px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);font-family:'Space Mono',monospace;font-size:0.6rem;line-height:1.4}
 .alt-name-badge .alt-src{color:var(--dim);letter-spacing:0.06em;text-transform:uppercase}
 .alt-name-badge .alt-val{color:var(--pale)}
+.constellation-diagram-wrap{width:200px;height:200px;margin:0 auto 18px;border:1px solid var(--border);border-radius:4px;overflow:hidden;background:var(--panel);flex-shrink:0}
+.constellation-diagram-wrap svg{display:block}
 
 /* BORTLE CALCULATOR */
 .bortle-scale{display:grid;grid-template-columns:repeat(9,1fr);gap:4px;margin:16px 0}
@@ -765,6 +767,27 @@ const CONSTELLATION_STARS = {
       { x: 300, y: 418 }
     ],
     lines: [[0, 1]]
+  },
+  pleiades: {
+    label: 'Pleiades',
+    color: '#b0c8f8',
+    months: [9, 10, 11, 0, 1],
+    points: [{ x: 185, y: 215 }],
+    lines: []
+  },
+  piscis_austrinus: {
+    label: 'Piscis Austrinus',
+    color: '#a8d0ff',
+    months: [7, 8, 9, 10],
+    points: [{ x: 330, y: 410 }],
+    lines: []
+  },
+  carina: {
+    label: 'Carina',
+    color: '#ffe0a8',
+    months: [0, 1, 2, 3, 4, 5, 6],
+    points: [{ x: 270, y: 450 }],
+    lines: []
   }
 };
 
@@ -1078,6 +1101,122 @@ function mkGrad(id,cx,cy,r,stops){
   return g;
 }
 
+function diagramDotRadius(mag) {
+  return starDotRadius(mag) * 0.55;
+}
+
+function catalogMagNearSkyPoint(skyX, skyY, groupKey) {
+  let bestMag = null;
+  let bestD = Infinity;
+  STARS.forEach(s => {
+    if (s.constellationGroup !== groupKey || s.skyX == null || s.skyY == null) return;
+    const d = (s.skyX - skyX) ** 2 + (s.skyY - skyY) ** 2;
+    if (d < bestD) {
+      bestD = d;
+      bestMag = s.mag;
+    }
+  });
+  return bestMag;
+}
+
+function findNearestConstellationPointIndex(star, points) {
+  if (!points.length) return 0;
+  if (star.skyX == null || star.skyY == null) return 0;
+  let idx = 0;
+  let bestD = Infinity;
+  points.forEach((p, i) => {
+    const d = (p.x - star.skyX) ** 2 + (p.y - star.skyY) ** 2;
+    if (d < bestD) {
+      bestD = d;
+      idx = i;
+    }
+  });
+  return idx;
+}
+
+function layoutConstellationDiagramPoints(points, boxW, boxH) {
+  const padX = 18;
+  const padTop = 14;
+  const padBottom = 22;
+  const plotW = boxW - padX * 2;
+  const plotH = boxH - padTop - padBottom;
+  const minX = Math.min(...points.map(p => p.x));
+  const maxX = Math.max(...points.map(p => p.x));
+  const minY = Math.min(...points.map(p => p.y));
+  const maxY = Math.max(...points.map(p => p.y));
+  const rangeX = maxX - minX || 1;
+  const rangeY = maxY - minY || 1;
+  const scale = Math.min(plotW / rangeX, plotH / rangeY);
+  const midX = (minX + maxX) / 2;
+  const midY = (minY + maxY) / 2;
+  const centerX = boxW / 2;
+  const centerY = padTop + plotH / 2;
+  return points.map(p => ({
+    x: centerX + (p.x - midX) * scale,
+    y: centerY + (p.y - midY) * scale
+  }));
+}
+
+function renderConstellationDiagramHtml(star) {
+  const W = 200;
+  const H = 200;
+  const drawColor = star.color || '#e8b84b';
+  const lineStroke = constellationStroke(drawColor, 0.3);
+
+  function singleDotDiagram() {
+    const cx = W / 2;
+    const cy = H / 2 - 4;
+    const r = diagramDotRadius(star.mag);
+    return `
+    <div class="constellation-diagram-wrap">
+      <svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-hidden="true">
+        <rect width="${W}" height="${H}" fill="var(--panel)"/>
+        <circle cx="${cx}" cy="${cy}" r="${r * 2.8}" fill="${drawColor}" opacity="0.18"/>
+        <circle cx="${cx}" cy="${cy}" r="${r * 1.6}" fill="${drawColor}" opacity="0.35"/>
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="${drawColor}"/>
+      </svg>
+    </div>`;
+  }
+
+  if (!star.constellationGroup) return singleDotDiagram();
+
+  const c = CONSTELLATION_STARS[star.constellationGroup];
+  if (!c || !c.points || !c.points.length) return singleDotDiagram();
+
+  const laid = layoutConstellationDiagramPoints(c.points, W, H);
+  const hiIdx = findNearestConstellationPointIndex(star, c.points);
+  const label = c.label || star.constellationLabel || '';
+
+  const linesSvg = (c.lines || []).map(([i, j]) => {
+    const a = laid[i];
+    const b = laid[j];
+    if (!a || !b) return '';
+    return `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="${lineStroke}" stroke-width="1.25" stroke-linecap="round"/>`;
+  }).join('');
+
+  const dotsSvg = laid.map((p, i) => {
+    const mag = catalogMagNearSkyPoint(c.points[i].x, c.points[i].y, star.constellationGroup);
+    const r = diagramDotRadius(mag);
+    const isHi = i === hiIdx;
+    const dotR = isHi ? r * 1.35 : r;
+    let extra = '';
+    if (isHi) {
+      extra = `<circle cx="${p.x}" cy="${p.y}" r="${dotR + 4}" fill="none" stroke="rgba(232,184,75,0.65)" stroke-width="1.25"/>`;
+    }
+    return `${extra}<circle cx="${p.x}" cy="${p.y}" r="${dotR}" fill="${drawColor}"/>`;
+  }).join('');
+
+  return `
+    <div class="constellation-diagram-wrap">
+      <svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="${label} constellation">
+        <rect width="${W}" height="${H}" fill="var(--panel)"/>
+        ${linesSvg}
+        ${dotsSvg}
+        <text x="${W / 2}" y="${H - 8}" text-anchor="middle" fill="var(--gold)" font-family="Cinzel, serif" font-size="9">${label}</text>
+      </svg>
+    </div>`;
+}
+
 function renderAltNamesHtml(altNames) {
   if (!altNames || !altNames.length) return '';
   const badges = altNames.map(a => {
@@ -1108,6 +1247,7 @@ function selectStar(star) {
     ? (isPlanet ? `${star.dist} light-years (approx.)` : `${star.dist} light-years`)
     : '—';
   p.innerHTML = `
+    ${renderConstellationDiagramHtml(star)}
     <div class="star-name-h">${star.h}</div>
     <div class="star-name-w">✦ ${star.w}</div>
     ${renderAltNamesHtml(star.altNames)}

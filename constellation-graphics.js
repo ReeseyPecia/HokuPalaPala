@@ -170,6 +170,27 @@ const CONSTELLATION_STARS = {
       { x: 300, y: 418 }
     ],
     lines: [[0, 1]]
+  },
+  pleiades: {
+    label: 'Pleiades',
+    color: '#b0c8f8',
+    months: [9, 10, 11, 0, 1],
+    points: [{ x: 185, y: 215 }],
+    lines: []
+  },
+  piscis_austrinus: {
+    label: 'Piscis Austrinus',
+    color: '#a8d0ff',
+    months: [7, 8, 9, 10],
+    points: [{ x: 330, y: 410 }],
+    lines: []
+  },
+  carina: {
+    label: 'Carina',
+    color: '#ffe0a8',
+    months: [0, 1, 2, 3, 4, 5, 6],
+    points: [{ x: 270, y: 450 }],
+    lines: []
   }
 };
 
