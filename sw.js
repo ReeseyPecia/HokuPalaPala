@@ -1,8 +1,9 @@
-const CACHE_NAME = 'hoku-palapala-v1';
+const CACHE_NAME = 'hoku-palapala-v3';
 
 const ASSETS = [
   '/',
   '/index.html',
+  '/stars.json',
   '/manifest.json',
   '/hokubigicon.png',
   '/hokusmallicon.png',

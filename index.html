@@ -193,7 +193,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(4,6,15,0.97);border-bottom
 <div class="hero">
   <div class="hero-title">Hōkū Palapala</div>
   <div class="hero-title" style="font-size:clamp(1rem,3vw,1.6rem);font-weight:400;margin-top:4px;">The Star Record</div>
-  <div class="hero-sub">A citizen-science sky brightness &amp; cultural astronomy archive — Hawaiʻi Island</div>
+  <div class="hero-sub">A living record of dark skies and ancestral stars</div>
   <div class="hero-tags">
     <span class="tag teal">Dark Sky Science</span>
     <span class="tag gold">Cultural Astronomy</span>
@@ -229,6 +229,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(4,6,15,0.97);border-bottom
               <option value="all">All Stars</option>
               <option value="nav">Navigation Stars Only</option>
               <option value="seasonal">Seasonal Markers</option>
+              <option value="starlines">Star Lines</option>
             </select>
           </div>
         </div>
@@ -482,7 +483,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(4,6,15,0.97);border-bottom
           </div>
           </div>
         </div>
-        <div class="panel teal-border">
+        <div class="panel teal-border" style="margin-bottom:20px">
           <div class="ctrl-label" style="margin-bottom:10px">Stewardship Partners</div>
           <div style="font-size:0.85rem;color:#9099aa;line-height:1.75;font-style:italic">
           Community partnerships currently in development.
@@ -574,18 +575,92 @@ function showTab(t) {
 }
 
 // ══════════════════════════════════════════
-// STAR DATA
+// STAR DATA (loaded from stars.json v2.1 — see corrections_log in JSON)
 // ══════════════════════════════════════════
-const STARS = [
-  { id:'hokulea', h:'Hōkūleʻa', w:'Arcturus (α Bootis)', meaning:'"Star of Gladness" — zenith star of Hawaiʻi at 21°N', type:'nav', color:'#f4a050', mag:-0.05, dist:36.7, spec:'K1.5 III (Orange Giant)', rsun:25.7, navRole:'Tahitian navigators sailed north following Hōkūleʻa to reach Hawaiʻi. It passes directly overhead at 21°N — the latitude of the islands. The voyaging canoe Hōkūleʻa is named for it.', riseHouse:'ʻĀina Koʻolau (NE)', setHouse:'ʻĀina Kona (NW)', obsNote:'Tracked by UH 2.2m & Keck; spectral data in IRTF Maunakea archives.', skyX:250, skyY:155, months:[3,4,5,6,7,8,9] },
-  { id:'hokupaa', h:'Hōkūpaʻa', w:'Polaris (α UMi)', meaning:'"Fixed Star" — the unmoving anchor of the northern sky', type:'nav', color:'#c8e0ff', mag:1.97, dist:433, spec:'F7 Ib-IIa Supergiant', rsun:37.5, navRole:'The North Star. Kept astern when sailing south from Hawaiʻi to Tahiti. When it disappears below the horizon, you have crossed the equator — switch to the Southern Cross.', riseHouse:'Circumpolar (never sets at Hawaiʻi)', obsNote:'Used as a calibration reference star for Maunakea telescope pointing.', skyX:250, skyY:48, months:[0,1,2,3,4,5,6,7,8,9,10,11] },
-  { id:'aa', h:'Aʻā', w:'Sirius (α CMa)', meaning:'"Glowing / Burning" — also Kāululaʻau', type:'nav', color:'#aad4ff', mag:-1.46, dist:8.6, spec:'A1 V Blue-White Main Sequence', rsun:1.71, navRole:'Brightest star in the Hawaiian sky. Passes directly over Tahiti — used to navigate the return voyage south. Part of the Ke Ka o Makaliʻi star line.', riseHouse:'Lā (Due East, seasonal)', obsNote:'One of the nearest stars. Extensively studied at Keck for stellar atmosphere properties.', skyX:130, skyY:300, months:[11,0,1,2,3] },
-  { id:'makali_i', h:'Makaliʻi', w:'Pleiades (M45)', meaning:'"Eyes of the Chief" — marks the start of Makahiki (Hawaiian New Year)', type:'seasonal', color:'#b0c8f8', mag:1.6, dist:444, spec:'Open cluster, ~1000 stars, B-type', navRole:'Rising of Makaliʻi at sunset marks the start of Makahiki. Critical seasonal marker. Gives its name to the star line Ke Ka o Makaliʻi.', riseHouse:'Koʻolau (NNE)', obsNote:'Extensively imaged by Subaru Telescope, Maunakea. Part of UKIRT infrared surveys.', skyX:185, skyY:215, months:[10,11,0,1] },
-  { id:'maui_hook', h:'Ka Makau Nui o Māui', w:'Scorpius (incl. Antares)', meaning:'"The Great Fishhook of Māui" — he fished up the islands with this hook', type:'cultural', color:'#f06868', mag:1.06, dist:550, spec:'M1 Iab+ Red Supergiant (Antares)', rsun:700, navRole:'The entire constellation serves as a southern meridian pointer. When the fishhook is high in the south, the navigator knows true south. The heart (Antares/Lehua) confirms the bearing.', riseHouse:'Lā (South of East)', obsNote:'Antares monitored by Keck for stellar mass loss. UKIRT infrared tracks dust shells around this supergiant.', skyX:340, skyY:365, months:[4,5,6,7,8] },
-  { id:'puana', h:'Puana', w:'Procyon (α CMi)', meaning:'"Blossom" — flowering before the Dog Star rises', type:'nav', color:'#ffe8a0', mag:0.34, dist:11.46, spec:'F5 IV-V Yellow-White Subgiant', rsun:2.05, navRole:'Part of the Ke Ka o Makaliʻi arc. Rises before Sirius and helps track the curvature of this key star group across the sky.', riseHouse:'ʻĀina Koʻolau (NE)', obsNote:'High-resolution spectroscopy at Keck I, Maunakea.', skyX:170, skyY:255, months:[11,0,1,2,3] },
-  { id:'cross', h:'Hanaiakamalama', w:'Southern Cross (Crux)', meaning:'"Cared for by the Moon" — a child of the Moon', type:'nav', color:'#c0f0e0', mag:0.77, dist:321, spec:'B0.5 III Blue Giant (Acrux)', rsun:7.8, navRole:'Used south of the equator when Hōkūpaʻa disappears. Two pointer stars indicate south. Ka Iwikuamoʻo (the Backbone) runs from Polaris to the Southern Cross.', riseHouse:'Nā Leo (South)', obsNote:'Low-elevation from Maunakea. CFHT archive includes Crux region southern sky surveys.', skyX:300, skyY:418, months:[2,3,4,5,6] },
-  { id:'hokulei', h:'Hōkūleī', w:'Capella (α Aur)', meaning:'"Star Wreath" — northernmost star of the Makaliʻi arc', type:'nav', color:'#fff0a0', mag:0.08, dist:42.9, spec:'G8 III + G0 III Binary', rsun:11.87, navRole:'Northernmost star of the Ke Ka o Makaliʻi arc. Helps the navigator track the full curvature of this key star line from north to south.', riseHouse:'ʻĀina Koʻolau (NNE)', obsNote:'Binary resolved with Keck interferometry at Maunakea.', skyX:210, skyY:128, months:[10,11,0,1,2] },
-];
+let STARS = [];
+const SKY_LAT = 20;
+const SKY_CX = 250;
+const SKY_CY = 250;
+const SKY_R = 240;
+
+const STAR_LINE_ORDER = {
+  'Ke Kā o Makaliʻi': ['hokulei', 'makali_i', 'hokupa', 'naale_a', 'puana', 'aa'],
+  'Ka Iwikuamoʻo': ['hokupaa', 'na_hiku', 'hokulea', 'haamea', 'cross'],
+  'Ka Lupe o Kāwelo': ['kawelo', 'ikua', 'kekaookalani', 'manaiakalani', 'hina_i_ele_ele'],
+  'Manaiakalani': ['lehua', 'maui_hook']
+};
+
+function normalizeStar(s) {
+  return { ...s, dist: s.dist_ly != null ? s.dist_ly : s.dist };
+}
+
+async function loadStars() {
+  try {
+    const res = await fetch('stars.json');
+    const data = await res.json();
+    STARS = data.stars.map(normalizeStar);
+  } catch (e) {
+    console.error('Failed to load stars.json', e);
+  }
+}
+
+function parseRA(raStr) {
+  if (!raStr || raStr === 'varies') return null;
+  const m = raStr.match(/(\d+)h\s*(\d+)m\s*([\d.]+)s/);
+  if (!m) return null;
+  return (+m[1] + +m[2] / 60 + +m[3] / 3600) * 15 * Math.PI / 180;
+}
+
+function parseDec(decStr) {
+  if (!decStr || decStr === 'varies') return null;
+  const m = decStr.match(/([+\u2212-−]?)\s*(\d+)°\s*(\d+)′\s*([\d.]+)″/);
+  if (!m) return null;
+  const sign = m[1] === '-' || m[1] === '−' || m[1] === '\u2212' ? -1 : 1;
+  return sign * (+m[2] + +m[3] / 60 + +m[4] / 3600) * Math.PI / 180;
+}
+
+function raDecToSkyXY(raStr, decStr, hourHST) {
+  const ra = parseRA(raStr);
+  const dec = parseDec(decStr);
+  if (ra == null || dec == null) return null;
+  const lat = SKY_LAT * Math.PI / 180;
+  const lst = ((hourHST + 20) % 24) * Math.PI / 12;
+  const ha = lst - ra;
+  const sinAlt = Math.sin(dec) * Math.sin(lat) + Math.cos(dec) * Math.cos(lat) * Math.cos(ha);
+  const alt = Math.asin(Math.max(-1, Math.min(1, sinAlt)));
+  if (alt < 0) return null;
+  const cosAzNum = Math.sin(dec) - Math.sin(alt) * Math.sin(lat);
+  const cosAzDen = Math.cos(alt) * Math.cos(lat);
+  let az = cosAzDen === 0 ? 0 : Math.acos(Math.max(-1, Math.min(1, cosAzNum / cosAzDen)));
+  if (Math.sin(ha) > 0) az = 2 * Math.PI - az;
+  const zenithDist = (Math.PI / 2 - alt) / (Math.PI / 2);
+  const r = SKY_R * zenithDist * 0.92;
+  return { x: SKY_CX + r * Math.sin(az), y: SKY_CY - r * Math.cos(az) };
+}
+
+function getStarSkyPos(star, month, hourHST) {
+  if (star.skyX != null && star.skyY != null) return { x: star.skyX, y: star.skyY };
+  if (star.ra && star.dec && star.ra !== 'varies') {
+    const computed = raDecToSkyXY(star.ra, star.dec, hourHST);
+    if (computed) return computed;
+  }
+  return null;
+}
+
+function starMatchesLayer(star, layer) {
+  if (layer === 'all') return star.type !== 'starline';
+  if (layer === 'nav') return star.type === 'nav';
+  if (layer === 'seasonal') return star.type === 'seasonal' || star.type === 'cultural';
+  if (layer === 'starlines') return !!star.starLine;
+  return true;
+}
+
+function starDotRadius(type) {
+  if (type === 'nav') return 5.5;
+  if (type === 'seasonal' || type === 'planet') return 6;
+  if (type === 'cultural') return 4.5;
+  return 4;
+}
 
 // ══════════════════════════════════════════
 // SKY DOME
@@ -595,12 +670,12 @@ let currentMonth = new Date().getMonth();
 function updateSky() {
   const dateVal = document.getElementById('obs-date').value;
   if (dateVal) currentMonth = new Date(dateVal).getMonth();
-  const hour = parseInt(document.getElementById('obs-hour').value);
+  const hour = parseInt(document.getElementById('obs-hour').value, 10);
   const layer = document.getElementById('sky-layer').value;
   const infoEl = document.getElementById('sky-info');
   const moonPhase = calcMoonPhaseRaw(dateVal ? new Date(dateVal) : new Date());
   infoEl.textContent = `Moon Phase: ${moonPhase.name} (${moonPhase.illumination}% illuminated) — ${moonPhase.illumination > 60 ? '⚠ Bright moon may reduce visibility' : '✓ Good for navigation stars'}`;
-  renderSkyDome(currentMonth, layer);
+  renderSkyDome(currentMonth, layer, hour);
 }
 
 function calcMoonPhaseRaw(date) {
@@ -614,10 +689,39 @@ function calcMoonPhaseRaw(date) {
   return { name: names[idx], illumination: ill, phase };
 }
 
-function renderSkyDome(month, layer) {
+function drawStarLines(svg, placed, layer) {
+  if (layer !== 'starlines') return;
+  const byLine = {};
+  placed.forEach(({ star, x, y }) => {
+    if (!star.starLine || star.type === 'starline') return;
+    if (!byLine[star.starLine]) byLine[star.starLine] = [];
+    byLine[star.starLine].push({ id: star.id, x, y });
+  });
+  Object.keys(byLine).forEach(lineName => {
+    const order = STAR_LINE_ORDER[lineName];
+    let pts = byLine[lineName];
+    if (order) {
+      pts = order.map(id => pts.find(p => p.id === id)).filter(Boolean);
+    } else {
+      pts = pts.sort((a, b) => Math.atan2(a.y - SKY_CY, a.x - SKY_CX) - Math.atan2(b.y - SKY_CY, b.x - SKY_CX));
+    }
+    if (pts.length < 2) return;
+    const path = mkEl('path');
+    path.setAttribute('d', pts.map((p, i) => `${i ? 'L' : 'M'}${p.x},${p.y}`).join(' '));
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', 'rgba(232,184,75,0.45)');
+    path.setAttribute('stroke-width', '1.5');
+    path.setAttribute('stroke-dasharray', '6,4');
+    path.setAttribute('clip-path', 'url(#dc)');
+    path.setAttribute('pointer-events', 'none');
+    svg.appendChild(path);
+  });
+}
+
+function renderSkyDome(month, layer, hourHST) {
   const svg = document.getElementById('sky-svg');
   svg.innerHTML = '';
-  const CX=250,CY=250,R=240;
+  const CX = SKY_CX, CY = SKY_CY, R = SKY_R;
 
   const defs = mkEl('defs');
   const g = mkGrad('dG','50%','40%','60%',[[0,'#0b1535'],[100,'#020408']]);
@@ -654,38 +758,54 @@ function renderSkyDome(month, layer) {
     bs.setAttribute('r',Math.random()*0.75+0.25);bs.setAttribute('fill',`rgba(200,215,255,${Math.random()*0.35+0.08})`);bs.setAttribute('clip-path','url(#dc)');svg.appendChild(bs);
   }
 
-  const visible = STARS.filter(s=>{
-    if(!s.months.includes(month)) return false;
-    if(layer==='nav' && s.type!=='nav') return false;
-    if(layer==='seasonal' && s.type!=='seasonal') return false;
-    return true;
-  });
+  const visible = STARS.filter(s => s.months.includes(month) && starMatchesLayer(s, layer));
+  const placed = [];
 
-  visible.forEach(star=>{
-    const px=star.skyX,py=star.skyY;
-    const dx=px-CX,dy=py-CY;
-    if(Math.sqrt(dx*dx+dy*dy)>R-5) return;
+  visible.forEach(star => {
+    const pos = getStarSkyPos(star, month, hourHST);
+    if (!pos) return;
+    const px = pos.x, py = pos.y;
+    const dx = px - CX, dy = py - CY;
+    if (Math.sqrt(dx * dx + dy * dy) > R - 5) return;
+    placed.push({ star, x: px, y: py });
 
-    const h=mkEl('circle');h.setAttribute('cx',px);h.setAttribute('cy',py);
-    h.setAttribute('r',star.type==='nav'?15:11);h.setAttribute('fill',star.color);h.setAttribute('opacity','0.07');h.setAttribute('clip-path','url(#dc)');svg.appendChild(h);
+    if (star.type !== 'starline') {
+      const halo = mkEl('circle');
+      halo.setAttribute('cx', px); halo.setAttribute('cy', py);
+      halo.setAttribute('r', star.type === 'nav' || star.type === 'planet' ? 15 : 11);
+      halo.setAttribute('fill', star.color); halo.setAttribute('opacity', '0.07');
+      halo.setAttribute('clip-path', 'url(#dc)');
+      svg.appendChild(halo);
 
-    const dot=mkEl('circle');dot.setAttribute('cx',px);dot.setAttribute('cy',py);
-    dot.setAttribute('r',star.type==='nav'?5.5:star.type==='seasonal'?6:4);
-    dot.setAttribute('fill',star.color);dot.setAttribute('stroke','rgba(255,255,255,0.25)');dot.setAttribute('stroke-width','0.5');
-    dot.setAttribute('clip-path','url(#dc)');
-    if(star.type==='nav') dot.classList.add('sp');
-    svg.appendChild(dot);
+      const dot = mkEl('circle');
+      dot.setAttribute('cx', px); dot.setAttribute('cy', py);
+      dot.setAttribute('r', starDotRadius(star.type));
+      dot.setAttribute('fill', star.color);
+      dot.setAttribute('stroke', 'rgba(255,255,255,0.25)');
+      dot.setAttribute('stroke-width', '0.5');
+      dot.setAttribute('clip-path', 'url(#dc)');
+      if (star.type === 'nav' || star.type === 'planet') dot.classList.add('sp');
+      svg.appendChild(dot);
+    }
 
-    const lbl=mkEl('text');lbl.setAttribute('x',px+8);lbl.setAttribute('y',py+4);
-    lbl.setAttribute('fill',star.color);lbl.setAttribute('opacity','0.82');
-    lbl.setAttribute('font-size','8');lbl.setAttribute('font-family','Cinzel, serif');
-    lbl.setAttribute('clip-path','url(#dc)');lbl.textContent=star.h;svg.appendChild(lbl);
+    const lbl = mkEl('text');
+    lbl.setAttribute('x', px + 8); lbl.setAttribute('y', py + 4);
+    lbl.setAttribute('fill', star.color); lbl.setAttribute('opacity', '0.82');
+    lbl.setAttribute('font-size', layer === 'starlines' ? '7' : '8');
+    lbl.setAttribute('font-family', 'Cinzel, serif');
+    lbl.setAttribute('clip-path', 'url(#dc)');
+    lbl.textContent = star.h;
+    svg.appendChild(lbl);
 
-    const hit=mkEl('circle');hit.setAttribute('cx',px);hit.setAttribute('cy',py);hit.setAttribute('r',20);
-    hit.setAttribute('fill','transparent');hit.setAttribute('cursor','pointer');hit.setAttribute('clip-path','url(#dc)');
+    const hit = mkEl('circle');
+    hit.setAttribute('cx', px); hit.setAttribute('cy', py); hit.setAttribute('r', 20);
+    hit.setAttribute('fill', 'transparent'); hit.setAttribute('cursor', 'pointer');
+    hit.setAttribute('clip-path', 'url(#dc)');
     bindStarHitArea(hit, star);
     svg.appendChild(hit);
   });
+
+  drawStarLines(svg, placed, layer);
 
   const z=mkEl('circle');z.setAttribute('cx',CX);z.setAttribute('cy',CY);z.setAttribute('r',3);z.setAttribute('fill','rgba(232,184,75,0.3)');svg.appendChild(z);
 }
@@ -699,23 +819,40 @@ function mkGrad(id,cx,cy,r,stops){
 
 function selectStar(star) {
   const p = document.getElementById('star-detail');
+  const isPlanet = star.type === 'planet';
+  const badgeClass = { nav: 'primary', seasonal: 'seasonal', cultural: 'seasonal', starline: 'seasonal', planet: 'primary' }[star.type] || 'seasonal';
+  const badgeLabel = {
+    nav: '⛵ Primary Navigation Star',
+    seasonal: '📅 Seasonal Marker',
+    cultural: '🌟 Cultural Constellation',
+    starline: '📐 Hawaiian Star Line',
+    planet: '🪐 Planet (Hōkū ʻEleʻele)'
+  }[star.type] || '🌟 Sky Object';
+  const obsLabel = isPlanet ? 'Planets' : 'Observatory Connection';
+  const astroTitle = isPlanet ? 'Planetary Data' : 'Astrophysics — Maunakea Observatory Data';
+  const distVal = star.dist != null
+    ? (isPlanet ? `${star.dist} light-years (approx.)` : `${star.dist} light-years`)
+    : '—';
   p.innerHTML = `
-    <div class="star-name-h">${star.h}</div>
-    <div class="star-name-w">✦ ${star.w}</div>
-    <div class="star-meaning">${star.meaning}</div>
-    <div class="data-sec">Navigation Role</div>
-    <div style="font-size:0.88rem;color:#a0aabb;line-height:1.7;margin-bottom:12px">${star.navRole}</div>
-    <div class="data-sec">Astrophysics — Maunakea Observatory Data</div>
-    <div class="data-row"><span class="dl">Apparent Magnitude</span><span class="dv hi">${star.mag}</span></div>
-    <div class="data-row"><span class="dl">Distance from Earth</span><span class="dv">${star.dist} light-years</span></div>
-    <div class="data-row"><span class="dl">Spectral Type</span><span class="dv">${star.spec}</span></div>
-    ${star.rsun?`<div class="data-row"><span class="dl">Radius (Solar)</span><span class="dv">${star.rsun} R☉</span></div>`:''}
-    <div class="data-row"><span class="dl">Rise House</span><span class="dv">${star.riseHouse}</span></div>
-    ${star.setHouse?`<div class="data-row"><span class="dl">Set House</span><span class="dv">${star.setHouse}</span></div>`:''}
-    <div class="data-sec">Observatory Connection</div>
-    <div style="font-size:0.82rem;color:#9099aa;line-height:1.6;margin-bottom:10px">${star.obsNote}</div>
-    <span class="nav-badge ${star.type==='nav'?'primary':'seasonal'}">${star.type==='nav'?'⛵ Primary Navigation Star':star.type==='seasonal'?'📅 Seasonal Marker':'🌟 Cultural Constellation'}</span>
-  `;
+    <motion class="star-name-h">${star.h}</motion>
+    <motion class="star-name-w">✦ ${star.w}</motion>
+    <motion class="star-meaning">${star.meaning}</motion>
+    <motion class="data-sec">Navigation Role</motion>
+    <motion style="font-size:0.88rem;color:#a0aabb;line-height:1.7;margin-bottom:12px">${star.navRole}</motion>
+    ${star.starLine ? `<motion class="data-row"><span class="dl">Hawaiian Star Line</span><span class="dv hi">${star.starLine}</span></motion>` : ''}
+    <motion class="data-sec">${astroTitle}</motion>
+    ${star.mag != null ? `<motion class="data-row"><span class="dl">Apparent Magnitude</span><span class="dv hi">${star.mag}</span></motion>` : ''}
+    ${star.dist != null ? `<motion class="data-row"><span class="dl">Distance from Earth</span><span class="dv">${distVal}</span></motion>` : ''}
+    <motion class="data-row"><span class="dl">Spectral Type</span><span class="dv">${star.spec}</span></motion>
+    ${star.rsun ? `<motion class="data-row"><span class="dl">Radius (Solar)</span><span class="dv">${star.rsun} R☉</span></motion>` : ''}
+    ${star.ra && star.ra !== 'varies' ? `<motion class="data-row"><span class="dl">Right Ascension</span><span class="dv">${star.ra}</span></motion>` : ''}
+    ${star.dec && star.dec !== 'varies' ? `<motion class="data-row"><span class="dl">Declination</span><span class="dv">${star.dec}</span></motion>` : ''}
+    <motion class="data-row"><span class="dl">Rise House</span><span class="dv">${star.riseHouse}</span></motion>
+    ${star.setHouse ? `<motion class="data-row"><span class="dl">Set House</span><span class="dv">${star.setHouse}</span></motion>` : ''}
+    <motion class="data-sec">${obsLabel}</motion>
+    <motion style="font-size:0.82rem;color:#9099aa;line-height:1.6;margin-bottom:10px">${star.obsNote}</motion>
+    <span class="nav-badge ${badgeClass}">${badgeLabel}</span>
+  `.replace('<motion', '<div').replace('</motion>', '</div>');
 }
 
 const tip = document.getElementById('tip');
@@ -783,8 +920,13 @@ function selectBortle(b) {
 
 function updateVisibilityGrid(nelm) {
   const grid = document.getElementById('vis-grid');
-  const allStars = [...STARS, {h:'Milky Way Core',mag:3.5,color:'#c0d0ff'},{h:'Zodiacal Light',mag:4.8,color:'#e0c880'},{h:'Andromeda (M31)',mag:3.4,color:'#d0c0f0'}];
-  grid.innerHTML = allStars.map(s=>{
+  const allStars = [
+    ...STARS.filter(s => s.mag != null),
+    { h: 'Milky Way Core', mag: 3.5, color: '#c0d0ff' },
+    { h: 'Zodiacal Light', mag: 4.8, color: '#e0c880' },
+    { h: 'Andromeda (M31)', mag: 3.4, color: '#d0c0f0' }
+  ];
+  grid.innerHTML = allStars.map(s => {
     const vis = s.mag <= nelm;
     return `<div class="vis-item">
       <div class="vis-dot" style="background:${s.color};box-shadow:0 0 6px ${s.color}40"></div>
@@ -856,7 +998,7 @@ function calcMahina() {
 let submissions = [];
 
 function renderStarCheckboxes() {
-  document.getElementById('star-checkboxes').innerHTML = STARS.map(s=>`
+  document.getElementById('star-checkboxes').innerHTML = STARS.filter(s => s.type !== 'starline').map(s => `
     <label class="star-check">
       <input type="checkbox" name="stars" value="${s.h}">
       <span style="color:${s.color}">${s.h}</span>
@@ -1010,16 +1152,19 @@ try {
   if (saved) submissions = JSON.parse(saved);
 } catch(e) {}
 
-renderSkyDome(currentMonth, 'all');
-updateSky();
-renderBortleScale();
-selectBortle(3);
-renderMoonCalendar();
-renderStarCheckboxes();
-renderSubmissions();
-renderMap();
-
-setTimeout(()=>{mapSVGBase = document.getElementById('map-svg').innerHTML;},100);
+async function initApp() {
+  await loadStars();
+  renderSkyDome(currentMonth, 'all', 22);
+  updateSky();
+  renderBortleScale();
+  selectBortle(3);
+  renderMoonCalendar();
+  renderStarCheckboxes();
+  renderSubmissions();
+  renderMap();
+  setTimeout(() => { mapSVGBase = document.getElementById('map-svg').innerHTML; }, 100);
+}
+initApp();
 </script>
 <script>
   if ('serviceWorker' in navigator) {
