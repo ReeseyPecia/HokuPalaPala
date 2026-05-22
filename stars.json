@@ -11,6 +11,116 @@
       "cultural": "Cultural Constellation — carries significant moʻolelo",
       "starline": "Star Line — one of the Nā Lālani Hōkū navigation arcs",
       "planet": "Planet — hōkū ʻeleʻele, the moving stars"
+    },
+    "constellation_graphics": {
+      "gemini": {
+        "label": "Gemini",
+        "edges": [
+          [
+            "naale_a",
+            "hokupa"
+          ]
+        ]
+      },
+      "scorpius": {
+        "label": "Scorpius",
+        "edges": [
+          [
+            "lehua",
+            "maui_hook"
+          ]
+        ]
+      },
+      "crux": {
+        "label": "Southern Cross",
+        "edges": [
+          [
+            "kaulia",
+            "cross"
+          ],
+          [
+            "cross",
+            "ka_mole_honua"
+          ]
+        ]
+      },
+      "summer_triangle": {
+        "label": "Summer Triangle",
+        "edges": [
+          [
+            "kawelo",
+            "kekaookalani"
+          ],
+          [
+            "kekaookalani",
+            "ikua"
+          ],
+          [
+            "ikua",
+            "kawelo"
+          ]
+        ]
+      },
+      "canis_major": {
+        "label": "Canis Major",
+        "edges": []
+      },
+      "bootes": {
+        "label": "Boötes",
+        "edges": []
+      },
+      "ursa_minor": {
+        "label": "Ursa Minor",
+        "edges": []
+      },
+      "pleiades": {
+        "label": "Pleiades",
+        "edges": []
+      },
+      "canis_minor": {
+        "label": "Canis Minor",
+        "edges": []
+      },
+      "auriga": {
+        "label": "Auriga",
+        "edges": []
+      },
+      "lyra": {
+        "label": "Lyra",
+        "edges": []
+      },
+      "aquila": {
+        "label": "Aquila",
+        "edges": []
+      },
+      "cygnus": {
+        "label": "Cygnus",
+        "edges": []
+      },
+      "virgo": {
+        "label": "Virgo",
+        "edges": []
+      },
+      "corvus": {
+        "label": "Corvus",
+        "edges": []
+      },
+      "piscis_austrinus": {
+        "label": "Piscis Austrinus",
+        "edges": []
+      },
+      "carina": {
+        "label": "Carina",
+        "edges": []
+      },
+      "centaurus": {
+        "label": "Centaurus",
+        "edges": []
+      },
+      "ursa_major": {
+        "label": "Ursa Major",
+        "edges": []
+      }
     }
   },
   "stars": [
@@ -42,7 +152,9 @@
         9
       ],
       "skyX": 250,
-      "skyY": 155
+      "skyY": 155,
+      "constellationGroup": "bootes",
+      "constellationLabel": "Boötes"
     },
     {
       "id": "hokupaa",
@@ -77,7 +189,9 @@
         11
       ],
       "skyX": 250,
-      "skyY": 48
+      "skyY": 48,
+      "constellationGroup": "ursa_minor",
+      "constellationLabel": "Ursa Minor"
     },
     {
       "id": "aa",
@@ -105,7 +219,9 @@
         3
       ],
       "skyX": 130,
-      "skyY": 300
+      "skyY": 300,
+      "constellationGroup": "canis_major",
+      "constellationLabel": "Canis Major"
     },
     {
       "id": "makali_i",
@@ -132,7 +248,9 @@
         1
       ],
       "skyX": 185,
-      "skyY": 215
+      "skyY": 215,
+      "constellationGroup": "pleiades",
+      "constellationLabel": "Pleiades"
     },
     {
       "id": "maui_hook",
@@ -160,7 +278,9 @@
         8
       ],
       "skyX": 340,
-      "skyY": 365
+      "skyY": 365,
+      "constellationGroup": "scorpius",
+      "constellationLabel": "Scorpius"
     },
     {
       "id": "puana",
@@ -188,7 +308,9 @@
         3
       ],
       "skyX": 170,
-      "skyY": 255
+      "skyY": 255,
+      "constellationGroup": "canis_minor",
+      "constellationLabel": "Canis Minor"
     },
     {
       "id": "cross",
@@ -216,7 +338,9 @@
         6
       ],
       "skyX": 300,
-      "skyY": 418
+      "skyY": 418,
+      "constellationGroup": "crux",
+      "constellationLabel": "Southern Cross"
     },
     {
       "id": "hokulei",
@@ -244,7 +368,9 @@
         2
       ],
       "skyX": 210,
-      "skyY": 128
+      "skyY": 128,
+      "constellationGroup": "auriga",
+      "constellationLabel": "Auriga"
     },
     {
       "id": "kawelo",
@@ -273,7 +399,9 @@
         10
       ],
       "skyX": 340,
-      "skyY": 120
+      "skyY": 120,
+      "constellationGroup": "summer_triangle",
+      "constellationLabel": "Summer Triangle"
     },
     {
       "id": "kekaookalani",
@@ -302,7 +430,9 @@
         10
       ],
       "skyX": 370,
-      "skyY": 200
+      "skyY": 200,
+      "constellationGroup": "summer_triangle",
+      "constellationLabel": "Summer Triangle"
     },
     {
       "id": "ikua",
@@ -331,7 +461,9 @@
         10
       ],
       "skyX": 320,
-      "skyY": 95
+      "skyY": 95,
+      "constellationGroup": "summer_triangle",
+      "constellationLabel": "Summer Triangle"
     },
     {
       "id": "hokupa",
@@ -359,7 +491,9 @@
         3
       ],
       "skyX": 155,
-      "skyY": 175
+      "skyY": 175,
+      "constellationGroup": "gemini",
+      "constellationLabel": "Gemini"
     },
     {
       "id": "naale_a",
@@ -387,7 +521,9 @@
         3
       ],
       "skyX": 148,
-      "skyY": 162
+      "skyY": 162,
+      "constellationGroup": "gemini",
+      "constellationLabel": "Gemini"
     },
     {
       "id": "manaiakalani",
@@ -415,7 +551,9 @@
         6
       ],
       "skyX": 295,
-      "skyY": 295
+      "skyY": 295,
+      "constellationGroup": "virgo",
+      "constellationLabel": "Virgo"
     },
     {
       "id": "hina_i_ele_ele",
@@ -442,7 +580,9 @@
         5
       ],
       "skyX": 270,
-      "skyY": 340
+      "skyY": 340,
+      "constellationGroup": "corvus",
+      "constellationLabel": "Corvus"
     },
     {
       "id": "newe",
@@ -469,7 +609,9 @@
         11
       ],
       "skyX": 330,
-      "skyY": 410
+      "skyY": 410,
+      "constellationGroup": "piscis_austrinus",
+      "constellationLabel": "Piscis Austrinus"
     },
     {
       "id": "miloii",
@@ -496,7 +638,9 @@
         2
       ],
       "skyX": 270,
-      "skyY": 450
+      "skyY": 450,
+      "constellationGroup": "carina",
+      "constellationLabel": "Carina"
     },
     {
       "id": "haamea",
@@ -524,7 +668,9 @@
         6
       ],
       "skyX": 315,
-      "skyY": 440
+      "skyY": 440,
+      "constellationGroup": "centaurus",
+      "constellationLabel": "Centaurus"
     },
     {
       "id": "na_hiku",
@@ -559,7 +705,9 @@
         11
       ],
       "skyX": 175,
-      "skyY": 90
+      "skyY": 90,
+      "constellationGroup": "ursa_major",
+      "constellationLabel": "Ursa Major"
     },
     {
       "id": "lehua",
@@ -587,7 +735,9 @@
         8
       ],
       "skyX": 355,
-      "skyY": 355
+      "skyY": 355,
+      "constellationGroup": "scorpius",
+      "constellationLabel": "Scorpius"
     },
     {
       "id": "ke_ka_o_makali_i",
@@ -912,7 +1062,9 @@
         6
       ],
       "skyX": 295,
-      "skyY": 405
+      "skyY": 405,
+      "constellationGroup": "crux",
+      "constellationLabel": "Southern Cross"
     },
     {
       "id": "ka_mole_honua",
@@ -940,7 +1092,9 @@
         6
       ],
       "skyX": 305,
-      "skyY": 425
+      "skyY": 425,
+      "constellationGroup": "crux",
+      "constellationLabel": "Southern Cross"
     },
     {
       "id": "mercury",
