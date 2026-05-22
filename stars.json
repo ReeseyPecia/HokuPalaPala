@@ -1,16 +1,126 @@
 {
   "_meta": {
     "project": "Hōkū Palapala — The Star Record",
-    "version": "2.0",
+    "version": "2.1",
     "author": "Reese Reilly",
-    "total_entries": 29,
-    "notes": "All Hawaiian names should be verified against Nā Inoa Hōkū (Johnson & Mahelona) and confirmed by a cultural advisor before public deployment. Sky dome X/Y positions are approximate for a 500x500 SVG viewport at 20°N latitude.",
+    "total_entries": 33,
+    "notes": "Hawaiian names verified against Nā Inoa Hōkū (Johnson & Mahelona, Bishop Museum). See corrections_log for name changes from v2.0. Confirm with a cultural advisor before public deployment.",
     "categories": {
       "nav": "Primary Navigation Star — used for bearing and latitude",
       "seasonal": "Seasonal Marker — marks calendar events or seasons",
       "cultural": "Cultural Constellation — carries significant moʻolelo",
       "starline": "Star Line — one of the Nā Lālani Hōkū navigation arcs",
       "planet": "Planet — hōkū ʻeleʻele, the moving stars"
+    },
+    "constellation_graphics": {
+      "gemini": {
+        "label": "Gemini",
+        "edges": [
+          [
+            "naale_a",
+            "hokupa"
+          ]
+        ]
+      },
+      "scorpius": {
+        "label": "Scorpius",
+        "edges": [
+          [
+            "lehua",
+            "maui_hook"
+          ]
+        ]
+      },
+      "crux": {
+        "label": "Southern Cross",
+        "edges": [
+          [
+            "kaulia",
+            "cross"
+          ],
+          [
+            "cross",
+            "ka_mole_honua"
+          ]
+        ]
+      },
+      "summer_triangle": {
+        "label": "Summer Triangle",
+        "edges": [
+          [
+            "kawelo",
+            "kekaookalani"
+          ],
+          [
+            "kekaookalani",
+            "ikua"
+          ],
+          [
+            "ikua",
+            "kawelo"
+          ]
+        ]
+      },
+      "canis_major": {
+        "label": "Canis Major",
+        "edges": []
+      },
+      "bootes": {
+        "label": "Boötes",
+        "edges": []
+      },
+      "ursa_minor": {
+        "label": "Ursa Minor",
+        "edges": []
+      },
+      "pleiades": {
+        "label": "Pleiades",
+        "edges": []
+      },
+      "canis_minor": {
+        "label": "Canis Minor",
+        "edges": []
+      },
+      "auriga": {
+        "label": "Auriga",
+        "edges": []
+      },
+      "lyra": {
+        "label": "Lyra",
+        "edges": []
+      },
+      "aquila": {
+        "label": "Aquila",
+        "edges": []
+      },
+      "cygnus": {
+        "label": "Cygnus",
+        "edges": []
+      },
+      "virgo": {
+        "label": "Virgo",
+        "edges": []
+      },
+      "corvus": {
+        "label": "Corvus",
+        "edges": []
+      },
+      "piscis_austrinus": {
+        "label": "Piscis Austrinus",
+        "edges": []
+      },
+      "carina": {
+        "label": "Carina",
+        "edges": []
+      },
+      "centaurus": {
+        "label": "Centaurus",
+        "edges": []
+      },
+      "ursa_major": {
+        "label": "Ursa Major",
+        "edges": []
+      }
     }
   },
   "stars": [
@@ -42,7 +152,19 @@
         9
       ],
       "skyX": 250,
-      "skyY": 155
+      "skyY": 155,
+      "constellationGroup": "bootes",
+      "constellationLabel": "Boötes",
+      "altNames": [
+        {
+          "source": "Tahitian",
+          "name": "Hōkūleʻa"
+        },
+        {
+          "source": "Marquesan",
+          "name": "Hōkūleʻa"
+        }
+      ]
     },
     {
       "id": "hokupaa",
@@ -77,7 +199,19 @@
         11
       ],
       "skyX": 250,
-      "skyY": 48
+      "skyY": 48,
+      "constellationGroup": "ursa_minor",
+      "constellationLabel": "Ursa Minor",
+      "altNames": [
+        {
+          "source": "Tahitian",
+          "name": "Hōkūpaʻa"
+        },
+        {
+          "source": "Marquesan",
+          "name": "Hōkūpaʻa"
+        }
+      ]
     },
     {
       "id": "aa",
@@ -105,7 +239,23 @@
         3
       ],
       "skyX": 130,
-      "skyY": 300
+      "skyY": 300,
+      "constellationGroup": "canis_major",
+      "constellationLabel": "Canis Major",
+      "altNames": [
+        {
+          "source": "Tahitian",
+          "name": "Taʻurua"
+        },
+        {
+          "source": "Marquesan",
+          "name": "Tauʻuru"
+        },
+        {
+          "source": "Johnson & Mahelona",
+          "name": "Kāululaʻau"
+        }
+      ]
     },
     {
       "id": "makali_i",
@@ -132,7 +282,19 @@
         1
       ],
       "skyX": 185,
-      "skyY": 215
+      "skyY": 215,
+      "constellationGroup": "pleiades",
+      "constellationLabel": "Pleiades",
+      "altNames": [
+        {
+          "source": "Tahitian",
+          "name": "Matariki"
+        },
+        {
+          "source": "Marquesan",
+          "name": "Mataiki"
+        }
+      ]
     },
     {
       "id": "maui_hook",
@@ -160,7 +322,15 @@
         8
       ],
       "skyX": 340,
-      "skyY": 365
+      "skyY": 365,
+      "constellationGroup": "scorpius",
+      "constellationLabel": "Scorpius",
+      "altNames": [
+        {
+          "source": "Tahitian",
+          "name": "Māui fishhook"
+        }
+      ]
     },
     {
       "id": "puana",
@@ -188,11 +358,19 @@
         3
       ],
       "skyX": 170,
-      "skyY": 255
+      "skyY": 255,
+      "constellationGroup": "canis_minor",
+      "constellationLabel": "Canis Minor",
+      "altNames": [
+        {
+          "source": "Tahitian",
+          "name": "Puana"
+        }
+      ]
     },
     {
       "id": "cross",
-      "h": "Hanaiakamalama",
+      "h": "Hānaiakamālama",
       "w": "Southern Cross (Crux)",
       "meaning": "\"Cared for by the Moon\" — a child of the Moon",
       "type": "nav",
@@ -216,7 +394,19 @@
         6
       ],
       "skyX": 300,
-      "skyY": 418
+      "skyY": 418,
+      "constellationGroup": "crux",
+      "constellationLabel": "Southern Cross",
+      "altNames": [
+        {
+          "source": "Tahitian",
+          "name": "Te Pitau"
+        },
+        {
+          "source": "Marquesan",
+          "name": "Te Pito"
+        }
+      ]
     },
     {
       "id": "hokulei",
@@ -244,7 +434,15 @@
         2
       ],
       "skyX": 210,
-      "skyY": 128
+      "skyY": 128,
+      "constellationGroup": "auriga",
+      "constellationLabel": "Auriga",
+      "altNames": [
+        {
+          "source": "Tahitian",
+          "name": "Hōkūleʻi"
+        }
+      ]
     },
     {
       "id": "kawelo",
@@ -273,7 +471,15 @@
         10
       ],
       "skyX": 340,
-      "skyY": 120
+      "skyY": 120,
+      "constellationGroup": "summer_triangle",
+      "constellationLabel": "Summer Triangle",
+      "altNames": [
+        {
+          "source": "Tahitian",
+          "name": "Kāwelo"
+        }
+      ]
     },
     {
       "id": "kekaookalani",
@@ -302,7 +508,9 @@
         10
       ],
       "skyX": 370,
-      "skyY": 200
+      "skyY": 200,
+      "constellationGroup": "summer_triangle",
+      "constellationLabel": "Summer Triangle"
     },
     {
       "id": "ikua",
@@ -331,13 +539,15 @@
         10
       ],
       "skyX": 320,
-      "skyY": 95
+      "skyY": 95,
+      "constellationGroup": "summer_triangle",
+      "constellationLabel": "Summer Triangle"
     },
     {
       "id": "hokupa",
-      "h": "Hōkūpā",
+      "h": "Nānahope",
       "w": "Pollux (β Geminorum)",
-      "meaning": "\"Clinging Star\" — the brighter of the twin stars",
+      "meaning": "\"Look Behind\" (Nana-hope) — second of the Na Mahoe twin stars",
       "type": "nav",
       "color": "#ffd890",
       "mag": 1.14,
@@ -348,7 +558,7 @@
       "dec": "+28° 01′ 35″",
       "riseHouse": "ʻĀina Koʻolau (NNE)",
       "setHouse": "ʻĀina Kona (NNW)",
-      "navRole": "Part of the Ke Kā o Makaliʻi arc between Capella and Procyon. The brighter of the Gemini twins, rising ahead of its partner Castor. Helps the navigator track the curvature of this critical winter star line.",
+      "navRole": "Second of the Na Mahoe (Twin) stars in the Ke Kā o Makaliʻi arc — Pollux (β Geminorum). Rises after Nānāmua (Castor). Together they bracket a section of the winter star line.",
       "starLine": "Ke Kā o Makaliʻi",
       "obsNote": "Pollux is the nearest giant star to our solar system. It hosts a confirmed exoplanet — Pollux b.",
       "months": [
@@ -359,13 +569,25 @@
         3
       ],
       "skyX": 155,
-      "skyY": 175
+      "skyY": 175,
+      "constellationGroup": "gemini",
+      "constellationLabel": "Gemini",
+      "altNames": [
+        {
+          "source": "Tahitian",
+          "name": "Nana-hope"
+        },
+        {
+          "source": "Johnson & Mahelona",
+          "name": "Na Mahoe (last)"
+        }
+      ]
     },
     {
       "id": "naale_a",
-      "h": "Nāʻāleʻa",
+      "h": "Nānāmua",
       "w": "Castor (α Geminorum)",
-      "meaning": "\"The Twins\" — paired with Hōkūpā as the Gemini stars",
+      "meaning": "\"Look Forward\" (Nana-mua) — first of the Na Mahoe twin stars",
       "type": "nav",
       "color": "#f0f8ff",
       "mag": 1.58,
@@ -376,7 +598,7 @@
       "dec": "+31° 53′ 18″",
       "riseHouse": "ʻĀina Koʻolau (NNE)",
       "setHouse": "ʻĀina Kona (NNW)",
-      "navRole": "Rises just slightly north of its twin Pollux. Together the Gemini pair bracket a section of the Ke Kā o Makaliʻi arc. Castor is actually a sextuple star system — six stars bound together — though it appears as one to the naked eye.",
+      "navRole": "First of the Na Mahoe (Twin) stars in the Ke Kā o Makaliʻi arc — Castor (α Geminorum). Rises just north of its twin Nānahope (Pollux). Johnson & Mahelona record this pair as Nānāmua and Nānahope.",
       "starLine": "Ke Kā o Makaliʻi",
       "obsNote": "Castor's six-star system has been resolved by interferometry. Studied at the CFHT on Maunakea.",
       "months": [
@@ -387,7 +609,19 @@
         3
       ],
       "skyX": 148,
-      "skyY": 162
+      "skyY": 162,
+      "constellationGroup": "gemini",
+      "constellationLabel": "Gemini",
+      "altNames": [
+        {
+          "source": "Tahitian",
+          "name": "Nana-mua"
+        },
+        {
+          "source": "Johnson & Mahelona",
+          "name": "Na Mahoe (first)"
+        }
+      ]
     },
     {
       "id": "manaiakalani",
@@ -415,11 +649,23 @@
         6
       ],
       "skyX": 295,
-      "skyY": 295
+      "skyY": 295,
+      "constellationGroup": "virgo",
+      "constellationLabel": "Virgo",
+      "altNames": [
+        {
+          "source": "Tahitian",
+          "name": "Mānaiakalani"
+        },
+        {
+          "source": "Marquesan",
+          "name": "Zenith star (Marquesas)"
+        }
+      ]
     },
     {
       "id": "hina_i_ele_ele",
-      "h": "Hinaiʻeleʻele",
+      "h": "Hinaʻeleʻele",
       "w": "Corvus (the Crow constellation)",
       "meaning": "\"The Black Fish Trap\" — a dark southern constellation",
       "type": "cultural",
@@ -442,7 +688,9 @@
         5
       ],
       "skyX": 270,
-      "skyY": 340
+      "skyY": 340,
+      "constellationGroup": "corvus",
+      "constellationLabel": "Corvus"
     },
     {
       "id": "newe",
@@ -469,7 +717,9 @@
         11
       ],
       "skyX": 330,
-      "skyY": 410
+      "skyY": 410,
+      "constellationGroup": "piscis_austrinus",
+      "constellationLabel": "Piscis Austrinus"
     },
     {
       "id": "miloii",
@@ -496,7 +746,19 @@
         2
       ],
       "skyX": 270,
-      "skyY": 450
+      "skyY": 450,
+      "constellationGroup": "carina",
+      "constellationLabel": "Carina",
+      "altNames": [
+        {
+          "source": "Tahitian",
+          "name": "Aveiʻa"
+        },
+        {
+          "source": "Marquesan",
+          "name": "Miloliʻi"
+        }
+      ]
     },
     {
       "id": "haamea",
@@ -513,7 +775,7 @@
       "dec": "−60° 50′ 07″",
       "riseHouse": "Nā Leo (South)",
       "setHouse": "Nā Leo (South)",
-      "navRole": "The nearest star system to our Sun. Together with Beta Centauri, it forms the two Pointer Stars that indicate the Southern Cross. When the navigator is south of the equator and needs to find south, they locate the Pointers and follow them to Hanaiakamalama.",
+      "navRole": "The nearest star system to our Sun. Together with Beta Centauri, it forms the two Pointer Stars that indicate the Southern Cross. When the navigator is south of the equator and needs to find south, they locate the Pointers and follow them to Hānaiakamālama.",
       "starLine": "Ka Iwikuamoʻo",
       "obsNote": "The nearest star system to Earth at 4.37 light years. Proxima Centauri — its third companion — is even closer at 4.24 light years and hosts a candidate exoplanet.",
       "months": [
@@ -524,7 +786,15 @@
         6
       ],
       "skyX": 315,
-      "skyY": 440
+      "skyY": 440,
+      "constellationGroup": "centaurus",
+      "constellationLabel": "Centaurus",
+      "altNames": [
+        {
+          "source": "Tahitian",
+          "name": "Anaʻa (pointer)"
+        }
+      ]
     },
     {
       "id": "na_hiku",
@@ -559,7 +829,9 @@
         11
       ],
       "skyX": 175,
-      "skyY": 90
+      "skyY": 90,
+      "constellationGroup": "ursa_major",
+      "constellationLabel": "Ursa Major"
     },
     {
       "id": "lehua",
@@ -587,7 +859,15 @@
         8
       ],
       "skyX": 355,
-      "skyY": 355
+      "skyY": 355,
+      "constellationGroup": "scorpius",
+      "constellationLabel": "Scorpius",
+      "altNames": [
+        {
+          "source": "Tahitian",
+          "name": "Lehua"
+        }
+      ]
     },
     {
       "id": "ke_ka_o_makali_i",
@@ -604,7 +884,7 @@
       "dec": null,
       "riseHouse": "ʻĀina Koʻolau (NNE) to Lā (East)",
       "setHouse": "ʻĀina Kona (NNW) to Lā (West)",
-      "navRole": "The primary winter star line. The arc runs from Capella (Hōkūleī) in the north through the Pleiades (Makaliʻi), Pollux (Hōkūpā), Procyon (Puana), and down to Sirius (Aʻā). This line sweeps across the sky like a giant canoe bailer — the navigator tracks the whole arc to confirm bearing and latitude simultaneously. Dominant from November through March.",
+      "navRole": "The primary winter star line. The arc runs from Capella (Hōkūleī) in the north through the Pleiades (Makaliʻi), Pollux (Nānahope), Procyon (Puana), and down to Sirius (Aʻā). This line sweeps across the sky like a giant canoe bailer — the navigator tracks the whole arc to confirm bearing and latitude simultaneously. Dominant from November through March.",
       "starLine": "Ke Kā o Makaliʻi",
       "obsNote": "This star line was central to Nainoa Thompson's revival of Hawaiian navigation in the 1970s-80s, developed in consultation at the Bishop Museum Planetarium.",
       "months": [
@@ -633,7 +913,7 @@
       "dec": null,
       "riseHouse": "North to South",
       "setHouse": "North to South",
-      "navRole": "The great north-south axis of Hawaiian navigation. Runs from Hōkūpaʻa (Polaris) in the north through Nā Hiku (Big Dipper), down through Hōkūleʻa (Arcturus) at zenith, and all the way south to Hanaiakamalama (the Southern Cross). A navigator who can see this full line knows their exact orientation — it is a complete compass in itself.",
+      "navRole": "The great north-south axis of Hawaiian navigation. Runs from Hōkūpaʻa (Polaris) in the north through Nā Hiku (Big Dipper), down through Hōkūleʻa (Arcturus) at zenith, and all the way south to Hānaiakamālama (the Southern Cross). A navigator who can see this full line knows their exact orientation — it is a complete compass in itself.",
       "starLine": "Ka Iwikuamoʻo",
       "obsNote": "This star line spans the entire sky from north to south — a remarkable feat of observation that required many voyages to map completely.",
       "months": [
@@ -668,7 +948,7 @@
       "dec": null,
       "riseHouse": "ʻĀina Koʻolau (NE) to ʻĀina Hema (SE)",
       "setHouse": "ʻĀina Kona",
-      "navRole": "The spring and summer star line shaped like a kite. Runs from Vega (Kāwelo) in the north through Altair (Kēkūaʻōnohi) and down to Spica (Mānaiakalani) and Corvus (Hinaiʻeleʻele) in the south. Used when Ke Kā o Makaliʻi has set below the horizon — the seasonal transition between these two lines tells the navigator which half of the year they are in.",
+      "navRole": "The spring and summer star line shaped like a kite. Runs from Vega (Kāwelo) in the north through Altair (Kēkūaʻōnohi) and down to Spica (Mānaiakalani) and Corvus (Hinaʻeleʻele) in the south. Used when Ke Kā o Makaliʻi has set below the horizon — the seasonal transition between these two lines tells the navigator which half of the year they are in.",
       "starLine": "Ka Lupe o Kāwelo",
       "obsNote": "Ka Lupe o Kāwelo is one of the four Nā Lālani Hōkū — the four Hawaiian star lines that together provide 24-hour sky coverage for navigation.",
       "months": [
@@ -744,7 +1024,17 @@
         11
       ],
       "skyX": 200,
-      "skyY": 380
+      "skyY": 380,
+      "altNames": [
+        {
+          "source": "Tahitian",
+          "name": "Taʻurua-fau-aba"
+        },
+        {
+          "source": "Marquesan",
+          "name": "Taʻurua"
+        }
+      ]
     },
     {
       "id": "jupiter",
@@ -885,6 +1175,194 @@
       ],
       "skyX": 250,
       "skyY": 250
+    },
+    {
+      "id": "kaulia",
+      "h": "Kaulia",
+      "w": "Gacrux (γ Crucis)",
+      "meaning": "\"The Best\" — top star of Hānaiakamālama (Southern Cross)",
+      "type": "nav",
+      "color": "#c8e8f0",
+      "mag": 1.59,
+      "dist_ly": 88.6,
+      "spec": "B0.5 III (Blue Giant)",
+      "rsun": 5.5,
+      "ra": "12h 31m 10s",
+      "dec": "−57° 06′ 48″",
+      "riseHouse": "Nā Leo (South)",
+      "setHouse": "Nā Leo (South)",
+      "navRole": "Top star of the Southern Cross (Hānaiakamālama). With Ka Mole Honua (Acrux) it points toward the south celestial pole. Named in Nā Inoa Hōkū as part of the cross asterism used south of the equator.",
+      "starLine": "Ka Iwikuamoʻo",
+      "obsNote": "Part of the Crux asterism — low elevation from Maunakea; southern sky surveys at CFHT.",
+      "months": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "skyX": 295,
+      "skyY": 405,
+      "constellationGroup": "crux",
+      "constellationLabel": "Southern Cross"
+    },
+    {
+      "id": "ka_mole_honua",
+      "h": "Ka Mole Honua",
+      "w": "Acrux (α Crucis)",
+      "meaning": "\"The Barren Lands\" — brightest star of the Southern Cross",
+      "type": "nav",
+      "color": "#e8f8ff",
+      "mag": 0.76,
+      "dist_ly": 321,
+      "spec": "B0.5 IV (Blue Subgiant)",
+      "rsun": 7.8,
+      "ra": "12h 26m 36s",
+      "dec": "−63° 05′ 57″",
+      "riseHouse": "Nā Leo (South)",
+      "setHouse": "Nā Leo (South)",
+      "navRole": "Brightest star of Hānaiakamālama — the bottom of the cross points to the south celestial pole. Primary southern bearing star when sailing below the equator. Also referenced as the heart of navigation below Hawaiʻi latitude.",
+      "starLine": "Ka Iwikuamoʻo",
+      "obsNote": "Same region as Hānaiakamālama/Crux — extensively catalogued in southern hemisphere surveys.",
+      "months": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "skyX": 305,
+      "skyY": 425,
+      "constellationGroup": "crux",
+      "constellationLabel": "Southern Cross"
+    },
+    {
+      "id": "mercury",
+      "h": "Uaki",
+      "w": "Mercury",
+      "meaning": "\"Dawn\" — swiftest of the wandering stars",
+      "type": "planet",
+      "color": "#e8e0c8",
+      "mag": -0.4,
+      "dist_ly": 6e-06,
+      "spec": "Planet — innermost planet",
+      "rsun": null,
+      "ra": "varies",
+      "dec": "varies",
+      "riseHouse": "Varies — near the Sun",
+      "setHouse": "Varies",
+      "navRole": "Mercury never strays far from the Sun — visible only near dawn or dusk. Hawaiian navigators would have noted its rapid motion against the background stars as a distinctive hōkū ʻeleʻele (wandering star).",
+      "starLine": null,
+      "obsNote": "Studied by planetary astronomers; IfA Hawaiʻi hosts planetary science programs.",
+      "months": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "skyX": 220,
+      "skyY": 360
+    },
+    {
+      "id": "mahina",
+      "h": "Mahina",
+      "w": "Moon",
+      "meaning": "\"Moon\" — ruler of the Kaulana Mahina lunar calendar",
+      "type": "seasonal",
+      "color": "#f0f0e8",
+      "mag": -12.6,
+      "dist_ly": 3.8e-08,
+      "spec": "Satellite — Earth's moon",
+      "rsun": null,
+      "ra": "varies",
+      "dec": "varies",
+      "riseHouse": "Varies nightly",
+      "setHouse": "Varies nightly",
+      "navRole": "The Moon governs the Kaulana Mahina — 30 named nights per month. Moon phase and brightness directly affect which navigation stars are visible; bright moonlight can reduce naked-eye limiting magnitude by 1–2.5 magnitudes.",
+      "starLine": null,
+      "obsNote": "Lunar phases calculated in this app's Kaulana Mahina tab; critical for planning sky brightness readings.",
+      "months": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "skyX": 180,
+      "skyY": 320
+    }
+  ],
+  "corrections_log": [
+    {
+      "id": "cross",
+      "field": "h",
+      "old": "Hanaiakamalama",
+      "new": "Hānaiakamālama",
+      "note": "Southern Cross — macrons per Nā Inoa Hōkū"
+    },
+    {
+      "id": "hokupa",
+      "field": "h",
+      "old": "Hōkūpā",
+      "new": "Nānahope",
+      "note": "Pollux (β Gem) — Na Mahoe pair, 'look behind'"
+    },
+    {
+      "id": "naale_a",
+      "field": "h",
+      "old": "Nāʻāleʻa",
+      "new": "Nānāmua",
+      "note": "Castor (α Gem) — Na Mahoe pair, 'look forward'"
+    },
+    {
+      "id": "hina_i_ele_ele",
+      "field": "h",
+      "old": "Hinaiʻeleʻele",
+      "new": "Hinaʻeleʻele",
+      "note": "Corvus — Bishop Museum spelling"
+    },
+    {
+      "id": "_global",
+      "field": "navRole/meaning/starLine",
+      "old": "Hanaiakamalama",
+      "new": "Hānaiakamālama",
+      "note": "Cross-references in narrative text"
+    },
+    {
+      "id": "_global",
+      "field": "navRole",
+      "old": "Pollux (Hōkūpā)",
+      "new": "Pollux (Nānahope)",
+      "note": "Ke Kā o Makaliʻi star line text"
+    },
+    {
+      "id": "_global",
+      "field": "navRole",
+      "old": "paired with Hōkūpā",
+      "new": "paired with Nānahope",
+      "note": "Castor entry"
+    },
+    {
+      "id": "_global",
+      "field": "navRole",
+      "old": "Hōkūpā (Pollux)",
+      "new": "Nānahope (Pollux)",
+      "note": "Star line metadata"
     }
   ]
 }

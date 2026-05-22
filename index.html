@@ -99,6 +99,10 @@ nav{position:sticky;top:0;z-index:100;background:rgba(4,6,15,0.97);border-bottom
 .nav-badge{display:inline-block;margin-top:12px;padding:4px 12px;border-radius:2px;font-family:'Space Mono',monospace;font-size:0.58rem;letter-spacing:0.08em;text-transform:uppercase}
 .nav-badge.primary{background:rgba(232,130,58,0.12);border:1px solid rgba(232,130,58,0.4);color:#e8823a}
 .nav-badge.seasonal{background:rgba(74,181,160,0.1);border:1px solid var(--teal-border);color:var(--teal)}
+.alt-names-row{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 16px}
+.alt-name-badge{display:inline-flex;align-items:baseline;gap:6px;padding:4px 10px;border-radius:2px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);font-family:'Space Mono',monospace;font-size:0.6rem;line-height:1.4}
+.alt-name-badge .alt-src{color:var(--dim);letter-spacing:0.06em;text-transform:uppercase}
+.alt-name-badge .alt-val{color:var(--pale)}
 
 /* BORTLE CALCULATOR */
 .bortle-scale{display:grid;grid-template-columns:repeat(9,1fr);gap:4px;margin:16px 0}
@@ -169,6 +173,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(4,6,15,0.97);border-bottom
 
 /* SUCCESS MESSAGE */
 .success-msg{background:rgba(74,181,160,0.1);border:1px solid var(--teal-border);color:var(--teal);padding:12px 16px;border-radius:3px;font-family:'Space Mono',monospace;font-size:0.7rem;margin-top:12px;display:none}
+#sky-svg .constellation-label{font-family:'Cinzel',serif;font-size:0.6rem;fill:#e8b84b;opacity:0.55;pointer-events:none}
 </style>
 </head>
 <body>
@@ -230,6 +235,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(4,6,15,0.97);border-bottom
               <option value="nav">Navigation Stars Only</option>
               <option value="seasonal">Seasonal Markers</option>
               <option value="starlines">Star Lines</option>
+              <option value="constellations">Constellation Lines</option>
             </select>
           </div>
         </div>
@@ -575,9 +581,10 @@ function showTab(t) {
 }
 
 // ══════════════════════════════════════════
-// STAR DATA (loaded from stars.json v2.0)
+// STAR DATA (loaded from stars.json v2.1 — see corrections_log in JSON)
 // ══════════════════════════════════════════
 let STARS = [];
+let CONSTELLATION_GRAPHICS = {};
 const SKY_LAT = 20;
 const SKY_CX = 250;
 const SKY_CY = 250;
@@ -599,9 +606,21 @@ async function loadStars() {
     const res = await fetch('stars.json');
     const data = await res.json();
     STARS = data.stars.map(normalizeStar);
+    CONSTELLATION_GRAPHICS = data.constellation_graphics || data._meta?.constellation_graphics || {};
   } catch (e) {
     console.error('Failed to load stars.json', e);
   }
+}
+
+function hexToRgba(hex, alpha) {
+  if (!hex || hex[0] !== '#') return `rgba(232,184,75,${alpha})`;
+  const h = hex.length === 4
+    ? hex.slice(1).split('').map(c => c + c).join('')
+    : hex.slice(1);
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
 }
 
 function parseRA(raStr) {
@@ -652,14 +671,18 @@ function starMatchesLayer(star, layer) {
   if (layer === 'nav') return star.type === 'nav';
   if (layer === 'seasonal') return star.type === 'seasonal' || star.type === 'cultural';
   if (layer === 'starlines') return !!star.starLine;
+  if (layer === 'constellations') return star.type !== 'starline';
   return true;
 }
 
-function starDotRadius(type) {
-  if (type === 'nav') return 5.5;
-  if (type === 'seasonal' || type === 'planet') return 6;
-  if (type === 'cultural') return 4.5;
-  return 4;
+/** Bishop Museum star map key: dot size by apparent magnitude */
+function starDotRadius(mag) {
+  if (mag == null) return 2;
+  if (mag < 0) return 7;
+  if (mag < 1) return 5.5;
+  if (mag < 2) return 4;
+  if (mag < 3) return 3;
+  return 2;
 }
 
 // ══════════════════════════════════════════
@@ -687,6 +710,73 @@ function calcMoonPhaseRaw(date) {
   const names = ['New Moon','Waxing Crescent','First Quarter','Waxing Gibbous','Full Moon','Waning Gibbous','Last Quarter','Waning Crescent'];
   const idx = Math.floor(phase/lun*8);
   return { name: names[idx], illumination: ill, phase };
+}
+
+function drawConstellationLines(svg, placed, layer) {
+  if (layer !== 'constellations') return;
+  const byId = Object.fromEntries(placed.map(p => [p.star.id, p]));
+  const groups = {};
+
+  placed.forEach(({ star, x, y }) => {
+    const g = star.constellationGroup;
+    if (!g) return;
+    if (!groups[g]) {
+      groups[g] = {
+        color: star.color,
+        label: star.constellationLabel || CONSTELLATION_GRAPHICS[g]?.label || g,
+        pts: []
+      };
+    }
+    groups[g].pts.push({ id: star.id, x, y });
+  });
+
+  Object.keys(groups).forEach(groupKey => {
+    const group = groups[groupKey];
+    const def = CONSTELLATION_GRAPHICS[groupKey] || {};
+    const stroke = hexToRgba(group.color, 0.2);
+    const edges = def.edges || [];
+
+    if (!edges.length && group.pts.length >= 2) {
+      const sorted = [...group.pts].sort(
+        (a, b) => Math.atan2(a.y - SKY_CY, a.x - SKY_CX) - Math.atan2(b.y - SKY_CY, b.x - SKY_CX)
+      );
+      for (let i = 0; i < sorted.length - 1; i++) {
+        edges.push([sorted[i].id, sorted[i + 1].id]);
+      }
+    }
+
+    edges.forEach(([idA, idB]) => {
+      const a = byId[idA];
+      const b = byId[idB];
+      if (!a || !b) return;
+      const line = mkEl('line');
+      line.setAttribute('x1', a.x);
+      line.setAttribute('y1', a.y);
+      line.setAttribute('x2', b.x);
+      line.setAttribute('y2', b.y);
+      line.setAttribute('stroke', stroke);
+      line.setAttribute('stroke-width', '0.75');
+      line.setAttribute('stroke-linecap', 'round');
+      line.setAttribute('fill', 'none');
+      line.setAttribute('clip-path', 'url(#dc)');
+      line.setAttribute('pointer-events', 'none');
+      svg.appendChild(line);
+    });
+
+    if (group.pts.length >= 1) {
+      const cx = group.pts.reduce((s, p) => s + p.x, 0) / group.pts.length;
+      const cy = group.pts.reduce((s, p) => s + p.y, 0) / group.pts.length;
+      const label = mkEl('text');
+      label.setAttribute('class', 'constellation-label');
+      label.setAttribute('x', cx);
+      label.setAttribute('y', cy);
+      label.setAttribute('text-anchor', 'middle');
+      label.setAttribute('dominant-baseline', 'middle');
+      label.setAttribute('clip-path', 'url(#dc)');
+      label.textContent = group.label;
+      svg.appendChild(label);
+    }
+  });
 }
 
 function drawStarLines(svg, placed, layer) {
@@ -768,18 +858,24 @@ function renderSkyDome(month, layer, hourHST) {
     const dx = px - CX, dy = py - CY;
     if (Math.sqrt(dx * dx + dy * dy) > R - 5) return;
     placed.push({ star, x: px, y: py });
+  });
 
+  drawConstellationLines(svg, placed, layer);
+  drawStarLines(svg, placed, layer);
+
+  placed.forEach(({ star, x: px, y: py }) => {
     if (star.type !== 'starline') {
+      const dotR = starDotRadius(star.mag);
       const halo = mkEl('circle');
       halo.setAttribute('cx', px); halo.setAttribute('cy', py);
-      halo.setAttribute('r', star.type === 'nav' || star.type === 'planet' ? 15 : 11);
+      halo.setAttribute('r', dotR * 2.15);
       halo.setAttribute('fill', star.color); halo.setAttribute('opacity', '0.07');
       halo.setAttribute('clip-path', 'url(#dc)');
       svg.appendChild(halo);
 
       const dot = mkEl('circle');
       dot.setAttribute('cx', px); dot.setAttribute('cy', py);
-      dot.setAttribute('r', starDotRadius(star.type));
+      dot.setAttribute('r', dotR);
       dot.setAttribute('fill', star.color);
       dot.setAttribute('stroke', 'rgba(255,255,255,0.25)');
       dot.setAttribute('stroke-width', '0.5');
@@ -805,8 +901,6 @@ function renderSkyDome(month, layer, hourHST) {
     svg.appendChild(hit);
   });
 
-  drawStarLines(svg, placed, layer);
-
   const z=mkEl('circle');z.setAttribute('cx',CX);z.setAttribute('cy',CY);z.setAttribute('r',3);z.setAttribute('fill','rgba(232,184,75,0.3)');svg.appendChild(z);
 }
 
@@ -815,6 +909,19 @@ function mkGrad(id,cx,cy,r,stops){
   const g=mkEl('radialGradient');g.setAttribute('id',id);g.setAttribute('cx',cx);g.setAttribute('cy',cy);g.setAttribute('r',r);
   stops.forEach(([o,c])=>{const s=mkEl('stop');s.setAttribute('offset',o+'%');s.setAttribute('stop-color',c);g.appendChild(s);});
   return g;
+}
+
+function renderAltNamesHtml(altNames) {
+  if (!altNames || !altNames.length) return '';
+  const badges = altNames.map(a => {
+    const src = a.source || a.label || 'Other';
+    const name = a.name || '';
+    return `<span class="alt-name-badge"><span class="alt-src">${src}</span><span class="alt-val">${name}</span></span>`;
+  }).join('');
+  return `
+    <div class="data-sec">Names Across the Pacific</div>
+    <div class="alt-names-row">${badges}</div>
+  `;
 }
 
 function selectStar(star) {
@@ -834,25 +941,26 @@ function selectStar(star) {
     ? (isPlanet ? `${star.dist} light-years (approx.)` : `${star.dist} light-years`)
     : '—';
   p.innerHTML = `
-    <motion class="star-name-h">${star.h}</motion>
-    <motion class="star-name-w">✦ ${star.w}</motion>
-    <motion class="star-meaning">${star.meaning}</motion>
-    <motion class="data-sec">Navigation Role</motion>
-    <motion style="font-size:0.88rem;color:#a0aabb;line-height:1.7;margin-bottom:12px">${star.navRole}</motion>
-    ${star.starLine ? `<motion class="data-row"><span class="dl">Hawaiian Star Line</span><span class="dv hi">${star.starLine}</span></motion>` : ''}
-    <motion class="data-sec">${astroTitle}</motion>
-    ${star.mag != null ? `<motion class="data-row"><span class="dl">Apparent Magnitude</span><span class="dv hi">${star.mag}</span></motion>` : ''}
-    ${star.dist != null ? `<motion class="data-row"><span class="dl">Distance from Earth</span><span class="dv">${distVal}</span></motion>` : ''}
-    <motion class="data-row"><span class="dl">Spectral Type</span><span class="dv">${star.spec}</span></motion>
-    ${star.rsun ? `<motion class="data-row"><span class="dl">Radius (Solar)</span><span class="dv">${star.rsun} R☉</span></motion>` : ''}
-    ${star.ra && star.ra !== 'varies' ? `<motion class="data-row"><span class="dl">Right Ascension</span><span class="dv">${star.ra}</span></motion>` : ''}
-    ${star.dec && star.dec !== 'varies' ? `<motion class="data-row"><span class="dl">Declination</span><span class="dv">${star.dec}</span></motion>` : ''}
-    <motion class="data-row"><span class="dl">Rise House</span><span class="dv">${star.riseHouse}</span></motion>
-    ${star.setHouse ? `<motion class="data-row"><span class="dl">Set House</span><span class="dv">${star.setHouse}</span></motion>` : ''}
-    <motion class="data-sec">${obsLabel}</motion>
-    <motion style="font-size:0.82rem;color:#9099aa;line-height:1.6;margin-bottom:10px">${star.obsNote}</motion>
+    <div class="star-name-h">${star.h}</div>
+    <div class="star-name-w">✦ ${star.w}</div>
+    ${renderAltNamesHtml(star.altNames)}
+    <div class="star-meaning">${star.meaning}</div>
+    <div class="data-sec">Navigation Role</div>
+    <div style="font-size:0.88rem;color:#a0aabb;line-height:1.7;margin-bottom:12px">${star.navRole}</div>
+    ${star.starLine ? `<div class="data-row"><span class="dl">Hawaiian Star Line</span><span class="dv hi">${star.starLine}</span></div>` : ''}
+    <div class="data-sec">${astroTitle}</div>
+    ${star.mag != null ? `<div class="data-row"><span class="dl">Apparent Magnitude</span><span class="dv hi">${star.mag}</span></div>` : ''}
+    ${star.dist != null ? `<div class="data-row"><span class="dl">Distance from Earth</span><span class="dv">${distVal}</span></div>` : ''}
+    <div class="data-row"><span class="dl">Spectral Type</span><span class="dv">${star.spec}</span></div>
+    ${star.rsun ? `<div class="data-row"><span class="dl">Radius (Solar)</span><span class="dv">${star.rsun} R☉</span></div>` : ''}
+    ${star.ra && star.ra !== 'varies' ? `<div class="data-row"><span class="dl">Right Ascension</span><span class="dv">${star.ra}</span></div>` : ''}
+    ${star.dec && star.dec !== 'varies' ? `<div class="data-row"><span class="dl">Declination</span><span class="dv">${star.dec}</span></div>` : ''}
+    <div class="data-row"><span class="dl">Rise House</span><span class="dv">${star.riseHouse}</span></div>
+    ${star.setHouse ? `<div class="data-row"><span class="dl">Set House</span><span class="dv">${star.setHouse}</span></div>` : ''}
+    <div class="data-sec">${obsLabel}</div>
+    <div style="font-size:0.82rem;color:#9099aa;line-height:1.6;margin-bottom:10px">${star.obsNote}</div>
     <span class="nav-badge ${badgeClass}">${badgeLabel}</span>
-  `.replace('<motion', '<div').replace('</motion>', '</div>');
+  `;
 }
 
 const tip = document.getElementById('tip');

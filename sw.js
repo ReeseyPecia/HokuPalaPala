@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hoku-palapala-v2';
+const CACHE_NAME = 'hoku-palapala-v3';
 
 const ASSETS = [
   '/',
