@@ -1,8 +1,9 @@
-const CACHE_NAME = 'hoku-palapala-v3';
+const CACHE_NAME = 'hoku-palapala-v4';
 
 const ASSETS = [
   '/',
   '/index.html',
+  '/constellation-graphics.js',
   '/stars.json',
   '/manifest.json',
   '/hokubigicon.png',
