@@ -231,11 +231,10 @@ nav{position:sticky;top:0;z-index:100;background:rgba(4,6,15,0.97);border-bottom
           <div class="ctrl-group" style="width:160px">
             <div class="ctrl-label">Show Layer</div>
             <select class="ctrl-input" id="sky-layer" onchange="updateSky()">
-              <option value="all">All Stars</option>
-              <option value="nav">Navigation Stars Only</option>
-              <option value="seasonal">Seasonal Markers</option>
-              <option value="starlines">Star Lines</option>
-              <option value="constellations">Constellation Lines</option>
+              <option value="all">Wayfinding Stars</option>
+              <option value="nav">Full Sky</option>
+              <option value="seasonal">Makahiki Sky</option>
+              <option value="constellations">Constellation</option>
             </select>
           </div>
         </div>
@@ -667,11 +666,10 @@ function getStarSkyPos(star, month, hourHST) {
 }
 
 function starMatchesLayer(star, layer) {
-  if (layer === 'all') return star.type !== 'starline';
   if (layer === 'nav') return star.type === 'nav';
   if (layer === 'seasonal') return star.type === 'seasonal' || star.type === 'cultural';
-  if (layer === 'starlines') return !!star.starLine;
-  if (layer === 'constellations') return star.type !== 'starline';
+  if (layer === 'constellations') return star.constellationGroup !== null;
+  if (layer === 'all') return star.type !== 'starline' && star.type !== 'planet';
   return true;
 }
 
