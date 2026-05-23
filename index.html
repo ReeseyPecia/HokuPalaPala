@@ -227,11 +227,11 @@ nav{position:sticky;top:0;z-index:100;background:rgba(4,6,15,0.97);border-bottom
           <div class="ctrl-group" style="width:160px">
             <div class="ctrl-label">Show Layer</div>
             <select class="ctrl-input" id="sky-layer" onchange="updateSky()">
-              <option value="all">All Stars</option>
-              <option value="nav">Navigation Stars Only</option>
-              <option value="seasonal">Seasonal Markers</option>
-              <option value="starlines">Star Lines</option>
-              <option value="constellations">Constellation Lines</option>
+              <option value="nav">Wayfinding Stars</option>
+              <option value="all">Full Sky</option>
+              <option value="seasonal">Makahiki Sky</option>
+              <option value="constellations">Constellation</option>
+            </select>
             </select>
           </div>
         </div>
@@ -919,7 +919,8 @@ function selectStar(star) {
   const distVal = star.dist != null
     ? (isPlanet ? `${star.dist} light-years (approx.)` : `${star.dist} light-years`)
     : '—';
-  p.innerHTML = `
+    p.innerHTML = `
+    ${buildConstellationDiagram(star)}
     <motion class="star-name-h">${star.h}</motion>
     <motion class="star-name-w">✦ ${star.w}</motion>
     <motion class="star-meaning">${star.meaning}</motion>
@@ -1251,6 +1252,434 @@ async function initApp() {
   setTimeout(() => { mapSVGBase = document.getElementById('map-svg').innerHTML; }, 100);
 }
 initApp();
+const DETAIL_CONSTELLATIONS = {
+ 
+ nahiku: {
+   h: 'Nāhiku', w: 'Big Dipper',
+   starIds: ['na_hiku'],
+   stars: [
+     {x:130,y:52},{x:142,y:68},{x:122,y:74},{x:112,y:58},
+     {x:90,y:52},{x:68,y:44},{x:44,y:32}
+   ],
+   lines:[[0,1],[1,2],[2,3],[3,0],[3,4],[4,5],[5,6]],
+   pointer:{from:0,to:{x:90,y:18}},
+   highlightIdx:null
+ },
+
+ // ── HŌKŪPA'A / URSA MINOR (Little Dipper) ────────────────────
+ // From Bishop Museum image: small dipper, handle curves DOWN-RIGHT
+ // Polaris at END of handle (top-left), bowl opens to the right
+ // The Little Dipper is like a mirror-image of the Big Dipper
+ ursa_minor: {
+   h: 'Hōkūpaʻa', w: 'Ursa Minor',
+   starIds: ['hokupaa'],
+   stars: [
+     {x:55,y:38},   // 0 polaris — tip of handle = Hōkūpaʻa
+     {x:72,y:52},   // 1 handle
+     {x:88,y:62},   // 2 handle
+     {x:105,y:75},  // 3 bowl corner — handle meets bowl
+     {x:118,y:88},  // 4 bowl — bottom right (kochab area)
+     {x:105,y:100}, // 5 bowl — bottom
+     {x:92,y:88},   // 6 bowl — completes rectangle
+   ],
+   lines:[
+     [0,1],[1,2],[2,3],      // handle from polaris
+     [3,6],[6,5],[5,4],[4,3] // bowl rectangle
+   ],
+   highlightIdx:0
+ },
+
+ // ── KA MŌ'Ī (Cepheus) ────────────────────────────────────────
+ // House/crown shape — 5 stars forming a pentagon with a pointed top
+ // Sits between Nāhiku and Ursa Minor in the north
+ ka_moi: {
+   h: 'Ka Mōʻī', w: 'Cepheus',
+   starIds: ['ka_moi'],
+   stars: [
+     {x:90,y:25},   // 0 alpha — pointed top of house
+     {x:55,y:58},   // 1 beta  — upper left
+     {x:62,y:95},   // 2 gamma — lower left
+     {x:118,y:95},  // 3 delta — lower right
+     {x:125,y:58},  // 4 epsilon — upper right
+   ],
+   lines:[
+     [0,1],[1,2],[2,3],[3,4],[4,0], // pentagon
+     [1,4]                           // cross brace
+   ],
+   highlightIdx:0
+ },
+
+ // ── PIRAʻETEA / CYGNUS (Northern Cross) ──────────────────────
+ // Clear cross shape — Deneb at TOP, Albireo at BOTTOM
+ // Horizontal bar crosses through center (Sadr)
+ cygnus: {
+   h: 'Piraʻetea', w: 'Cygnus',
+   starIds: ['piraetea'],
+   stars: [
+     {x:90,y:18},   // 0 deneb  — TOP = Piraʻetea
+     {x:90,y:68},   // 1 sadr   — center of cross
+     {x:90,y:148},  // 2 albireo — BOTTOM
+     {x:32,y:68},   // 3 left wing
+     {x:148,y:68},  // 4 right wing
+   ],
+   lines:[
+     [0,1],[1,2],   // vertical spine top to bottom
+     [3,1],[1,4]    // horizontal wings
+   ],
+   highlightIdx:0
+ },
+
+ // ── KEOE / LYRA ───────────────────────────────────────────────
+ // Vega at top + small parallelogram of 4 stars below
+ lyra: {
+   h: 'Keoe', w: 'Lyra',
+   starIds: ['kawelo'],
+   stars: [
+     {x:90,y:25},   // 0 vega = Keoe — BRIGHTEST at top
+     {x:62,y:72},   // 1 beta  — left of parallelogram
+     {x:70,y:108},  // 2 gamma — bottom left
+     {x:110,y:108}, // 3 delta — bottom right
+     {x:118,y:72},  // 4 epsilon — right of parallelogram
+   ],
+   lines:[
+     [0,1],[0,4],          // vega connects to both sides
+     [1,2],[2,3],[3,4],[4,1] // parallelogram
+   ],
+   highlightIdx:0
+ },
+
+ // ── HUMU / AQUILA (Eagle) ─────────────────────────────────────
+ // Altair at center with stars above and below + wings spreading
+ // Looks like a diamond with a line through it
+ aquila: {
+   h: 'Humu', w: 'Aquila',
+   starIds: ['humu'],
+   stars: [
+     {x:90,y:75},   // 0 altair  — center = Humu
+     {x:90,y:38},   // 1 tarazed — directly above
+     {x:90,y:112},  // 2 alshain — directly below
+     {x:128,y:95},  // 3 delta   — right wing
+     {x:90,y:138},  // 4 eta     — bottom point
+     {x:52,y:95},   // 5 lambda  — left wing
+     {x:115,y:118}, // 6 zeta    — lower right
+   ],
+   lines:[
+     [1,0],[0,2],[2,4],  // vertical spine
+     [5,0],[0,3],        // wings through altair
+     [2,6],[6,3]         // lower body
+   ],
+   highlightIdx:0
+ },
+
+ // ── HŌKŪ'IWA / BOÖTES ────────────────────────────────────────
+ // ALREADY FIXED — keeping corrected kite shape
+ hokūiwa: {
+   h: 'Hōkūʻiwa', w: 'Boötes',
+   starIds: ['hokulea'],
+   stars: [
+     {x:90,y:145},  // 0 arcturus — BOTTOM point = Hōkūleʻa
+     {x:60,y:110},  // 1 eta — left
+     {x:68,y:72},   // 2 beta — upper left
+     {x:90,y:55},   // 3 gamma — TOP point
+     {x:112,y:72},  // 4 delta — upper right
+     {x:120,y:110}, // 5 epsilon — right
+     {x:100,y:145}, // 6 rho — lower right
+   ],
+   lines:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,0],[2,5]],
+   highlightIdx:0
+ },
+
+ // ── KAUAMEA / CORONA BOREALIS ─────────────────────────────────
+ // Small arc/crown — 7 stars in a shallow U shape
+ // Alphecca is the brightest at the top of the arc
+ kauamea: {
+   h: 'Kauamea', w: 'Corona Borealis',
+   starIds: ['kauamea_alphecca'],
+   stars: [
+     {x:90,y:48},   // 0 alphecca — TOP of arc, brightest
+     {x:65,y:62},   // 1 beta
+     {x:45,y:88},   // 2 gamma — left end
+     {x:55,y:115},  // 3 delta
+     {x:90,y:128},  // 4 epsilon — bottom of U
+     {x:125,y:115}, // 5 iota
+     {x:135,y:88},  // 6 theta — right end
+     {x:115,y:62},  // 7 nu
+   ],
+   lines:[
+     [2,1],[1,0],[0,7],[7,6],[6,5],[5,4],[4,3],[3,2]
+   ],
+   highlightIdx:0
+ },
+
+ // ── IKIIKI / LEO (Sickle + body) ─────────────────────────────
+ // Backward question mark (sickle) on left + triangle on right
+ // Regulus/Ikiiki at bottom of sickle
+ leo: {
+   h: 'Ikiiki', w: 'Leo',
+   starIds: ['ikiiki'],
+   stars: [
+     {x:72,y:128},  // 0 regulus  — BOTTOM of sickle = Ikiiki
+     {x:65,y:105},  // 1 eta leo
+     {x:52,y:82},   // 2 gamma    — top of sickle
+     {x:62,y:55},   // 3 zeta
+     {x:82,y:45},   // 4 mu       — top right of sickle
+     {x:102,y:58},  // 5 epsilon
+     {x:108,y:82},  // 6 theta    — closes sickle loop
+     {x:65,y:135},  // 7 delta    — body
+     {x:138,y:128}, // 8 beta leo — TAIL = Denebola
+   ],
+   lines:[
+     [0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,0], // sickle
+     [7,0],[7,8]                                  // body to tail
+   ],
+   highlightIdx:0
+ },
+
+ // ── HIKIANALIA / VIRGO ────────────────────────────────────────
+ // Large Y shape — Spica/Hikianalia at the bottom point
+ virgo: {
+   h: 'Hikianalia', w: 'Virgo',
+   starIds: ['hikianalia'],
+   stars: [
+     {x:90,y:148},  // 0 spica    — BOTTOM = Hikianalia
+     {x:95,y:115},  // 1 gamma    — stem
+     {x:115,y:90},  // 2 delta    — right branch
+     {x:132,y:65},  // 3 epsilon  — right tip
+     {x:108,y:78},  // 4 zeta
+     {x:75,y:90},   // 5 beta     — left branch
+     {x:55,y:72},   // 6 eta
+     {x:38,y:52},   // 7 tau      — left tip
+   ],
+   lines:[
+     [0,1],         // stem up
+     [1,2],[2,3],   // right arm
+     [1,4],[4,5],   // middle
+     [5,6],[6,7]    // left arm
+   ],
+   highlightIdx:0
+ },
+
+ // ── MEʻE / CORVUS (Compact trapezoid) ────────────────────────
+ // Four stars in a compact trapezoid — like a small kite/sail
+ // From the June sky chart it's a clear quadrilateral
+ mee: {
+   h: 'Meʻe', w: 'Corvus',
+   starIds: ['mee'],
+   stars: [
+     {x:62,y:55},   // 0 gienah   — top left
+     {x:118,y:48},  // 1 eta crv  — top right
+     {x:128,y:112}, // 2 epsilon  — bottom right
+     {x:55,y:118},  // 3 delta    — bottom left
+   ],
+   lines:[
+     [0,1],[1,2],[2,3],[3,0], // trapezoid
+     [0,2]                    // diagonal
+   ],
+   highlightIdx:null
+ },
+
+ // ── KAMAKAUNUIAMĀUI / SCORPIUS ────────────────────────────────
+ // The FULL fishhook — head, body, and dramatic curling tail
+ // More curved and hooky than before — matches the iconic shape
+ // Lehuakona (Antares) is the bright heart at index 3
+ scorpius: {
+   h: 'Kamakaunuiamāui', w: 'Scorpius — The Great Fishhook',
+   starIds: ['kamakaunuiamāui','lehuakona'],
+   stars: [
+     {x:50,y:22},   // 0  graffias  — head left
+     {x:72,y:28},   // 1  dschubba  — head right
+     {x:85,y:40},   // 2  pi sco    — neck
+     {x:92,y:58},   // 3  ANTARES   — heart = Lehuakona ★
+     {x:98,y:75},   // 4  tau sco
+     {x:104,y:90},  // 5  epsilon
+     {x:110,y:105}, // 6  mu sco
+     {x:114,y:118}, // 7  zeta      — tail starts curving
+     {x:115,y:130}, // 8  eta
+     {x:112,y:142}, // 9  theta     — curve begins RIGHT to LEFT
+     {x:102,y:150}, // 10 iota      — curling inward
+     {x:88,y:155},  // 11 kappa
+     {x:72,y:152},  // 12 shaula    — tail tip (curves back left)
+     {x:58,y:145},  // 13 upsilon   — end of hook
+   ],
+   lines:[
+     [0,1],[1,2],[2,3],              // head to heart
+     [3,4],[4,5],[5,6],[6,7],        // body going down-right
+     [7,8],[8,9],[9,10],[10,11],     // tail curving
+     [11,12],[12,13]                 // hook tip curling back left
+   ],
+   highlightIdx:3
+ },
+
+ // ── PĪMOE / SAGITTARIUS (Teapot) ─────────────────────────────
+ // Classic teapot asterism — spout on left, handle on right
+ sagittarius: {
+   h: 'Pīmoe', w: 'Sagittarius — The Teapot',
+   starIds: ['pimoe_kaus_australis'],
+   stars: [
+     {x:105,y:128}, // 0 kaus aus  — bottom right of teapot
+     {x:88,y:105},  // 1 kaus med  — right side
+     {x:68,y:78},   // 2 kaus bor  — top of teapot
+     {x:45,y:92},   // 3 phi       — spout LEFT tip
+     {x:78,y:140},  // 4 sigma     — base
+     {x:52,y:128},  // 5 zeta      — lower spout
+     {x:38,y:105},  // 6 epsilon   — spout tip
+   ],
+   lines:[
+     [0,1],[1,2],           // right wall up
+     [2,3],[3,6],[6,5],     // spout
+     [0,4],[4,5],           // base
+     [2,1],[1,4]            // body braces
+   ],
+   highlightIdx:0
+ },
+
+ // ── CENTAURUS POINTER STARS ───────────────────────────────────
+ // Just two bright stars with a dashed line pointing to the Cross
+ // Kamailehope (alpha) is brighter, Kamailemua (beta) is the pointer
+ centaurus: {
+   h: 'Kamailemua me Kamailehope', w: 'Centaurus Pointer Stars',
+   starIds: ['kamailehope','kamailemua'],
+   stars: [
+     {x:62,y:108},  // 0 alpha cen = Kamailehope — left/lower
+     {x:118,y:62},  // 1 beta cen  = Kamailemua  — right/upper
+   ],
+   lines:[[0,1]],
+   pointer:{from:0,to:{x:90,y:148}},
+   highlightIdx:null
+ },
+
+ // ── HĀNAIAKAMALAMA / CRUX (Southern Cross) ───────────────────
+ // Clean CROSS shape — long axis runs top to bottom (pointing south)
+ // Short axis runs left to right
+ // This is the key navigation constellation for sailing south
+ crux: {
+   h: 'Hānaiakamalama', w: 'Southern Cross',
+   starIds: ['hanaiakamalama'],
+   stars: [
+     {x:90,y:148},  // 0 acrux   — BOTTOM (southernmost, brightest)
+     {x:90,y:32},   // 1 gacrux  — TOP
+     {x:148,y:90},  // 2 mimosa  — RIGHT (brightest in cross)
+     {x:32,y:90},   // 3 delta   — LEFT
+     {x:98,y:78},   // 4 epsilon — small inner star near center
+   ],
+   lines:[
+     [0,1],  // long vertical axis — points to south pole
+     [2,3],  // short horizontal axis
+     [1,4]   // epsilon to top (slightly off-center)
+   ],
+   highlightIdx:0
+ }
+
+};
+const STAR_TO_CONSTELLATION = {
+  'hokupaa': 'ursa_minor',
+  'na_hiku': 'nahiku',
+  'ka_moi': 'ka_moi',
+  'piraetea': 'cygnus',
+  'kawelo': 'lyra',
+  'humu': 'aquila',
+  'hokulea': 'hokūiwa',
+  'lehuakona': 'scorpius',
+  'kamakaunuiamāui': 'scorpius',
+  'hikianalia': 'virgo',
+  'mee': 'mee',
+  'ikiiki': 'leo',
+  'hanaiakamalama': 'crux',
+  'kamailehope': 'centaurus',
+  'kamailemua': 'centaurus',
+  'aa': null,
+  'makali_i': null,
+  'hokulei': null,
+  'nanamua': null,
+  'nanahope': null,
+  'puana': null,
+  'miloii': null,
+  'newe': null,
+  'ikaika': null,
+  'venus': null,
+  'mars': null,
+  'saturn': null,
+  'milky_way': null,
+  'ke_ka_o_makali_i': null,
+  'ka_iwikuamo_o': null,
+  'ka_lupe_o_kawelo': null,
+  'manaiakalani_line': null
+};
+
+function buildConstellationDiagram(star) {
+  const conKey = STAR_TO_CONSTELLATION[star.id] ||
+    (star.constellationGroup ? star.constellationGroup : null);
+  const con = conKey ? DETAIL_CONSTELLATIONS[conKey] : null;
+
+  if (!con) {
+    return `
+      <div style="width:100%;background:rgba(4,8,24,0.8);border:1px solid var(--border);
+                  border-radius:4px;margin-bottom:16px;display:flex;flex-direction:column;
+                  align-items:center;padding:20px 0 12px">
+        <svg viewBox="0 0 180 80" style="width:80px;height:35px">
+          <circle cx="90" cy="40" r="12" fill="${star.color}" opacity="0.12"/>
+          <circle cx="90" cy="40" r="6"  fill="${star.color}" opacity="0.18"/>
+          <circle cx="90" cy="40" r="3"  fill="${star.color}" opacity="0.9"/>
+        </svg>
+        <div style="font-family:'Space Mono',monospace;font-size:0.58rem;
+                    color:var(--dim);letter-spacing:0.08em;text-transform:uppercase">
+          ${star.h}
+        </div>
+      </div>`;
+  }
+
+  let hilite = con.highlightIdx;
+  if (hilite === null || hilite === undefined) {
+    const idx = (con.starIds || []).indexOf(star.id);
+    if (idx >= 0) hilite = idx;
+  }
+
+  const linesSVG = con.lines.map(([a,b]) => {
+    const sa = con.stars[a], sb = con.stars[b];
+    return `<line x1="${sa.x}" y1="${sa.y}" x2="${sb.x}" y2="${sb.y}"
+              stroke="${star.color}" stroke-width="1" opacity="0.35"
+              stroke-linecap="round"/>`;
+  }).join('');
+
+  const pointerSVG = con.pointer ? (() => {
+    const src = con.stars[con.pointer.from];
+    const dst = con.pointer.to;
+    return `<line x1="${src.x}" y1="${src.y}" x2="${dst.x}" y2="${dst.y}"
+              stroke="${star.color}" stroke-width="0.7"
+              stroke-dasharray="4,3" opacity="0.22"/>`;
+  })() : '';
+
+  const dotsSVG = con.stars.map((s, idx) => {
+    const isHit = idx === hilite;
+    const r = isHit ? 4 : 2.2;
+    const op = isHit ? '1' : '0.65';
+    const ring = isHit
+      ? `<circle cx="${s.x}" cy="${s.y}" r="7"
+           fill="none" stroke="${star.color}" stroke-width="0.8" opacity="0.4"/>`
+      : '';
+    return `
+      <circle cx="${s.x}" cy="${s.y}" r="${r+5}" fill="${star.color}" opacity="0.06"/>
+      ${ring}
+      <circle cx="${s.x}" cy="${s.y}" r="${r}" fill="${star.color}" opacity="${op}"/>`;
+  }).join('');
+
+  return `
+    <div style="width:100%;background:rgba(4,8,24,0.85);
+                border:1px solid var(--border);border-radius:4px;
+                margin-bottom:16px;overflow:hidden">
+      <svg viewBox="0 0 180 170" style="width:100%;display:block">
+        ${linesSVG}
+        ${pointerSVG}
+        ${dotsSVG}
+        <text x="90" y="165" text-anchor="middle"
+              font-family="Cinzel, serif" font-size="7.5"
+              fill="${star.color}" opacity="0.6"
+              letter-spacing="0.06em">
+          ${star.h.toUpperCase()}
+        </text>
+      </svg>
+    </div>`;
+}
 </script>
 <script>
   if ('serviceWorker' in navigator) {
