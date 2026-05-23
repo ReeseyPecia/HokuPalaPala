@@ -17,15 +17,14 @@ const CONSTELLATION_STARS = {
     months: [0,1,2,3,4,5,6,7,8,9,10,11],
     color: "#c0d8f8",
     stars: [
-      { id: "dubhe",   x: 312, y: 108, mag: 1.8, label: "Nānāmua pointer" },
-      { id: "merak",   x: 330, y: 128, mag: 2.4, label: "Nānāhope pointer" },
-      { id: "phecda",  x: 318, y: 148, mag: 2.4 },
-      { id: "megrez",  x: 295, y: 138, mag: 3.3 },
-      { id: "alioth",  x: 272, y: 132, mag: 1.8 },
-      { id: "mizar",   x: 252, y: 118, mag: 2.1 },
-      { id: "alkaid",  x: 228, y: 105, mag: 1.9 }
+      { id: "dubhe",    x: 322, y: 105, mag: 1.8, label: "bowl top-right" },
+      { id: "merak",    x: 328, y: 122, mag: 2.4, label: "bowl bottom-right" },
+      { id: "phecda",   x: 308, y: 128, mag: 2.4 },
+      { id: "megrez",   x: 302, y: 112, mag: 3.3 },
+      { id: "alioth",   x: 282, y: 108, mag: 1.8 },
+      { id: "mizar",    x: 262, y: 100, mag: 2.1 },
+      { id: "alkaid",   x: 240, y: 88,  mag: 1.9 }
     ],
-    // Lines: connect in order — bowl first, then handle
     lines: [
       ["dubhe","merak"],
       ["merak","phecda"],
@@ -34,9 +33,7 @@ const CONSTELLATION_STARS = {
       ["megrez","alioth"],
       ["alioth","mizar"],
       ["mizar","alkaid"]
-    ],
-    // Pointer line to Polaris (dashed)
-    pointerLine: { from: "dubhe", to: "hokupaa", dashed: true }
+    ]
   },
 
   // ── KA MŌʻĪ (Cepheus) ─────────────────────────────────────────
@@ -66,30 +63,29 @@ const CONSTELLATION_STARS = {
   // ── URSA MINOR (containing Hōkūpaʻa/Polaris) ──────────────────
   // Small dipper shape around the north pole
   ursa_minor: {
-    h: "Ursa Minor",
+    h: "Hōkūpa'a",
     w: "Ursa Minor",
     months: [0,1,2,3,4,5,6,7,8,9,10,11],
     color: "#c8e0ff",
     stars: [
-      { id: "polaris",    x: 250, y: 52,  mag: 2.0, label: "Hōkūpaʻa" },
-      { id: "umi_beta",   x: 265, y: 72,  mag: 2.1 },
-      { id: "umi_gamma",  x: 278, y: 85,  mag: 3.0 },
-      { id: "umi_delta",  x: 272, y: 98,  mag: 4.3 },
-      { id: "umi_epsilon",x: 258, y: 105, mag: 4.2 },
-      { id: "umi_zeta",   x: 245, y: 95,  mag: 4.3 },
-      { id: "umi_eta",    x: 238, y: 82,  mag: 4.9 }
+      { id: "polaris",     x: 250, y: 52,  mag: 2.0, label: "Hōkūpaʻa" },
+      { id: "umi_delta",   x: 258, y: 65,  mag: 4.3 },
+      { id: "umi_epsilon", x: 268, y: 75,  mag: 4.2 },
+      { id: "umi_zeta",    x: 272, y: 88,  mag: 4.3 },
+      { id: "umi_eta",     x: 262, y: 95,  mag: 4.9 },
+      { id: "umi_beta",    x: 278, y: 98,  mag: 2.1 },
+      { id: "umi_gamma",   x: 285, y: 88,  mag: 3.0 }
     ],
     lines: [
-      ["polaris","umi_beta"],
-      ["umi_beta","umi_gamma"],
-      ["umi_gamma","umi_delta"],
+      ["polaris","umi_delta"],
       ["umi_delta","umi_epsilon"],
       ["umi_epsilon","umi_zeta"],
       ["umi_zeta","umi_eta"],
-      ["umi_eta","umi_epsilon"]
+      ["umi_eta","umi_beta"],
+      ["umi_beta","umi_gamma"],
+      ["umi_gamma","umi_zeta"]
     ]
   },
-
   // ── CYGNUS (containing Piraʻetea/Deneb) ───────────────────────
   // Northern cross / swan shape, upper-left quadrant (east/NE)
   cygnus: {
