@@ -422,7 +422,7 @@ const CONSTELLATION_STARS = {
 
 function renderConstellations(svg, month, CX, CY, R) {
   const layer = document.getElementById('sky-layer').value;
-  if (layer !== 'constellations' && layer !== 'all') return;
+  if (layer !== 'constellations') return;
 
   Object.values(CONSTELLATION_STARS).forEach(con => {
     // Only show constellations visible this month
