@@ -33,7 +33,8 @@ const CONSTELLATION_STARS = {
       ["megrez","alioth"],
       ["alioth","mizar"],
       ["mizar","alkaid"]
-    ]
+    ],
+    pointerLine: { from: "dubhe", to: "hokupaa", dashed: true }
   },
 
   // ── KA MŌʻĪ (Cepheus) ─────────────────────────────────────────
@@ -63,7 +64,7 @@ const CONSTELLATION_STARS = {
   // ── URSA MINOR (containing Hōkūpaʻa/Polaris) ──────────────────
   // Small dipper shape around the north pole
   ursa_minor: {
-    h: "Hōkūpa'a",
+    h: "Hōkūpaʻa",
     w: "Ursa Minor",
     months: [0,1,2,3,4,5,6,7,8,9,10,11],
     color: "#c8e0ff",
@@ -459,8 +460,9 @@ function renderConstellations(svg, month, CX, CY, R) {
       const from = starMap[con.pointerLine.from];
       // Find target in other constellations
       let to = null;
+      const targetId = con.pointerLine.to === 'hokupaa' ? 'polaris' : con.pointerLine.to;
       Object.values(CONSTELLATION_STARS).forEach(c2 => {
-        c2.stars.forEach(s => { if (s.id === con.pointerLine.to) to = s; });
+        c2.stars.forEach(s => { if (s.id === targetId) to = s; });
       });
       if (from && to) {
         const dline = mkEl('line');
