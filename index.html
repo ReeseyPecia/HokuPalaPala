@@ -591,12 +591,41 @@ const SKY_CX = 250;
 const SKY_CY = 250;
 const SKY_R = 240;
 
-const STAR_LINE_ORDER = {
-  'Ke Kā o Makaliʻi': ['hokulei', 'makali_i', 'hokupa', 'naale_a', 'puana', 'aa'],
-  'Ka Iwikuamoʻo': ['hokupaa', 'na_hiku', 'hokulea', 'haamea', 'cross'],
-  'Ka Lupe o Kāwelo': ['kawelo', 'ikua', 'kekaookalani', 'manaiakalani', 'hina_i_ele_ele'],
-  'Manaiakalani': ['lehua', 'maui_hook']
+const STAR_ID_ALIASES = {
+  nahiku_stars: 'na_hiku',
+  hanaiakamalama: 'cross',
+  nanamua: 'naale_a',
+  nanahope: 'hokupa',
+  hikianalia: 'manaiakalani',
+  mee: 'kaulia',
+  humu: 'kekaookalani',
+  kamakaunuiamaui: 'maui_hook',
+  kamakaunuiamāui: 'maui_hook',
+  lehuakona: 'lehua'
 };
+
+const HAWAIIAN_NAV_LINES = [
+  {
+    name: 'Ka Iwikuamoʻo',
+    color: '#4ab5a0',
+    ids: ['hokupaa', 'nahiku_stars', 'hokulea', 'hikianalia', 'mee', 'hanaiakamalama']
+  },
+  {
+    name: 'Ke Kā o Makaliʻi',
+    color: '#9dc8f0',
+    ids: ['hokulei', 'makali_i', 'nanamua', 'nanahope', 'puana', 'aa']
+  },
+  {
+    name: 'Ka Lupe o Kāwelo',
+    color: '#c8b8ff',
+    ids: ['kawelo', 'humu', 'hikianalia', 'mee']
+  },
+  {
+    name: 'Manaiakalani',
+    color: '#f08060',
+    ids: ['kamakaunuiamāui', 'lehuakona']
+  }
+];
 
 
 const CONSTELLATION_STARS = {
@@ -802,6 +831,113 @@ function constellationStroke(color, alpha) {
   return `rgba(${r},${g},${b},${alpha})`;
 }
 
+function getStarById(id) {
+  const resolved = STAR_ID_ALIASES[id] || id;
+  return STARS.find(s => s.id === resolved);
+}
+
+function getNavLineForStar(star) {
+  return HAWAIIAN_NAV_LINES.find(
+    line => line.name === star.h || line.name === star.starLine
+  );
+}
+
+function appendStarLineGlowFilters(defs) {
+  HAWAIIAN_NAV_LINES.forEach((line, idx) => {
+    const f = mkEl('filter');
+    f.setAttribute('id', 'sl-glow-' + idx);
+    f.setAttribute('x', '-50%');
+    f.setAttribute('y', '-50%');
+    f.setAttribute('width', '200%');
+    f.setAttribute('height', '200%');
+    const blur = mkEl('feGaussianBlur');
+    blur.setAttribute('stdDeviation', '3');
+    blur.setAttribute('result', 'blur');
+    const merge = mkEl('feMerge');
+    const n1 = mkEl('feMergeNode');
+    n1.setAttribute('in', 'blur');
+    const n2 = mkEl('feMergeNode');
+    n2.setAttribute('in', 'SourceGraphic');
+    merge.appendChild(n1);
+    merge.appendChild(n2);
+    f.appendChild(blur);
+    f.appendChild(merge);
+    defs.appendChild(f);
+  });
+}
+
+function polylineCentroid(pts) {
+  const x = pts.reduce((s, p) => s + p.x, 0) / pts.length;
+  const y = pts.reduce((s, p) => s + p.y, 0) / pts.length;
+  return { x, y };
+}
+
+function appendStarLineMidLabel(svg, x, y, label, color) {
+  const g = mkEl('g');
+  g.setAttribute('clip-path', 'url(#dc)');
+  const padX = 8;
+  const padY = 4;
+  const textW = Math.max(36, label.length * 5.4);
+  const textH = 14;
+  const rect = mkEl('rect');
+  rect.setAttribute('x', x - textW / 2);
+  rect.setAttribute('y', y - textH / 2);
+  rect.setAttribute('width', textW);
+  rect.setAttribute('height', textH);
+  rect.setAttribute('rx', textH / 2);
+  rect.setAttribute('fill', constellationStroke(color, 0.2));
+  rect.setAttribute('stroke', constellationStroke(color, 0.6));
+  rect.setAttribute('stroke-width', '1');
+  const text = mkEl('text');
+  text.setAttribute('x', x);
+  text.setAttribute('y', y + 3);
+  text.setAttribute('text-anchor', 'middle');
+  text.setAttribute('font-family', 'Cinzel, serif');
+  text.setAttribute('font-size', '8');
+  text.setAttribute('fill', constellationStroke(color, 0.9));
+  text.textContent = label;
+  g.appendChild(rect);
+  g.appendChild(text);
+  svg.appendChild(g);
+}
+
+function renderStarLines(svg, CX, CY, R, month, hourHST) {
+  const layer = document.getElementById('sky-layer')?.value;
+  if (layer !== 'starlines' && layer !== 'all') return;
+
+  HAWAIIAN_NAV_LINES.forEach((line, idx) => {
+    const pts = [];
+    line.ids.forEach(id => {
+      const star = getStarById(id);
+      if (!star) return;
+      const pos = getStarSkyPos(star, month, hourHST);
+      if (!pos) return;
+      const dx = pos.x - CX;
+      const dy = pos.y - CY;
+      if (Math.sqrt(dx * dx + dy * dy) > R - 5) return;
+      pts.push({ x: pos.x, y: pos.y });
+    });
+    if (pts.length < 2) return;
+
+    const d = pts.map((p, i) => `${i ? 'L' : 'M'}${p.x},${p.y}`).join(' ');
+    const path = mkEl('path');
+    path.setAttribute('d', d);
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', line.color);
+    path.setAttribute('stroke-width', '2.5');
+    path.setAttribute('stroke-opacity', '0.45');
+    path.setAttribute('stroke-linecap', 'round');
+    path.setAttribute('stroke-linejoin', 'round');
+    path.setAttribute('filter', 'url(#sl-glow-' + idx + ')');
+    path.setAttribute('clip-path', 'url(#dc)');
+    path.setAttribute('pointer-events', 'none');
+    svg.appendChild(path);
+
+    const mid = polylineCentroid(pts);
+    appendStarLineMidLabel(svg, mid.x, mid.y, line.name, line.color);
+  });
+}
+
 function renderConstellations(svg, currentMonth, CX, CY, R) {
   const layer = document.getElementById('sky-layer')?.value;
   if (layer !== 'constellations') return;
@@ -968,35 +1104,6 @@ function calcMoonPhaseRaw(date) {
   return { name: names[idx], illumination: ill, phase };
 }
 
-function drawStarLines(svg, placed, layer) {
-  if (layer !== 'starlines') return;
-  const byLine = {};
-  placed.forEach(({ star, x, y }) => {
-    if (!star.starLine || star.type === 'starline') return;
-    if (!byLine[star.starLine]) byLine[star.starLine] = [];
-    byLine[star.starLine].push({ id: star.id, x, y });
-  });
-  Object.keys(byLine).forEach(lineName => {
-    const order = STAR_LINE_ORDER[lineName];
-    let pts = byLine[lineName];
-    if (order) {
-      pts = order.map(id => pts.find(p => p.id === id)).filter(Boolean);
-    } else {
-      pts = pts.sort((a, b) => Math.atan2(a.y - SKY_CY, a.x - SKY_CX) - Math.atan2(b.y - SKY_CY, b.x - SKY_CX));
-    }
-    if (pts.length < 2) return;
-    const path = mkEl('path');
-    path.setAttribute('d', pts.map((p, i) => `${i ? 'L' : 'M'}${p.x},${p.y}`).join(' '));
-    path.setAttribute('fill', 'none');
-    path.setAttribute('stroke', 'rgba(232,184,75,0.45)');
-    path.setAttribute('stroke-width', '1.5');
-    path.setAttribute('stroke-dasharray', '6,4');
-    path.setAttribute('clip-path', 'url(#dc)');
-    path.setAttribute('pointer-events', 'none');
-    svg.appendChild(path);
-  });
-}
-
 function renderSkyDome(month, layer, hourHST) {
   const svg = document.getElementById('sky-svg');
   svg.innerHTML = '';
@@ -1018,6 +1125,7 @@ function renderSkyDome(month, layer, hourHST) {
   const clip=mkEl('clipPath');clip.setAttribute('id','dc');
   const cc=mkEl('circle');cc.setAttribute('cx',CX);cc.setAttribute('cy',CY);cc.setAttribute('r',R-2);
   clip.appendChild(cc);defs.appendChild(clip);
+  appendStarLineGlowFilters(defs);
   svg.appendChild(defs);
 
   const bg=mkEl('circle');bg.setAttribute('cx',CX);bg.setAttribute('cy',CY);bg.setAttribute('r',R);bg.setAttribute('fill','url(#dG)');svg.appendChild(bg);
@@ -1037,6 +1145,7 @@ function renderSkyDome(month, layer, hourHST) {
     bs.setAttribute('r',Math.random()*0.75+0.25);bs.setAttribute('fill',`rgba(200,215,255,${Math.random()*0.35+0.08})`);bs.setAttribute('clip-path','url(#dc)');svg.appendChild(bs);
   }
 
+  renderStarLines(svg, CX, CY, R, month, hourHST);
   renderConstellations(svg, month, CX, CY, R);
 
   const visible = STARS.filter(s => s.months.includes(month) && starMatchesLayer(s, layer));
@@ -1050,8 +1159,6 @@ function renderSkyDome(month, layer, hourHST) {
     if (Math.sqrt(dx * dx + dy * dy) > R - 5) return;
     placed.push({ star, x: px, y: py });
   });
-
-  drawStarLines(svg, placed, layer);
 
   placed.forEach(({ star, x: px, y: py }) => {
     if (star.type !== 'starline') {
@@ -1157,6 +1264,91 @@ function layoutConstellationDiagramPoints(points, boxW, boxH) {
   }));
 }
 
+function layoutVerticalStarLineDiagram(members, boxW, boxH) {
+  const padX = 26;
+  const padTop = 26;
+  const padBottom = 10;
+  const plotW = boxW - padX * 2;
+  const plotH = boxH - padTop - padBottom;
+  const sorted = members
+    .map(star => ({ star, x: star.skyX, y: star.skyY }))
+    .filter(m => m.x != null && m.y != null)
+    .sort((a, b) => a.y - b.y);
+  if (!sorted.length) return [];
+
+  const minY = sorted[0].y;
+  const maxY = sorted[sorted.length - 1].y;
+  const rangeY = maxY - minY || 1;
+  const minX = Math.min(...sorted.map(m => m.x));
+  const maxX = Math.max(...sorted.map(m => m.x));
+  const rangeX = maxX - minX || 1;
+  const scaleY = plotH / rangeY;
+  const scaleX = Math.min(plotW / rangeX, scaleY * 0.4);
+  const midX = (minX + maxX) / 2;
+  const centerX = boxW / 2;
+
+  return sorted.map(m => ({
+    x: centerX + (m.x - midX) * scaleX,
+    y: padTop + ((m.y - minY) / rangeY) * plotH,
+    label: m.star.h,
+    star: m.star
+  }));
+}
+
+function starLineDiagramPill(x, y, label, color) {
+  const textW = Math.max(44, label.length * 5.4 + 14);
+  const textH = 14;
+  const fill = constellationStroke(color, 0.2);
+  const stroke = constellationStroke(color, 0.6);
+  const textFill = constellationStroke(color, 0.9);
+  return `
+    <g>
+      <rect x="${x - textW / 2}" y="${y - textH / 2}" width="${textW}" height="${textH}" rx="${textH / 2}"
+        fill="${fill}" stroke="${stroke}" stroke-width="1"/>
+      <text x="${x}" y="${y + 3}" text-anchor="middle" font-family="Cinzel, serif" font-size="7.5" fill="${textFill}">${label}</text>
+    </g>`;
+}
+
+function renderStarLineDiagramHtml(star) {
+  const line = getNavLineForStar(star);
+  if (!line) return renderConstellationDiagramHtml(star);
+
+  const members = line.ids.map(id => getStarById(id)).filter(Boolean);
+  const W = 200;
+  const H = 200;
+  const laid = layoutVerticalStarLineDiagram(members, W, H);
+  if (laid.length < 2) return renderConstellationDiagramHtml(star);
+
+  const color = line.color;
+  const pathD = laid.map((p, i) => `${i ? 'L' : 'M'}${p.x},${p.y}`).join(' ');
+  const dots = laid.map(p => {
+    const r = diagramDotRadius(p.star.mag) * 1.1;
+    return `<circle cx="${p.x}" cy="${p.y}" r="${r}" fill="${color}"/>`;
+  }).join('');
+  const pills = laid.map(p => starLineDiagramPill(p.x, p.y - 14, p.label, color)).join('');
+
+  return `
+    <div class="constellation-diagram-wrap">
+      <svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="${line.name} star line">
+        <defs>
+          <filter id="detail-sl-glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="3" result="blur"/>
+            <feMerge>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+        <rect width="${W}" height="${H}" fill="var(--panel)"/>
+        <text x="${W / 2}" y="16" text-anchor="middle" fill="var(--gold)" font-family="Cinzel, serif" font-size="10">${line.name}</text>
+        <path d="${pathD}" fill="none" stroke="${color}" stroke-width="2.5" stroke-opacity="0.45"
+          stroke-linecap="round" stroke-linejoin="round" filter="url(#detail-sl-glow)"/>
+        ${dots}
+        ${pills}
+      </svg>
+    </div>`;
+}
+
 function renderConstellationDiagramHtml(star) {
   const W = 200;
   const H = 200;
@@ -1247,7 +1439,7 @@ function selectStar(star) {
     ? (isPlanet ? `${star.dist} light-years (approx.)` : `${star.dist} light-years`)
     : '—';
   p.innerHTML = `
-    ${renderConstellationDiagramHtml(star)}
+    ${star.type === 'starline' ? renderStarLineDiagramHtml(star) : renderConstellationDiagramHtml(star)}
     <div class="star-name-h">${star.h}</div>
     <div class="star-name-w">✦ ${star.w}</div>
     ${renderAltNamesHtml(star.altNames)}
