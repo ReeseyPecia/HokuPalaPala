@@ -414,134 +414,144 @@ const CONSTELLATION_STARS = {
 
 };
 
-// ══════════════════════════════════════════════════════════════════
-// CONSTELLATION RENDERING FUNCTION
-// Paste this into your existing renderSkyDome() function
-// Call it after drawing background stars, before drawing main stars
-// ══════════════════════════════════════════════════════════════════
+// Map stick-figure anchor points → catalog star ids (stars.json) so lines meet tappable dots
+const GRAPHICS_STAR_TO_CATALOG = {
+  polaris: 'hokupaa',
+  antares: 'lehuakona',
+  arcturus: 'hokulea',
+  acrux: 'hanaiakamalama',
+  alpha_cen: 'kamailehope',
+  beta_cen: 'kamailemua',
+  vega: 'kawelo',
+  altair: 'humu',
+  deneb: 'piraetea',
+  gienah: 'mee',
+  alphacca: 'ka_moi',
+  spica: 'hikianalia',
+  regulus: 'ikiiki'
+};
 
+const GRAPHICS_KEY_ALIASES = {
+  scorpius: 'kamakaunuiamāui',
+  crux: 'hanaiakamalama',
+  centaurus: 'centaurus_pointers'
+};
+
+let CONSTELLATION_GROUPS = [];
+
+function buildCatalogPositionMap() {
+  const map = {};
+  if (typeof STARS === 'undefined') return map;
+  STARS.forEach(star => {
+    if (star.skyX == null || star.skyY == null) return;
+    map[star.id] = { x: star.skyX, y: star.skyY };
+  });
+  return map;
+}
+
+function computeConstellationOffset(con, catalogPos) {
+  const deltas = [];
+  con.stars.forEach(s => {
+    const catalogId = GRAPHICS_STAR_TO_CATALOG[s.id];
+    if (!catalogId || !catalogPos[catalogId]) return;
+    deltas.push({
+      dx: catalogPos[catalogId].x - s.x,
+      dy: catalogPos[catalogId].y - s.y
+    });
+  });
+  if (!deltas.length) return { dx: 0, dy: 0 };
+  return {
+    dx: deltas.reduce((sum, d) => sum + d.dx, 0) / deltas.length,
+    dy: deltas.reduce((sum, d) => sum + d.dy, 0) / deltas.length
+  };
+}
+
+function resolveGraphicsPoint(gfxStar, catalogPos, offset) {
+  const catalogId = GRAPHICS_STAR_TO_CATALOG[gfxStar.id];
+  if (catalogId && catalogPos[catalogId]) return catalogPos[catalogId];
+  const dx = offset?.dx || 0;
+  const dy = offset?.dy || 0;
+  return { x: gfxStar.x + dx, y: gfxStar.y + dy };
+}
+
+function insideDome(x, y, CX, CY, R) {
+  const dx = x - CX;
+  const dy = y - CY;
+  return Math.sqrt(dx * dx + dy * dy) <= R - 5;
+}
+
+function drawConstellationLine(svg, x1, y1, x2, y2, color, dashed) {
+  const line = mkEl('line');
+  line.setAttribute('x1', x1);
+  line.setAttribute('y1', y1);
+  line.setAttribute('x2', x2);
+  line.setAttribute('y2', y2);
+  line.setAttribute('stroke', color);
+  line.setAttribute('stroke-width', dashed ? '0.9' : '1.1');
+  line.setAttribute('stroke-opacity', dashed ? '0.35' : '0.28');
+  if (dashed) line.setAttribute('stroke-dasharray', '5,4');
+  line.setAttribute('stroke-linecap', 'round');
+  line.setAttribute('clip-path', 'url(#dc)');
+  line.setAttribute('pointer-events', 'none');
+  svg.appendChild(line);
+}
+
+// Lines only — catalog stars are drawn (and tappable) in renderSkyDome()
 function renderConstellations(svg, month, CX, CY, R) {
-  const layer = document.getElementById('sky-layer').value;
+  const layer = document.getElementById('sky-layer')?.value;
   if (layer !== 'constellations') return;
 
-  Object.values(CONSTELLATION_STARS).forEach(con => {
-    // Only show constellations visible this month
+  const catalogPos = buildCatalogPositionMap();
+
+  Object.entries(CONSTELLATION_STARS).forEach(([gfxKey, con]) => {
     if (!con.months.includes(month)) return;
 
-    const starMap = {};
-    con.stars.forEach(s => { starMap[s.id] = s; });
+    const groupMeta = (CONSTELLATION_GROUPS || []).find(
+      g => g.id === gfxKey || g.id === GRAPHICS_KEY_ALIASES[gfxKey]
+    );
+    const color = groupMeta?.lineColor || con.color;
+    const label = groupMeta?.h || con.h;
 
-    // Draw constellation lines
-    con.lines.forEach(([fromId, toId]) => {
-      const from = starMap[fromId];
-      const to   = starMap[toId];
-      if (!from || !to) return;
-
-      // Clip to dome circle
-      const dx1 = from.x - CX, dy1 = from.y - CY;
-      const dx2 = to.x   - CX, dy2 = to.y   - CY;
-      if (Math.sqrt(dx1*dx1+dy1*dy1) > R-5) return;
-      if (Math.sqrt(dx2*dx2+dy2*dy2) > R-5) return;
-
-      const line = mkEl('line');
-      line.setAttribute('x1', from.x);
-      line.setAttribute('y1', from.y);
-      line.setAttribute('x2', to.x);
-      line.setAttribute('y2', to.y);
-      line.setAttribute('stroke', con.color);
-      line.setAttribute('stroke-width', '1');
-      line.setAttribute('opacity', '0.22');
-      line.setAttribute('clip-path', 'url(#dc)');
-      svg.appendChild(line);
-    });
-
-    // Draw pointer/dashed lines if present
-    if (con.pointerLine) {
-      const from = starMap[con.pointerLine.from];
-      // Find target in other constellations
-      let to = null;
-      const targetId = con.pointerLine.to === 'hokupaa' ? 'polaris' : con.pointerLine.to;
-      Object.values(CONSTELLATION_STARS).forEach(c2 => {
-        c2.stars.forEach(s => { if (s.id === targetId) to = s; });
-      });
-      if (from && to) {
-        const dline = mkEl('line');
-        dline.setAttribute('x1', from.x);
-        dline.setAttribute('y1', from.y);
-        dline.setAttribute('x2', to.x);
-        dline.setAttribute('y2', to.y);
-        dline.setAttribute('stroke', con.color);
-        dline.setAttribute('stroke-width', '0.8');
-        dline.setAttribute('stroke-dasharray', '4,4');
-        dline.setAttribute('opacity', '0.18');
-        dline.setAttribute('clip-path', 'url(#dc)');
-        svg.appendChild(dline);
-      }
-    }
-
-    // Draw individual constellation stars
+    const offset = computeConstellationOffset(con, catalogPos);
+    const resolved = {};
     con.stars.forEach(s => {
-      const dx = s.x - CX, dy = s.y - CY;
-      if (Math.sqrt(dx*dx+dy*dy) > R-5) return;
-
-      // Size by magnitude
-      const r = s.mag < 0 ? 5.5 : s.mag < 1.5 ? 4 : s.mag < 2.5 ? 3 : s.mag < 3.5 ? 2.2 : 1.6;
-
-      // Glow halo
-      const halo = mkEl('circle');
-      halo.setAttribute('cx', s.x);
-      halo.setAttribute('cy', s.y);
-      halo.setAttribute('r', r + 5);
-      halo.setAttribute('fill', con.color);
-      halo.setAttribute('opacity', '0.06');
-      halo.setAttribute('clip-path', 'url(#dc)');
-      svg.appendChild(halo);
-
-      // Star dot
-      const dot = mkEl('circle');
-      dot.setAttribute('cx', s.x);
-      dot.setAttribute('cy', s.y);
-      dot.setAttribute('r', r);
-      dot.setAttribute('fill', con.color);
-      dot.setAttribute('stroke', 'rgba(255,255,255,0.2)');
-      dot.setAttribute('stroke-width', '0.5');
-      dot.setAttribute('clip-path', 'url(#dc)');
-      svg.appendChild(dot);
-
-      // Label for named stars
-      if (s.label) {
-        const lbl = mkEl('text');
-        lbl.setAttribute('x', s.x + 7);
-        lbl.setAttribute('y', s.y + 4);
-        lbl.setAttribute('fill', con.color);
-        lbl.setAttribute('opacity', '0.7');
-        lbl.setAttribute('font-size', '7');
-        lbl.setAttribute('font-family', 'Cinzel, serif');
-        lbl.setAttribute('clip-path', 'url(#dc)');
-        lbl.textContent = s.label;
-        svg.appendChild(lbl);
-      }
+      resolved[s.id] = resolveGraphicsPoint(s, catalogPos, offset);
     });
 
-    // Constellation name label at centroid
-    const xs = con.stars.map(s => s.x);
-    const ys = con.stars.map(s => s.y);
-    const cx = xs.reduce((a,b) => a+b, 0) / xs.length;
-    const cy = ys.reduce((a,b) => a+b, 0) / ys.length;
-    const dcx = cx - CX, dcy = cy - CY;
-    if (Math.sqrt(dcx*dcx+dcy*dcy) < R-20) {
-      const name = mkEl('text');
-      name.setAttribute('x', cx);
-      name.setAttribute('y', cy - 12);
-      name.setAttribute('text-anchor', 'middle');
-      name.setAttribute('fill', con.color);
-      name.setAttribute('opacity', '0.55');
-      name.setAttribute('font-size', '8.5');
-      name.setAttribute('font-family', 'Cinzel, serif');
-      name.setAttribute('letter-spacing', '0.06em');
-      name.setAttribute('clip-path', 'url(#dc)');
-      name.textContent = con.h.toUpperCase();
-      svg.appendChild(name);
+    (con.lines || []).forEach(([fromId, toId]) => {
+      const a = resolved[fromId];
+      const b = resolved[toId];
+      if (!a || !b) return;
+      if (!insideDome(a.x, a.y, CX, CY, R) && !insideDome(b.x, b.y, CX, CY, R)) return;
+      drawConstellationLine(svg, a.x, a.y, b.x, b.y, color, false);
+    });
+
+    if (con.pointerLine) {
+      const from = resolved[con.pointerLine.from];
+      let to = resolved[con.pointerLine.to];
+      if (!to && con.pointerLine.to === 'hokupaa') to = catalogPos.hokupaa;
+      if (!to && con.pointerLine.to === 'acrux') to = catalogPos.hanaiakamalama;
+      if (from && to) drawConstellationLine(svg, from.x, from.y, to.x, to.y, color, true);
     }
+
+    const pts = Object.values(resolved);
+    if (!pts.length) return;
+    const cx = pts.reduce((s, p) => s + p.x, 0) / pts.length;
+    const cy = pts.reduce((s, p) => s + p.y, 0) / pts.length;
+    if (!insideDome(cx, cy, CX, CY, R)) return;
+
+    const name = mkEl('text');
+    name.setAttribute('x', cx);
+    name.setAttribute('y', cy - 14);
+    name.setAttribute('text-anchor', 'middle');
+    name.setAttribute('fill', color);
+    name.setAttribute('opacity', '0.6');
+    name.setAttribute('font-size', '8.5');
+    name.setAttribute('font-family', 'Cinzel, serif');
+    name.setAttribute('letter-spacing', '0.06em');
+    name.setAttribute('clip-path', 'url(#dc)');
+    name.setAttribute('pointer-events', 'none');
+    name.textContent = label;
+    svg.appendChild(name);
   });
 }

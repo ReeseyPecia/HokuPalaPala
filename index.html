@@ -587,23 +587,25 @@ function showTab(t) {
 // STAR DATA (loaded from stars.json v2.1 — see corrections_log in JSON)
 // ══════════════════════════════════════════
 let STARS = [];
+let CONSTELLATION_GROUPS = [];
 const SKY_LAT = 20;
 const SKY_CX = 250;
 const SKY_CY = 250;
 const SKY_R = 240;
 
 const STAR_ID_ALIASES = {
-  nahiku_stars: 'na_hiku',
-  hanaiakamalama: 'cross',
-  nanamua: 'naale_a',
-  nanahope: 'hokupa',
-  hikianalia: 'manaiakalani',
-  mee: 'kaulia',
-  humu: 'kekaookalani',
-  kamakaunuiamaui: 'maui_hook',
-  kamakaunuiamāui: 'maui_hook',
-  lehuakona: 'lehua'
+  cross: 'hanaiakamalama',
+  maui_hook: 'lehuakona',
+  na_hiku: 'nahiku_stars',
+  naale_a: 'nanamua',
+  hokupa: 'nanahope',
+  manaiakalani: 'hikianalia',
+  kaulia: 'mee',
+  kekaookalani: 'humu',
+  lehua: 'lehuakona'
 };
+
+const CONSTELLATION_AGGREGATE_IDS = new Set(['nahiku_stars', 'kamakaunuiamāui']);
 
 const HAWAIIAN_NAV_LINES = [
   {
@@ -631,28 +633,52 @@ const HAWAIIAN_NAV_LINES = [
 
 const CONSTELLATION_GROUP_ALIASES = {
   bootes: 'hokūiwa',
+  hokūiwa: 'hokūiwa',
   ursa_major: 'nahiku',
+  scorpius: 'kamakaunuiamāui',
+  crux: 'hanaiakamalama',
+  centaurus: 'centaurus_pointers',
   gemini: 'leo',
   corvus: 'mee',
+  mee: 'mee',
   summer_triangle: 'lyra'
 };
 
 function getConstellationGraphic(groupKey) {
   if (!groupKey || typeof CONSTELLATION_STARS === 'undefined') return null;
-  const key = CONSTELLATION_GROUP_ALIASES[groupKey] || groupKey;
-  const c = CONSTELLATION_STARS[key];
-  if (!c) return null;
-  if (c.points) {
-    return { color: c.color, label: c.label || c.h, points: c.points, lines: c.lines || [] };
-  }
-  if (!c.stars) return null;
-  const points = c.stars.map(s => ({ x: s.x, y: s.y }));
+  const gfxKey = CONSTELLATION_GROUP_ALIASES[groupKey] || groupKey;
+  const c = CONSTELLATION_STARS[gfxKey];
+  if (!c || !c.stars) return null;
+
+  const catalogPos = {};
+  STARS.forEach(star => {
+    if (star.skyX != null && star.skyY != null) catalogPos[star.id] = { x: star.skyX, y: star.skyY };
+  });
+
+  const offset = typeof computeConstellationOffset === 'function'
+    ? computeConstellationOffset(c, catalogPos)
+    : { dx: 0, dy: 0 };
+  const points = c.stars.map(s => {
+    const catalogId = typeof GRAPHICS_STAR_TO_CATALOG !== 'undefined'
+      ? GRAPHICS_STAR_TO_CATALOG[s.id]
+      : null;
+    if (catalogId && catalogPos[catalogId]) return catalogPos[catalogId];
+    return { x: s.x + offset.dx, y: s.y + offset.dy };
+  });
+
   const indexById = {};
   c.stars.forEach((s, i) => { indexById[s.id] = i; });
   const lines = (c.lines || [])
     .map(pair => [indexById[pair[0]], indexById[pair[1]]])
     .filter(pair => pair[0] != null && pair[1] != null);
-  return { color: c.color, label: c.h || c.label, points, lines };
+
+  const meta = CONSTELLATION_GROUPS.find(g => g.id === gfxKey || g.id === groupKey);
+  return {
+    color: meta?.lineColor || c.color,
+    label: meta?.h || c.h,
+    points,
+    lines
+  };
 }
 
 function constellationStroke(color, alpha) {
@@ -782,6 +808,10 @@ async function loadStars() {
     const res = await fetch('stars.json');
     const data = await res.json();
     STARS = data.stars.map(normalizeStar);
+    CONSTELLATION_GROUPS = data.constellationGroups || [];
+    if (typeof window !== 'undefined') {
+      window.CONSTELLATION_GROUPS = CONSTELLATION_GROUPS;
+    }
   } catch (e) {
     console.error('Failed to load stars.json', e);
   }
@@ -845,7 +875,10 @@ function starMatchesLayer(star, layer) {
   if (layer === 'nav') return star.type === 'nav';
   if (layer === 'seasonal') return star.type === 'seasonal' || star.type === 'cultural';
   if (layer === 'starlines') return !!star.starLine;
-  if (layer === 'constellations') return star.type !== 'starline';
+  if (layer === 'constellations') {
+    if (CONSTELLATION_AGGREGATE_IDS.has(star.id)) return false;
+    return star.type !== 'starline' && star.type !== 'planet';
+  }
   if (layer === 'all') return star.type !== 'starline';
   return true;
 }
