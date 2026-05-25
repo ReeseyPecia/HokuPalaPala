@@ -4,6 +4,7 @@ const ASSETS = [
   '/',
   '/index.html',
   '/stars.json',
+  '/constellation-highlight.js',
   '/manifest.json',
   '/hokubigicon.png',
   '/hokusmallicon.png',
