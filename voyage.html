@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#04060f">
+<title>Hoʻokele — Voyage Simulation · Hōkū Palapala</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --black: #04060f;
+  --ocean: #070d1a;
+  --gold: #e8b84b;
+  --teal: #4ab5a0;
+  --blue-star: #9dc8f0;
+  --red-star: #f08060;
+  --pale: #e8e0d0;
+  --dim: #6a7080;
+  --panel: rgba(8,16,38,0.92);
+  --border: rgba(232,184,75,0.18);
+  --teal-border: rgba(74,181,160,0.25);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--black);
+  color: var(--pale);
+  font-family: 'EB Garamond', serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* === Atmospheric background canvas (matches main app) === */
+#bg-canvas {
+  position: fixed; top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0; pointer-events: none;
+}
+.wrap { position: relative; z-index: 1; max-width: 1280px; margin: 0 auto; padding: 20px 20px 60px; }
+
+/* === Header === */
+header {
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  padding: 16px 0 20px;
+  margin-bottom: 32px;
+}
+.back-link {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--gold); text-decoration: none;
+  padding: 9px 16px; border: 1px solid var(--border); border-radius: 3px;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+.back-link:hover { background: rgba(232,184,75,0.1); }
+.title-block { text-align: center; flex: 1; }
+.title-block h1 {
+  font-family: 'Cinzel', serif; font-weight: 700;
+  font-size: clamp(1.2rem, 3.2vw, 1.9rem);
+  color: var(--gold); letter-spacing: 0.1em;
+  text-shadow: 0 0 30px rgba(232,184,75,0.3);
+  line-height: 1.1;
+}
+.title-block .subtitle {
+  font-style: italic; color: var(--dim);
+  font-size: clamp(0.78rem, 1.6vw, 0.95rem);
+  margin-top: 6px;
+}
+.header-spacer { width: 140px; }
+@media (max-width: 700px) {
+  header { flex-direction: column; gap: 14px; padding-bottom: 16px; }
+  .header-spacer { display: none; }
+}
+
+/* === Main grid: dome on left, panel on right === */
+.voyage-grid {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 28px;
+  align-items: start;
+}
+@media (max-width: 1000px) {
+  .voyage-grid { grid-template-columns: 1fr; }
+}
+
+/* === Sky dome === */
+.dome-wrap {
+  position: relative;
+  width: 100%; max-width: 560px;
+  margin: 0 auto;
+  aspect-ratio: 1;
+}
+.dome {
+  width: 100%; height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, #0b1535 0%, #020408 75%);
+  border: 1px solid var(--border);
+  box-shadow: 0 0 100px rgba(5,15,40,0.9), inset 0 0 60px rgba(0,0,0,0.5);
+  overflow: hidden;
+  transition: box-shadow 0.5s ease, border-color 0.5s ease;
+}
+.dome::before {
+  content: ''; position: absolute; inset: 0; border-radius: 50%;
+  background: radial-gradient(ellipse at 30% 20%, rgba(30,60,120,0.12), transparent 60%);
+  pointer-events: none;
+}
+.dome.crossing {
+  box-shadow: 0 0 140px rgba(232,184,75,0.5), inset 0 0 60px rgba(0,0,0,0.5);
+  border-color: rgba(232,184,75,0.55);
+}
+#sky-svg { width: 100%; height: 100%; display: block; position: relative; z-index: 1; }
+
+.dome-label {
+  position: absolute; font-family: 'Space Mono', monospace;
+  font-size: 0.58rem; color: rgba(232,184,75,0.45);
+  letter-spacing: 0.12em; text-transform: uppercase;
+  pointer-events: none; z-index: 2;
+}
+.dome-label.n { top: 12px; left: 50%; transform: translateX(-50%); }
+.dome-label.s { bottom: 14px; left: 50%; transform: translateX(-50%); }
+.dome-label.e { right: 10px; top: 50%; transform: translateY(-50%); }
+.dome-label.w { left: 10px; top: 50%; transform: translateY(-50%); }
+
+.time-note {
+  text-align: center;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.6rem; color: var(--dim);
+  letter-spacing: 0.08em;
+  margin-top: 16px;
+}
+
+/* === Side panels === */
+.side-panel { display: flex; flex-direction: column; gap: 16px; }
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 18px;
+  backdrop-filter: blur(8px);
+}
+.panel-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.58rem;
+  color: var(--teal);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+/* === Route picker === */
+.route-picker { display: flex; flex-direction: column; gap: 6px; }
+.route-btn {
+  font-family: 'Cinzel', serif;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--pale);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
+.route-btn:hover { border-color: var(--gold); }
+.route-btn.active {
+  background: rgba(232,184,75,0.12);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+.route-btn .route-meta {
+  display: block;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.55rem;
+  color: var(--dim);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-top: 3px;
+}
+.route-btn.active .route-meta { color: rgba(232,184,75,0.6); }
+
+/* === Map inset === */
+.map-inset {
+  width: 100%;
+  aspect-ratio: 4/5;
+  border-radius: 3px;
+  overflow: hidden;
+  background: #050a18;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+.map-inset svg { width: 100%; height: 100%; display: block; }
+
+/* === Readouts === */
+.readouts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.readout {
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 3px;
+  padding: 12px;
+  min-height: 78px;
+}
+.readout-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.55rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--dim); margin-bottom: 6px;
+}
+.readout-value {
+  font-family: 'Cinzel', serif;
+  font-size: 1.35rem; color: var(--gold);
+  line-height: 1.1;
+}
+.readout-value.compact { font-size: 1rem; padding-top: 4px; }
+.readout-sub {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.58rem; color: var(--pale);
+  margin-top: 4px; letter-spacing: 0.04em;
+  opacity: 0.85;
+}
+
+/* === Narration === */
+.narration {
+  font-style: italic;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--pale);
+  border-left: 2px solid var(--gold);
+  padding: 2px 0 2px 16px;
+  transition: opacity 0.35s ease;
+  min-height: 110px;
+}
+.narration.fading { opacity: 0; }
+.narration .nar-key {
+  font-style: normal;
+  font-family: 'Cinzel', serif;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.78rem;
+  display: block;
+  margin-bottom: 8px;
+}
+
+/* === Controls === */
+.controls {
+  margin-top: 32px;
+  padding: 22px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 22px;
+  align-items: center;
+}
+@media (max-width: 800px) {
+  .controls { grid-template-columns: 1fr; gap: 16px; }
+}
+.play-btn {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 14px 22px;
+  background: rgba(232,184,75,0.12);
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  min-width: 160px;
+}
+.play-btn:hover { background: rgba(232,184,75,0.22); }
+
+.slider-wrap { display: flex; flex-direction: column; gap: 10px; }
+.lat-slider {
+  width: 100%;
+  -webkit-appearance: none; appearance: none;
+  height: 4px;
+  background: linear-gradient(to right,
+    rgba(157,200,240,0.4) 0%,
+    rgba(157,200,240,0.5) 45%,
+    rgba(232,184,75,0.7) 50%,
+    rgba(240,128,96,0.5) 55%,
+    rgba(240,128,96,0.4) 100%);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+.lat-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 18px; height: 18px;
+  background: var(--gold);
+  border: 2px solid #0a1024;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 0 14px rgba(232,184,75,0.6);
+}
+.lat-slider::-moz-range-thumb {
+  width: 18px; height: 18px;
+  background: var(--gold);
+  border: 2px solid #0a1024;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 0 14px rgba(232,184,75,0.6);
+}
+.slider-labels {
+  display: flex; justify-content: space-between;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.55rem; color: var(--dim);
+  letter-spacing: 0.08em; text-transform: uppercase;
+}
+.slider-labels .equator { color: var(--gold); }
+.speed-controls { display: flex; gap: 6px; }
+.speed-btn {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.62rem;
+  padding: 8px 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--pale);
+  border-radius: 3px;
+  cursor: pointer;
+  min-width: 40px;
+  transition: all 0.2s;
+}
+.speed-btn:hover { border-color: var(--gold); }
+.speed-btn.active { background: rgba(232,184,75,0.15); border-color: var(--gold); color: var(--gold); }
+
+/* === SVG sky styling === */
+.star-label {
+  font-family: 'Cinzel', serif;
+  pointer-events: none;
+}
+@keyframes zenith-pulse {
+  0%, 100% { stroke-opacity: 0.6; }
+  50%      { stroke-opacity: 1; }
+}
+.zenith-ring.active {
+  animation: zenith-pulse 2.6s ease-in-out infinite;
+}
+@keyframes star-twinkle {
+  0%, 100% { opacity: 0.4; }
+  50%      { opacity: 0.85; }
+}
+
+/* === Footer === */
+footer {
+  margin-top: 60px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--dim);
+  letter-spacing: 0.08em;
+}
+footer a { color: var(--gold); text-decoration: none; }
+</style>
+</head>
+<body>
+<canvas id="bg-canvas"></canvas>
+<div class="wrap">
+
+<header>
+  <a class="back-link" href="index.html">← Hōkū Palapala</a>
+  <div class="title-block">
+    <h1>Hoʻokele — Voyage Simulation</h1>
+    <div class="subtitle">Sailing the latitudes our ancestors knew</div>
+  </div>
+  <div class="header-spacer"></div>
+</header>
+
+<div class="voyage-grid">
+
+  <!-- ═══════════════════ LEFT: Sky Dome ═══════════════════ -->
+  <div>
+    <div class="dome-wrap">
+      <div class="dome" id="dome">
+        <svg id="sky-svg" viewBox="0 0 500 500"></svg>
+      </div>
+      <div class="dome-label n">N — Hōkūpaʻa</div>
+      <div class="dome-label s">S — Nā Leo</div>
+      <div class="dome-label e">E — Koʻolau</div>
+      <div class="dome-label w">W — Kona</div>
+    </div>
+    <div class="time-note">Simulated: late April evening · LST 14h 30m</div>
+  </div>
+
+  <!-- ═══════════════════ RIGHT: Side Panel ═══════════════════ -->
+  <div class="side-panel">
+
+    <div class="panel">
+      <div class="panel-label">Voyage</div>
+      <div class="route-picker">
+        <button class="route-btn active" data-route="marquesas">
+          Hawaiʻi → Marquesas
+          <span class="route-meta">The Ancestral Crossing · 19.6°N to 8.9°S</span>
+        </button>
+        <button class="route-btn" data-route="tahiti">
+          Hawaiʻi → Tahiti
+          <span class="route-meta">The Southern Voyage · 19.6°N to 17.6°S</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="panel" style="padding: 14px;">
+      <div class="panel-label">Position</div>
+      <div class="map-inset">
+        <svg id="map-svg" viewBox="0 0 240 300"></svg>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="readouts">
+        <div class="readout">
+          <div class="readout-label">Latitude</div>
+          <div class="readout-value" id="readout-lat">19.6°N</div>
+          <div class="readout-sub" id="readout-lat-sub">Kawaihae</div>
+        </div>
+        <div class="readout">
+          <div class="readout-label">Zenith Star</div>
+          <div class="readout-value compact" id="readout-zenith">Hōkūleʻa</div>
+          <div class="readout-sub" id="readout-zenith-sub">Arcturus · Hawaiʻi</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label">Wayfinding Notes</div>
+      <div class="narration" id="narration">
+        <span class="nar-key">Departing Kawaihae</span>
+        Hōkūpaʻa hangs 20° above the northern horizon — its altitude is your latitude. Hōkūleʻa rides directly overhead.
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ═══════════════════ Controls Bar ═══════════════════ -->
+<div class="controls">
+  <button class="play-btn" id="play-btn">▶ Begin Voyage</button>
+  <div class="slider-wrap">
+    <input type="range" class="lat-slider" id="lat-slider"
+           min="-25" max="25" step="0.1" value="19.6">
+    <div class="slider-labels">
+      <span>25°N</span>
+      <span>Hawaiʻi</span>
+      <span class="equator">EQUATOR</span>
+      <span>Marquesas</span>
+      <span>25°S</span>
+    </div>
+  </div>
+  <div class="speed-controls">
+    <button class="speed-btn" data-speed="0.5">½×</button>
+    <button class="speed-btn active" data-speed="1">1×</button>
+    <button class="speed-btn" data-speed="2">2×</button>
+  </div>
+</div>
+
+<footer>
+  Hōkū Palapala — Built by Reese Reilly. The voyaging knowledge represented here belongs to the
+  Polynesian Voyaging Society and the kūpuna whose oral traditions kept it alive.
+</footer>
+
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════════════
+   STAR DATA — Navigation stars relevant to the north-south voyage
+   ═══════════════════════════════════════════════════════════════════════════ */
+const STARS = [
+  // Northern reference (drops as we sail south)
+  { id: 'hokupaa',  h: 'Hōkūpaʻa',   w: 'Polaris',     ra: 2.53,   dec:  89.27, mag: 1.97, color: '#c8e0ff' },
+  { id: 'dubhe',    h: '',           w: 'Dubhe',       ra: 11.06,  dec:  61.75, mag: 1.79, color: '#a8c8e8' },
+  { id: 'merak',    h: '',           w: 'Merak',       ra: 11.03,  dec:  56.38, mag: 2.37, color: '#a8c8e8' },
+  { id: 'alkaid',   h: '',           w: 'Alkaid',      ra: 13.79,  dec:  49.31, mag: 1.85, color: '#a8c8e8' },
+  { id: 'mizar',    h: '',           w: 'Mizar',       ra: 13.40,  dec:  54.92, mag: 2.23, color: '#a8c8e8' },
+  { id: 'kawelo',   h: 'Kāwelo',     w: 'Vega',        ra: 18.62,  dec:  38.78, mag: 0.03, color: '#d0eeff' },
+  { id: 'ikua',     h: 'ʻIkuā',      w: 'Deneb',       ra: 20.69,  dec:  45.28, mag: 1.25, color: '#e0f0ff' },
+  { id: 'altair',   h: 'Kēkūaʻōnohi', w: 'Altair',     ra: 19.85,  dec:   8.87, mag: 0.76, color: '#e8f4ff' },
+
+  // ZENITH STARS — the emotional core of the simulation
+  { id: 'hokulea',  h: 'Hōkūleʻa',   w: 'Arcturus',    ra: 14.26,  dec:  19.18, mag:-0.05,
+    color: '#f4a050', zenithLat:  19.18, zenithLabel: 'Hawaiʻi' },
+  { id: 'hikianalia', h: 'Mānaiakalani', w: 'Spica',   ra: 13.42,  dec: -11.16, mag: 0.97,
+    color: '#b8d8ff', zenithLat: -11.16, zenithLabel: 'Marquesas' },
+  { id: 'aa',       h: 'Aʻā',        w: 'Sirius',      ra: 6.75,   dec: -16.72, mag:-1.46,
+    color: '#aad4ff', zenithLat: -16.72, zenithLabel: 'Tahiti' },
+
+  // Southern stars (rise as we sail south)
+  { id: 'lehua',    h: 'Lehua',      w: 'Antares',     ra: 16.49,  dec: -26.43, mag: 1.06, color: '#ff7060' },
+  { id: 'shaula',   h: '',           w: 'Shaula',      ra: 17.56,  dec: -37.10, mag: 1.62, color: '#c8d8e8' },
+  { id: 'newe',     h: 'Newe',       w: 'Fomalhaut',   ra: 22.96,  dec: -29.62, mag: 1.16, color: '#d0e8ff' },
+  { id: 'haamea',   h: 'Haʻamea',    w: 'α Cen',       ra: 14.66,  dec: -60.83, mag:-0.27, color: '#ffe8b0' },
+  { id: 'hadar',    h: '',           w: 'β Cen',       ra: 14.06,  dec: -60.37, mag: 0.61, color: '#c8d8e8' },
+
+  // Southern Cross — visible from ~lat 25°N down (low) and dramatic from southern lats
+  { id: 'acrux',    h: 'Ka Mole Honua', w: 'Acrux',    ra: 12.44,  dec: -63.10, mag: 0.76, color: '#c0f0e0' },
+  { id: 'gacrux',   h: 'Kaulia',     w: 'Gacrux',      ra: 12.52,  dec: -57.11, mag: 1.59, color: '#c8e8f0' },
+  { id: 'mimosa',   h: '',           w: 'Mimosa',      ra: 12.80,  dec: -59.69, mag: 1.25, color: '#c8e8e0' },
+  { id: 'delta_cru', h: '',          w: 'δ Cru',       ra: 12.25,  dec: -58.75, mag: 2.79, color: '#a0d0c0' },
+];
+
+// Lines defining the Southern Cross shape (rendered when all four stars visible)
+const CRUX_LINES = [['acrux', 'gacrux'], ['mimosa', 'delta_cru']];
+// Big Dipper handle (just enough to suggest the pointer)
+const DIPPER_LINES = [['dubhe', 'merak'], ['mizar', 'alkaid']];
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   VOYAGE ROUTES
+   ═══════════════════════════════════════════════════════════════════════════ */
+const ROUTES = {
+  marquesas: {
+    label: 'Hawaiʻi → Marquesas',
+    origin: { lat:  19.6, lng: -155.8, name: 'Kawaihae' },
+    dest:   { lat:  -8.9, lng: -140.0, name: 'Nuku Hiva' },
+  },
+  tahiti: {
+    label: 'Hawaiʻi → Tahiti',
+    origin: { lat:  19.6, lng: -155.8, name: 'Kawaihae' },
+    dest:   { lat: -17.6, lng: -149.5, name: 'Papeʻete' },
+  }
+};
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   NARRATION — Triggered at latitude thresholds (sorted north → south)
+   ═══════════════════════════════════════════════════════════════════════════ */
+const NARRATIONS = {
+  marquesas: [
+    { lat:  19.0, key: 'Departing Kawaihae',
+      text: "Hōkūpaʻa hangs 20° above the northern horizon — its altitude is your latitude. Hōkūleʻa rides directly overhead." },
+    { lat:  14.0, key: 'Day Three',
+      text: "The North Star sinks. The trade winds carry the canoe south. Hōkūleʻa drifts from zenith — Hawaiʻi falls behind." },
+    { lat:   9.0, key: 'Day Seven',
+      text: "Hōkūpaʻa is half its old height. Unfamiliar stars climb out of the southern horizon. Hānaiakamālama, the Southern Cross, begins to rise." },
+    { lat:   4.0, key: 'The Doldrums',
+      text: "The wind fails. You enter the windless belt that straddles the equator. Hōkūpaʻa skims the sea." },
+    { lat:   0.5, key: 'The Crossing',
+      text: "Hōkūpaʻa touches the horizon — and is gone. You have entered the southern skies. The old compass no longer works." },
+    { lat:  -4.0, key: 'Southern Waters',
+      text: "Hānaiakamālama climbs higher each night. Its long axis points to true south. You learn to read the sky anew." },
+    { lat:  -8.5, key: 'Landfall',
+      text: "Mānaiakalani — Spica — passes directly overhead. You are at the latitude of the Marquesas, where your ancestors began the voyage to Hawaiʻi a thousand years ago." }
+  ],
+  tahiti: [
+    { lat:  19.0, key: 'Departing Kawaihae',
+      text: "Hōkūpaʻa hangs 20° above the northern horizon — its altitude is your latitude. Hōkūleʻa rides directly overhead." },
+    { lat:  14.0, key: 'Day Three',
+      text: "The North Star sinks. The trade winds carry the canoe south. Hōkūleʻa drifts from zenith." },
+    { lat:   9.0, key: 'Day Eight',
+      text: "Hōkūpaʻa is half its old height. The Southern Cross begins to climb out of the south." },
+    { lat:   4.0, key: 'The Doldrums',
+      text: "The wind fails. You enter the windless belt near the equator. Hōkūpaʻa skims the horizon." },
+    { lat:   0.5, key: 'The Crossing',
+      text: "Hōkūpaʻa touches the sea — and is gone. The old navigation has ended." },
+    { lat:  -5.0, key: 'Southern Waters',
+      text: "Hānaiakamālama climbs higher each night. The Southern Cross becomes the new compass." },
+    { lat: -11.0, key: 'Past the Marquesas',
+      text: "Mānaiakalani passes overhead. You continue south past the Marquesas, the trade winds turning easterly." },
+    { lat: -16.5, key: 'Tahiti',
+      text: "Land. At this latitude in December, Aʻā — Sirius — would pass directly overhead. Tonight your ancestors took its bearing from memory." }
+  ]
+};
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   STATE & CONSTANTS
+   ═══════════════════════════════════════════════════════════════════════════ */
+const state = {
+  lat: 19.6,
+  route: 'marquesas',
+  isPlaying: false,
+  lastTickTime: 0,
+  speed: 1.0,
+  lastNarrationIdx: -1,
+};
+
+const LST = 14.5;                 // Local sidereal time (fixed late-April evening)
+const CX = 250, CY = 250, R = 240; // Sky dome geometry
+const ZENITH_THRESHOLD = 3.0;      // Degrees from zenith to count as zenith star
+const VOYAGE_DURATION = 45;        // Seconds for full voyage at 1× speed
+let narrationTimeout = null;
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SKY PROJECTION — Standard altitude/azimuth math
+   ═══════════════════════════════════════════════════════════════════════════ */
+function raDecToAltAz(ra, dec, lat) {
+  // RA in hours, dec & lat in degrees → alt & az in degrees
+  const raRad = ra * 15 * Math.PI / 180;
+  const decRad = dec * Math.PI / 180;
+  const latRad = lat * Math.PI / 180;
+  const lstRad = LST * 15 * Math.PI / 180;
+  const ha = lstRad - raRad;
+  const sinAlt = Math.sin(decRad) * Math.sin(latRad)
+               + Math.cos(decRad) * Math.cos(latRad) * Math.cos(ha);
+  const alt = Math.asin(Math.max(-1, Math.min(1, sinAlt)));
+  const cosAlt = Math.cos(alt);
+  let az;
+  if (Math.abs(cosAlt) < 1e-9) {
+    az = 0;
+  } else {
+    const cosAzNum = Math.sin(decRad) - Math.sin(alt) * Math.sin(latRad);
+    const cosAzDen = cosAlt * Math.cos(latRad);
+    az = Math.acos(Math.max(-1, Math.min(1, cosAzNum / cosAzDen)));
+    if (Math.sin(ha) > 0) az = 2 * Math.PI - az;
+  }
+  return { alt: alt * 180 / Math.PI, az: az * 180 / Math.PI };
+}
+
+function altAzToScreen(alt, az) {
+  if (alt < -1) return null;
+  const zd = (90 - alt) / 90;
+  const r = R * zd * 0.92;
+  const azRad = az * Math.PI / 180;
+  return { x: CX + r * Math.sin(azRad), y: CY - r * Math.cos(azRad), alt };
+}
+
+function projectStar(star, lat) {
+  const aa = raDecToAltAz(star.ra, star.dec, lat);
+  const pos = altAzToScreen(aa.alt, aa.az);
+  if (!pos) return null;
+  return { x: pos.x, y: pos.y, alt: aa.alt, az: aa.az };
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BACKGROUND STAR FIELD — random RA/Dec, projected each frame
+   ═══════════════════════════════════════════════════════════════════════════ */
+const BG_STARS = [];
+function seedBgStars() {
+  const seed = 12345;
+  let s = seed;
+  const rng = () => { s = (s * 9301 + 49297) % 233280; return s / 233280; };
+  for (let i = 0; i < 160; i++) {
+    BG_STARS.push({
+      ra: rng() * 24,
+      dec: Math.asin(2 * rng() - 1) * 180 / Math.PI,
+      mag: rng() * 2.5 + 2.5,
+      phase: rng() * 3
+    });
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FULL-PAGE BACKGROUND CANVAS — atmospheric stars behind everything
+   ═══════════════════════════════════════════════════════════════════════════ */
+const bgCanvas = document.getElementById('bg-canvas');
+const bgCtx = bgCanvas.getContext('2d');
+let viewportStars = [];
+function sizeBgCanvas() {
+  bgCanvas.width = window.innerWidth;
+  bgCanvas.height = window.innerHeight;
+  viewportStars = [];
+  for (let i = 0; i < 180; i++) {
+    viewportStars.push({
+      x: Math.random() * bgCanvas.width,
+      y: Math.random() * bgCanvas.height,
+      r: Math.random() * 1 + 0.2,
+      a: Math.random() * 0.4 + 0.1,
+      tw: Math.random() * Math.PI * 2,
+      sp: Math.random() * 0.015 + 0.004
+    });
+  }
+}
+function drawViewportStars() {
+  bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+  viewportStars.forEach(s => {
+    s.tw += s.sp;
+    bgCtx.beginPath();
+    bgCtx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    bgCtx.fillStyle = `rgba(220,228,255,${s.a * (0.6 + 0.4 * Math.sin(s.tw))})`;
+    bgCtx.fill();
+  });
+  requestAnimationFrame(drawViewportStars);
+}
+sizeBgCanvas();
+requestAnimationFrame(drawViewportStars);
+window.addEventListener('resize', sizeBgCanvas);
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SVG HELPER
+   ═══════════════════════════════════════════════════════════════════════════ */
+function el(tag, attrs = {}) {
+  const e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SKY RENDER — Called every animation frame during playback
+   ═══════════════════════════════════════════════════════════════════════════ */
+function renderSky() {
+  const svg = document.getElementById('sky-svg');
+  // Build new content as a fragment for one DOM swap (cheaper than incremental edits)
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+  // Defs (gradient + clip)
+  const defs = el('defs');
+  defs.innerHTML = `
+    <radialGradient id="dg" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#0b1535"/>
+      <stop offset="100%" stop-color="#020408"/>
+    </radialGradient>
+    <clipPath id="dc"><circle cx="${CX}" cy="${CY}" r="${R-2}"/></clipPath>
+  `;
+  svg.appendChild(defs);
+  svg.appendChild(el('circle', { cx: CX, cy: CY, r: R, fill: 'url(#dg)' }));
+
+  // Faint altitude rings
+  [0.28, 0.52, 0.76].forEach(f => {
+    svg.appendChild(el('circle', {
+      cx: CX, cy: CY, r: R * f, fill: 'none',
+      stroke: 'rgba(232,184,75,0.045)', 'stroke-width': '1'
+    }));
+  });
+  // N-S, E-W gridlines
+  svg.appendChild(el('line', { x1: 10, y1: CY, x2: 490, y2: CY,
+    stroke: 'rgba(232,184,75,0.05)', 'stroke-width': 1, 'clip-path': 'url(#dc)' }));
+  svg.appendChild(el('line', { x1: CX, y1: 10, x2: CX, y2: 490,
+    stroke: 'rgba(232,184,75,0.05)', 'stroke-width': 1, 'clip-path': 'url(#dc)' }));
+
+  // Field stars (projected from RA/Dec — they shift with latitude)
+  BG_STARS.forEach(bs => {
+    const aa = raDecToAltAz(bs.ra, bs.dec, state.lat);
+    if (aa.alt < 0) return;
+    const pos = altAzToScreen(aa.alt, aa.az);
+    if (!pos) return;
+    if (Math.hypot(pos.x - CX, pos.y - CY) > R - 5) return;
+    const horizonFade = Math.min(1, aa.alt / 8);
+    svg.appendChild(el('circle', {
+      cx: pos.x, cy: pos.y,
+      r: Math.max(0.4, 1.6 - bs.mag * 0.3),
+      fill: `rgba(200,215,255,${0.55 * horizonFade})`,
+      'clip-path': 'url(#dc)'
+    }));
+  });
+
+  // Project named stars
+  const placed = {};
+  STARS.forEach(star => {
+    const p = projectStar(star, state.lat);
+    if (!p) return;
+    if (Math.hypot(p.x - CX, p.y - CY) > R - 5) return;
+    placed[star.id] = { ...p, star };
+  });
+
+  // Constellation lines (drawn before star dots so dots sit on top)
+  if (['acrux', 'gacrux', 'mimosa', 'delta_cru'].every(k => placed[k])) {
+    CRUX_LINES.forEach(([a, b]) => {
+      svg.appendChild(el('line', {
+        x1: placed[a].x, y1: placed[a].y,
+        x2: placed[b].x, y2: placed[b].y,
+        stroke: '#c0f0e0', 'stroke-width': 1.2, opacity: 0.5,
+        'stroke-linecap': 'round', 'clip-path': 'url(#dc)'
+      }));
+    });
+  }
+  DIPPER_LINES.forEach(([a, b]) => {
+    if (!placed[a] || !placed[b]) return;
+    svg.appendChild(el('line', {
+      x1: placed[a].x, y1: placed[a].y,
+      x2: placed[b].x, y2: placed[b].y,
+      stroke: '#a8c8e8', 'stroke-width': 0.8, opacity: 0.32,
+      'stroke-linecap': 'round', 'stroke-dasharray': '2,3', 'clip-path': 'url(#dc)'
+    }));
+  });
+
+  // Identify visible zenith star
+  let zenithStar = null;
+  let zenithBest = ZENITH_THRESHOLD;
+  Object.values(placed).forEach(({ alt, star }) => {
+    if (star.zenithLat === undefined) return;
+    const zd = Math.abs(90 - alt);
+    if (zd < zenithBest) { zenithBest = zd; zenithStar = star; }
+  });
+
+  // Draw stars
+  Object.values(placed).forEach(({ x, y, alt, star }) => {
+    const horizonFade = Math.min(1, alt / 4);
+    const radius = Math.max(2, 4.5 - star.mag * 0.5);
+    const isZenith = (zenithStar && star.id === zenithStar.id);
+
+    // Halo
+    svg.appendChild(el('circle', {
+      cx: x, cy: y, r: radius * 3,
+      fill: star.color, opacity: 0.08 * horizonFade,
+      'clip-path': 'url(#dc)'
+    }));
+    // Star
+    svg.appendChild(el('circle', {
+      cx: x, cy: y, r: radius,
+      fill: star.color,
+      stroke: 'rgba(255,255,255,0.3)', 'stroke-width': 0.5,
+      'clip-path': 'url(#dc)', opacity: horizonFade
+    }));
+    // Label — Hawaiian name if present, else western name
+    if (star.h || star.w) {
+      const lbl = el('text', {
+        x: x + 8, y: y + 4,
+        fill: star.color, opacity: (star.h ? 0.9 : 0.5) * horizonFade,
+        'font-family': 'Cinzel, serif',
+        'font-size': isZenith ? 10 : (star.h ? 8.5 : 7),
+        'clip-path': 'url(#dc)'
+      });
+      lbl.textContent = star.h || star.w;
+      svg.appendChild(lbl);
+    }
+  });
+
+  // Zenith marker — gold ring at center + line connecting to the zenith star
+  const ring = el('circle', {
+    cx: CX, cy: CY, r: 24,
+    fill: 'none', stroke: '#e8b84b', 'stroke-width': 1.5,
+    opacity: zenithStar ? 0.85 : 0
+  });
+  ring.classList.add('zenith-ring');
+  if (zenithStar) ring.classList.add('active');
+  svg.appendChild(ring);
+
+  if (zenithStar && placed[zenithStar.id]) {
+    const zs = placed[zenithStar.id];
+    svg.appendChild(el('line', {
+      x1: CX, y1: CY, x2: zs.x, y2: zs.y,
+      stroke: '#e8b84b', 'stroke-width': 0.7, opacity: 0.4,
+      'stroke-dasharray': '3,3'
+    }));
+  }
+
+  // Center crosshair
+  svg.appendChild(el('circle', { cx: CX, cy: CY, r: 2, fill: 'rgba(232,184,75,0.55)' }));
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MAP RENDER — Pacific inset showing voyage progress
+   ═══════════════════════════════════════════════════════════════════════════ */
+const MAP_VIEW = { lngMin: -170, lngMax: -130, latMax: 30, latMin: -30, w: 240, h: 300 };
+function lngLatToMap(lng, lat) {
+  return {
+    x: ((lng - MAP_VIEW.lngMin) / (MAP_VIEW.lngMax - MAP_VIEW.lngMin)) * MAP_VIEW.w,
+    y: ((MAP_VIEW.latMax - lat) / (MAP_VIEW.latMax - MAP_VIEW.latMin)) * MAP_VIEW.h
+  };
+}
+
+function renderMap() {
+  const svg = document.getElementById('map-svg');
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+  svg.appendChild(el('rect', { x: 0, y: 0, width: MAP_VIEW.w, height: MAP_VIEW.h, fill: '#040814' }));
+
+  // Faint Pacific stars
+  for (let i = 0; i < 60; i++) {
+    svg.appendChild(el('circle', {
+      cx: (i * 67) % MAP_VIEW.w,
+      cy: (i * 113) % MAP_VIEW.h,
+      r: ((i * 17) % 10) * 0.06 + 0.2,
+      fill: `rgba(120,150,200,${0.1 + ((i * 7) % 20) * 0.015})`
+    }));
+  }
+
+  // Equator dashed line
+  const eq = lngLatToMap(MAP_VIEW.lngMin, 0);
+  svg.appendChild(el('line', {
+    x1: 0, y1: eq.y, x2: MAP_VIEW.w, y2: eq.y,
+    stroke: 'rgba(232,184,75,0.3)', 'stroke-width': 0.7, 'stroke-dasharray': '3,3'
+  }));
+  const eqLabel = el('text', {
+    x: 5, y: eq.y - 4,
+    fill: 'rgba(232,184,75,0.6)',
+    'font-family': 'Space Mono, monospace', 'font-size': 7, 'letter-spacing': 1
+  });
+  eqLabel.textContent = 'EQUATOR';
+  svg.appendChild(eqLabel);
+
+  // Hawaiian Islands marker
+  const hi = lngLatToMap(-155.5, 20);
+  svg.appendChild(el('ellipse', { cx: hi.x, cy: hi.y, rx: 7, ry: 3.5,
+    fill: 'rgba(74,181,160,0.35)', stroke: 'rgba(74,181,160,0.8)', 'stroke-width': 0.7 }));
+  const hiLabel = el('text', { x: hi.x + 10, y: hi.y - 2,
+    fill: '#4ab5a0', 'font-family': 'Cinzel, serif', 'font-size': 8.5 });
+  hiLabel.textContent = 'Hawaiʻi';
+  svg.appendChild(hiLabel);
+
+  // Destination
+  const route = ROUTES[state.route];
+  const dest = lngLatToMap(route.dest.lng, route.dest.lat);
+  svg.appendChild(el('ellipse', { cx: dest.x, cy: dest.y, rx: 4.5, ry: 2.5,
+    fill: 'rgba(232,184,75,0.35)', stroke: 'rgba(232,184,75,0.8)', 'stroke-width': 0.7 }));
+  const destLabel = el('text', { x: dest.x + 7, y: dest.y + 3,
+    fill: '#e8b84b', 'font-family': 'Cinzel, serif', 'font-size': 8.5 });
+  destLabel.textContent = route.dest.name;
+  svg.appendChild(destLabel);
+
+  // Route path (dashed)
+  const origin = lngLatToMap(route.origin.lng, route.origin.lat);
+  svg.appendChild(el('line', {
+    x1: origin.x, y1: origin.y, x2: dest.x, y2: dest.y,
+    stroke: 'rgba(232,184,75,0.3)', 'stroke-width': 0.8, 'stroke-dasharray': '4,3'
+  }));
+
+  // Interpolate canoe position by latitude progress
+  const t = (state.lat - route.origin.lat) / (route.dest.lat - route.origin.lat);
+  const tClamped = Math.max(0, Math.min(1, t));
+  const canoeLng = route.origin.lng + tClamped * (route.dest.lng - route.origin.lng);
+  const canoePos = lngLatToMap(canoeLng, state.lat);
+
+  // Trail from origin to canoe
+  if (tClamped > 0.01) {
+    svg.appendChild(el('line', {
+      x1: origin.x, y1: origin.y, x2: canoePos.x, y2: canoePos.y,
+      stroke: '#e8b84b', 'stroke-width': 1.3, opacity: 0.75
+    }));
+  }
+
+  // Canoe icon
+  svg.appendChild(el('circle', { cx: canoePos.x, cy: canoePos.y, r: 7,
+    fill: 'rgba(232,184,75,0.18)' }));
+  svg.appendChild(el('circle', { cx: canoePos.x, cy: canoePos.y, r: 3.5,
+    fill: '#e8b84b', stroke: '#fff8e0', 'stroke-width': 1 }));
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   READOUTS — Latitude + zenith star info
+   ═══════════════════════════════════════════════════════════════════════════ */
+function findZenithStar() {
+  // Returns the zenith-flagged star within threshold, regardless of visibility.
+  // (For Sirius at Tahiti's latitude in spring, the star is below horizon but
+  // the zenith relationship still applies — that's a teaching moment.)
+  let best = null, bestDist = ZENITH_THRESHOLD;
+  for (const s of STARS) {
+    if (s.zenithLat === undefined) continue;
+    const d = Math.abs(s.zenithLat - state.lat);
+    if (d < bestDist) { bestDist = d; best = s; }
+  }
+  return best;
+}
+
+function getLocationContext() {
+  const lat = state.lat;
+  const route = ROUTES[state.route];
+  if (Math.abs(lat - 19.6) < 0.4) return 'Kawaihae';
+  if (Math.abs(lat - route.dest.lat) < 0.4) return route.dest.name;
+  if (Math.abs(lat) < 1.0) return 'The Equator';
+  if (lat > 15) return 'Hawaiian Latitudes';
+  if (lat > 5) return 'Northern Trades';
+  if (lat > -5) return 'Doldrums';
+  return 'Southern Trades';
+}
+
+function updateReadouts() {
+  const lat = state.lat;
+  const latAbs = Math.abs(lat);
+  const hemi = lat >= 0 ? 'N' : 'S';
+  document.getElementById('readout-lat').textContent = `${latAbs.toFixed(1)}°${hemi}`;
+  document.getElementById('readout-lat-sub').textContent = getLocationContext();
+
+  const zs = findZenithStar();
+  if (zs) {
+    document.getElementById('readout-zenith').textContent = zs.h;
+    document.getElementById('readout-zenith-sub').textContent =
+      `${zs.w} · ${zs.zenithLabel}`;
+  } else {
+    document.getElementById('readout-zenith').textContent = '—';
+    document.getElementById('readout-zenith-sub').textContent = 'No star at zenith';
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   NARRATION — Updates when a threshold is crossed
+   ═══════════════════════════════════════════════════════════════════════════ */
+function updateNarration() {
+  const arr = NARRATIONS[state.route];
+  // Find the most recent threshold the latitude has passed (going south)
+  let idx = 0;
+  for (let i = arr.length - 1; i >= 0; i--) {
+    if (state.lat <= arr[i].lat) { idx = i; break; }
+  }
+  if (state.lat > arr[0].lat) idx = 0;
+
+  if (idx === state.lastNarrationIdx) return;
+  state.lastNarrationIdx = idx;
+
+  const narEl = document.getElementById('narration');
+  narEl.classList.add('fading');
+  if (narrationTimeout) clearTimeout(narrationTimeout);
+  narrationTimeout = setTimeout(() => {
+    narEl.innerHTML = `<span class="nar-key">${arr[idx].key}</span>${arr[idx].text}`;
+    narEl.classList.remove('fading');
+  }, 220);
+
+  // Special: equator crossing visual flash
+  if (arr[idx].key === 'The Crossing') {
+    const dome = document.getElementById('dome');
+    dome.classList.add('crossing');
+    setTimeout(() => dome.classList.remove('crossing'), 1400);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MAIN RENDER (called whenever latitude or route changes)
+   ═══════════════════════════════════════════════════════════════════════════ */
+function render() {
+  renderSky();
+  renderMap();
+  updateReadouts();
+  updateNarration();
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ANIMATION LOOP
+   ═══════════════════════════════════════════════════════════════════════════ */
+function startVoyage() {
+  const route = ROUTES[state.route];
+  // If already at destination, reset to origin
+  const atDest = (route.dest.lat < route.origin.lat)
+    ? state.lat <= route.dest.lat + 0.1
+    : state.lat >= route.dest.lat - 0.1;
+  if (atDest) {
+    state.lat = route.origin.lat;
+    state.lastNarrationIdx = -1;
+    document.getElementById('lat-slider').value = state.lat;
+  }
+  state.isPlaying = true;
+  state.lastTickTime = performance.now();
+  document.getElementById('play-btn').textContent = '⏸ Pause';
+  requestAnimationFrame(tick);
+}
+
+function pauseVoyage() {
+  state.isPlaying = false;
+  document.getElementById('play-btn').textContent = '▶ Resume';
+}
+
+function tick(now) {
+  if (!state.isPlaying) return;
+  const dt = Math.min(0.05, (now - state.lastTickTime) / 1000); // cap dt to handle tab-switch
+  state.lastTickTime = now;
+
+  const route = ROUTES[state.route];
+  const totalDelta = route.dest.lat - route.origin.lat; // negative for southward
+  const ratePerSec = totalDelta * state.speed / VOYAGE_DURATION;
+  state.lat += ratePerSec * dt;
+
+  // Check arrival
+  const done = (totalDelta < 0) ? state.lat <= route.dest.lat : state.lat >= route.dest.lat;
+  if (done) {
+    state.lat = route.dest.lat;
+    state.isPlaying = false;
+    document.getElementById('play-btn').textContent = '↺ Replay Voyage';
+  }
+
+  document.getElementById('lat-slider').value = state.lat;
+  render();
+
+  if (state.isPlaying) requestAnimationFrame(tick);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   INPUT HANDLERS
+   ═══════════════════════════════════════════════════════════════════════════ */
+function init() {
+  seedBgStars();
+
+  // Slider
+  document.getElementById('lat-slider').addEventListener('input', e => {
+    if (state.isPlaying) pauseVoyage();
+    state.lat = parseFloat(e.target.value);
+    render();
+  });
+
+  // Play/pause
+  document.getElementById('play-btn').addEventListener('click', () => {
+    if (state.isPlaying) pauseVoyage();
+    else startVoyage();
+  });
+
+  // Route selection
+  document.querySelectorAll('.route-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.route-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.route = btn.dataset.route;
+      state.lat = ROUTES[state.route].origin.lat;
+      state.lastNarrationIdx = -1;
+      document.getElementById('lat-slider').value = state.lat;
+      if (state.isPlaying) pauseVoyage();
+      document.getElementById('play-btn').textContent = '▶ Begin Voyage';
+      render();
+    });
+  });
+
+  // Speed buttons
+  document.querySelectorAll('.speed-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.speed = parseFloat(btn.dataset.speed);
+    });
+  });
+
+  // Keyboard: space = play/pause, ← → = step
+  document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT') return;
+    if (e.key === ' ') {
+      e.preventDefault();
+      if (state.isPlaying) pauseVoyage(); else startVoyage();
+    } else if (e.key === 'ArrowLeft') {
+      state.lat = Math.min(25, state.lat + 1);
+      document.getElementById('lat-slider').value = state.lat;
+      if (state.isPlaying) pauseVoyage();
+      render();
+    } else if (e.key === 'ArrowRight') {
+      state.lat = Math.max(-25, state.lat - 1);
+      document.getElementById('lat-slider').value = state.lat;
+      if (state.isPlaying) pauseVoyage();
+      render();
+    }
+  });
+
+  render();
+}
+init();
+</script>
+</body>
+</html>
