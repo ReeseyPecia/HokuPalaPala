@@ -1,9 +1,10 @@
-const CACHE_NAME = 'hoku-palapala-v4';
+const CACHE_NAME = 'hoku-palapala-v5';
 
 const ASSETS = [
   '/',
   '/index.html',
   '/voyage.html',
+  '/compass.html',
   '/stars.json',
   '/constellation-highlight.js',
   '/manifest.json',

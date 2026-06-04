@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#04060f">
+<title>Hoaka — Sky Compass · Hōkū Palapala</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --black: #04060f;
+  --ocean: #070d1a;
+  --gold: #e8b84b;
+  --gold-dim: #8a6e2c;
+  --teal: #4ab5a0;
+  --pale: #e8e0d0;
+  --dim: #6a7080;
+  --panel: rgba(8,16,38,0.94);
+  --border: rgba(232,184,75,0.18);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: var(--black);
+  color: var(--pale);
+  font-family: 'EB Garamond', serif;
+  min-height: 100vh;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Atmospheric backdrop */
+#bg-canvas {
+  position: fixed; top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0; pointer-events: none;
+}
+.wrap { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 20px 20px 40px; }
+
+/* Header */
+header {
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  padding: 16px 0 20px; margin-bottom: 28px;
+}
+.back-link {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--gold); text-decoration: none;
+  padding: 9px 16px; border: 1px solid var(--border); border-radius: 3px;
+  transition: background 0.2s; white-space: nowrap;
+}
+.back-link:hover { background: rgba(232,184,75,0.1); }
+.title-block { text-align: center; flex: 1; }
+.title-block h1 {
+  font-family: 'Cinzel', serif; font-weight: 700;
+  font-size: clamp(1.2rem, 3.2vw, 1.9rem);
+  color: var(--gold); letter-spacing: 0.1em;
+  text-shadow: 0 0 30px rgba(232,184,75,0.3);
+}
+.title-block .subtitle {
+  font-style: italic; color: var(--dim);
+  font-size: clamp(0.78rem, 1.6vw, 0.95rem);
+  margin-top: 6px;
+}
+.header-spacer { width: 140px; }
+@media (max-width: 700px) {
+  header { flex-direction: column; gap: 14px; padding-bottom: 16px; }
+  .header-spacer { display: none; }
+}
+
+/* === PERMISSION GATE === */
+.gate {
+  max-width: 540px;
+  margin: 60px auto;
+  padding: 36px 32px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  text-align: center;
+  backdrop-filter: blur(10px);
+}
+.gate h2 {
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  color: var(--gold);
+  font-size: 1.2rem;
+  letter-spacing: 0.08em;
+  margin-bottom: 18px;
+}
+.gate p {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--pale);
+  margin-bottom: 22px;
+  font-style: italic;
+}
+.gate p.fine {
+  font-style: normal;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--dim);
+  letter-spacing: 0.04em;
+  line-height: 1.6;
+  margin-top: 18px;
+  margin-bottom: 0;
+}
+.enable-btn {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 16px 36px;
+  background: rgba(232,184,75,0.12);
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.enable-btn:hover { background: rgba(232,184,75,0.22); }
+
+/* === ACTIVE COMPASS VIEW === */
+.compass-view { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media (max-width: 800px) { .compass-view { grid-template-columns: 1fr; } }
+
+/* Compass column */
+.compass-col { display: flex; flex-direction: column; gap: 16px; }
+
+/* Compass rose */
+.compass-wrap {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 20px;
+  text-align: center;
+  backdrop-filter: blur(8px);
+}
+.compass-svg {
+  width: 100%;
+  max-width: 280px;
+  height: auto;
+  margin: 0 auto;
+  display: block;
+}
+.compass-readout {
+  margin-top: 14px;
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.readout-cell {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 3px;
+  padding: 10px;
+}
+.readout-cell .label {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.1em;
+  color: var(--dim);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.readout-cell .value {
+  font-family: 'Cinzel', serif;
+  font-size: 1.4rem;
+  color: var(--gold);
+  line-height: 1;
+}
+.readout-cell .sub {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--pale);
+  margin-top: 4px;
+  letter-spacing: 0.04em;
+}
+
+/* Status bar */
+.status-bar {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 12px 16px;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
+  color: var(--dim);
+  text-align: center;
+  backdrop-filter: blur(8px);
+}
+.status-bar .accent { color: var(--gold); }
+.status-bar .live::before {
+  content: '●';
+  color: var(--teal);
+  margin-right: 6px;
+  animation: pulse 2.5s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* Stars column */
+.stars-col { display: flex; flex-direction: column; gap: 16px; }
+
+/* Pointed-at panel */
+.pointed-at {
+  background: var(--panel);
+  border: 1px solid var(--gold);
+  border-radius: 4px;
+  padding: 22px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 0 30px rgba(232,184,75,0.12);
+  transition: opacity 0.4s ease;
+}
+.pointed-at.faded { opacity: 0.6; border-color: var(--border); box-shadow: none; }
+.pointed-at .pt-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.58rem;
+  color: var(--teal);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.pointed-at.faded .pt-label { color: var(--dim); }
+.pointed-at .pt-name {
+  font-family: 'Cinzel', serif;
+  font-size: 1.7rem;
+  color: var(--gold);
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+}
+.pointed-at .pt-western {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--pale);
+  letter-spacing: 0.06em;
+  margin-top: 4px;
+  margin-bottom: 12px;
+}
+.pointed-at .pt-distance {
+  font-style: italic;
+  color: var(--dim);
+  font-size: 0.85rem;
+  margin-bottom: 12px;
+}
+.pointed-at .pt-distance .deg { color: var(--gold); font-style: normal; font-family: 'Space Mono', monospace; }
+.pointed-at .pt-desc {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  font-style: italic;
+  border-left: 2px solid var(--gold);
+  padding-left: 14px;
+}
+.pointed-at.faded .pt-desc { border-color: var(--border); }
+
+/* Other-stars panel */
+.others {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 18px;
+  backdrop-filter: blur(8px);
+}
+.others .o-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.58rem;
+  color: var(--teal);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.star-row {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-size: 0.92rem;
+}
+.star-row:last-child { border-bottom: none; }
+.star-row .name { color: var(--pale); }
+.star-row .name .w {
+  color: var(--dim);
+  font-family: 'Space Mono', monospace;
+  font-size: 0.65rem;
+  margin-left: 8px;
+  letter-spacing: 0.04em;
+}
+.star-row .dist {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--gold);
+  letter-spacing: 0.04em;
+}
+
+/* Tilt indicator */
+.tilt-help {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.55rem;
+  color: var(--dim);
+  letter-spacing: 0.06em;
+  text-align: center;
+  margin-top: 10px;
+  font-style: italic;
+}
+
+/* Simulator (desktop fallback) */
+.simulator {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 18px;
+  backdrop-filter: blur(8px);
+}
+.simulator .s-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.58rem;
+  color: var(--teal);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.sim-row { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+.sim-row label {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  color: var(--pale);
+  min-width: 64px;
+  text-transform: uppercase;
+}
+.sim-row input[type="range"] {
+  flex: 1;
+  -webkit-appearance: none; appearance: none;
+  height: 3px;
+  background: linear-gradient(to right, rgba(157,200,240,0.4) 0%, rgba(232,184,75,0.6) 100%);
+  border-radius: 2px;
+  outline: none;
+}
+.sim-row input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px; height: 16px;
+  background: var(--gold);
+  border: 2px solid #0a1024;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(232,184,75,0.5);
+}
+.sim-row input[type="range"]::-moz-range-thumb {
+  width: 16px; height: 16px;
+  background: var(--gold);
+  border: 2px solid #0a1024;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(232,184,75,0.5);
+}
+.sim-row .sim-val {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--gold);
+  min-width: 50px;
+  text-align: right;
+}
+.sim-note {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.55rem;
+  color: var(--dim);
+  letter-spacing: 0.04em;
+  margin-top: 6px;
+  font-style: italic;
+}
+
+/* Recalibrate button */
+.recalibrate {
+  display: inline-block;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--dim);
+  border-radius: 3px;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: all 0.2s;
+}
+.recalibrate:hover { color: var(--gold); border-color: var(--gold); }
+
+footer {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.58rem;
+  color: var(--dim);
+  letter-spacing: 0.06em;
+  line-height: 1.7;
+}
+footer a { color: var(--gold); text-decoration: none; }
+</style>
+</head>
+<body>
+<canvas id="bg-canvas"></canvas>
+<div class="wrap">
+
+<header>
+  <a class="back-link" href="index.html">← Hōkū Palapala</a>
+  <div class="title-block">
+    <h1>Hoaka — Sky Compass</h1>
+    <div class="subtitle">Lift your phone toward the stars</div>
+  </div>
+  <div class="header-spacer"></div>
+</header>
+
+<!-- ═══ PERMISSION GATE (shown first on iOS) ═══ -->
+<div class="gate" id="gate">
+  <h2>Tap to Enable Sky Compass</h2>
+  <p>This page reads your phone's compass and tilt sensors to figure out which star you're pointing at — like a planetarium app in your pocket. No camera, no internet beyond this page.</p>
+  <button class="enable-btn" id="enable-btn">Enable Compass</button>
+  <p class="fine">Your phone will ask permission to share orientation and location. Best used at night, outdoors. Keep moving away from large metal objects (cars, lampposts) for best compass accuracy.</p>
+</div>
+
+<!-- ═══ ACTIVE VIEW ═══ -->
+<div class="compass-view" id="compass-view" hidden>
+
+  <div class="compass-col">
+    <div class="compass-wrap">
+      <svg class="compass-svg" id="compass-svg" viewBox="0 0 260 260"></svg>
+      <div class="compass-readout">
+        <div class="readout-cell">
+          <div class="label">Azimuth</div>
+          <div class="value" id="az-val">—</div>
+          <div class="sub" id="az-sub">—</div>
+        </div>
+        <div class="readout-cell">
+          <div class="label">Altitude</div>
+          <div class="value" id="alt-val">—</div>
+          <div class="sub" id="alt-sub">—</div>
+        </div>
+      </div>
+      <div class="tilt-help" id="tilt-help">Lift phone toward the sky to see what you're pointing at.</div>
+      <button class="recalibrate" id="recal-btn" hidden>Recalibrate Compass</button>
+    </div>
+
+    <div class="simulator" id="simulator" hidden>
+      <div class="s-label">Simulator Mode (Desktop)</div>
+      <div class="sim-row">
+        <label>Azimuth</label>
+        <input type="range" id="sim-az" min="0" max="359" value="180" step="1">
+        <div class="sim-val" id="sim-az-v">180°</div>
+      </div>
+      <div class="sim-row">
+        <label>Altitude</label>
+        <input type="range" id="sim-alt" min="-10" max="90" value="45" step="1">
+        <div class="sim-val" id="sim-alt-v">45°</div>
+      </div>
+      <div class="sim-note">No phone sensors detected — drag the sliders to test which star you'd be pointing at.</div>
+    </div>
+
+    <div class="status-bar" id="status-bar">
+      <span class="live" id="live-dot"></span>
+      <span id="loc-text">Locating…</span> · <span id="time-text">—</span>
+    </div>
+  </div>
+
+  <div class="stars-col">
+    <div class="pointed-at" id="pointed-at">
+      <div class="pt-label">Pointed At</div>
+      <div class="pt-name" id="pt-name">—</div>
+      <div class="pt-western" id="pt-western">—</div>
+      <div class="pt-distance" id="pt-distance">—</div>
+      <div class="pt-desc" id="pt-desc">Lift your phone to begin.</div>
+    </div>
+
+    <div class="others">
+      <div class="o-label">Other Visible Stars</div>
+      <div id="other-stars">
+        <div class="star-row" style="color:var(--dim); font-style:italic;">Computing visible stars…</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  Hoaka — Phone-pointing sky compass · Built by Reese Reilly · Hōkū Palapala<br>
+  Star data from Nā Inoa Hōkū (Johnson & Mahelona) and the Hōkū Palapala star catalog.<br>
+  Sensor accuracy depends on phone calibration — wave the phone in a figure-8 if heading feels off.
+</footer>
+
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════════════
+   HOAKA — Phone-Pointing Sky Compass (Level 1 Prototype)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+// Magnetic declination for Hawaiʻi (~10.5°E in 2026). Used only when the
+// phone reports magnetic heading rather than true heading.
+const HI_MAGDEC = 10.5;
+
+// Default observer location if GPS unavailable (Waimanalo, Oʻahu)
+const DEFAULT_LOC = { lat: 21.34, lng: -157.72, label: 'Waimanalo, Oʻahu' };
+
+// Distance threshold for "you are pointing at this star" (degrees)
+const POINTED_AT_THRESHOLD = 8.0;
+
+/* ── STAR DATA ─────────────────────────────────────────────────
+   ra: right ascension in hours · dec: declination in degrees
+   Hawaiian names follow Nā Inoa Hōkū conventions.
+*/
+const STARS = [
+  { id:'hokupaa',  h:'Hōkūpaʻa',         w:'Polaris',     ra: 2.530, dec: 89.27, mag: 1.97,
+    desc:'"The fixed star." Marks true north. Its altitude above the horizon equals your latitude — at 20°N, it sits 20° above the northern horizon. The pivot point Polynesian navigators used to hold a northbound course.' },
+  { id:'hokulea',  h:'Hōkūleʻa',         w:'Arcturus',    ra: 14.261, dec: 19.18, mag: -0.05,
+    desc:'"Star of joy" — the zenith star of Hawaiʻi. Passes directly overhead from these latitudes. The voyaging canoe Hōkūleʻa is named for it. Spring and early summer evenings.' },
+  { id:'hikianalia', h:'Hikianalia',     w:'Spica',       ra: 13.420, dec: -11.16, mag: 0.97,
+    desc:'Also called Mānaiakalani — "the chief\'s fishline." The zenith star of the Marquesas. When this star passes overhead, you are at the latitude of your ancestors\' homeland.' },
+  { id:'kawelo',   h:'Kāwelo',           w:'Vega',        ra: 18.616, dec: 38.78, mag: 0.03,
+    desc:'Brilliant blue-white star in the Summer Triangle. High in the northeast on summer evenings. One of the brightest northern stars.' },
+  { id:'ikua',     h:'ʻIkuā',            w:'Deneb',       ra: 20.691, dec: 45.28, mag: 1.25,
+    desc:'Tail of the Northern Cross (Cygnus). Marks the head of the Summer Triangle. Among the most distant stars visible to the naked eye.' },
+  { id:'humu',     h:'Humu',             w:'Altair',      ra: 19.846, dec: 8.87, mag: 0.76,
+    desc:'"The Triggerfish." Third star of the Summer Triangle. Eastern sky on summer evenings.' },
+  { id:'lehua',    h:'Lehua',            w:'Antares',     ra: 16.490, dec: -26.43, mag: 1.06,
+    desc:'Red heart of Maui\'s Great Fishhook (Scorpius). Visible high in the southern sky on summer evenings. Its reddish color is famous in voyaging tradition.' },
+  { id:'newe',     h:'Newe',             w:'Fomalhaut',   ra: 22.961, dec: -29.62, mag: 1.16,
+    desc:'"The Solitary One." Low in the southern sky in autumn evenings. The brightest star in a region of otherwise faint constellations.' },
+  { id:'acrux',    h:'Ka Mole Honua',    w:'Acrux',       ra: 12.443, dec: -63.10, mag: 0.76,
+    desc:'"The foundation of the earth." Bottom star of Hānaiakamālama (the Southern Cross). Skims the southern horizon from Hawaiʻi in spring evenings.' },
+  { id:'gacrux',   h:'Kaulia',           w:'Gacrux',      ra: 12.521, dec: -57.11, mag: 1.59,
+    desc:'Top of the Southern Cross. The line through Kaulia and Ka Mole Honua points toward the south celestial pole.' },
+  { id:'haamea',   h:'Haʻamea',          w:'α Centauri',  ra: 14.660, dec: -60.83, mag: -0.27,
+    desc:'Closest star system to our Sun (4.4 light years). One of two Pointers leading to the Southern Cross. Low in the south from Hawaiʻi.' },
+  { id:'aa',       h:'Aʻā',              w:'Sirius',      ra: 6.752, dec: -16.72, mag: -1.46,
+    desc:'Brightest star in the night sky. Zenith star of Tahiti. Winter evenings in Hawaiʻi.' },
+  { id:'miloii',   h:'Miloliʻi',         w:'Canopus',     ra: 6.399, dec: -52.70, mag: -0.74,
+    desc:'Second-brightest star in the sky. Low in the southern sky from Hawaiʻi during winter. Used as a course indicator in southern voyages.' },
+  { id:'makalii',  h:'Makaliʻi',         w:'Pleiades',    ra: 3.792, dec: 24.11, mag: 1.60,
+    desc:'"Little eyes." The Pleiades star cluster. When Makaliʻi rises at sunset (around November 18th), Makahiki — the Hawaiian new year — begins.' },
+  { id:'puanakau', h:'Puanakau',         w:'Rigel',       ra: 5.242, dec: -8.20, mag: 0.18,
+    desc:'"Blossom of the tree." Bright blue-white star at the foot of Orion. Visible most of the night in winter.' },
+  { id:'kaheihei', h:'Ka Hei-Hei',       w:'Betelgeuse',  ra: 5.919, dec: 7.41, mag: 0.42,
+    desc:'Red supergiant at the shoulder of Orion. One of the largest stars visible to the naked eye. Winter sky.' },
+  { id:'hokulei',  h:'Hōkūlei',          w:'Capella',     ra: 5.278, dec: 45.99, mag: 0.08,
+    desc:'"Star wreath." Brilliant yellow star high in the northern sky on winter evenings. The sixth-brightest star in the sky.' },
+  { id:'pirepire', h:'Pirepire',         w:'Aldebaran',   ra: 4.599, dec: 16.51, mag: 0.86,
+    desc:'Red eye of Taurus the Bull. Marks the head of the V-shaped Hyades cluster. Winter sky.' },
+  { id:'puana',    h:'Puana',            w:'Procyon',     ra: 7.655, dec: 5.22, mag: 0.34,
+    desc:'"Blossom." Bright star in Canis Minor, forming the Winter Triangle with Sirius and Betelgeuse.' },
+  { id:'nanamua',  h:'Nānā-mua',         w:'Castor',      ra: 7.577, dec: 31.89, mag: 1.58,
+    desc:'"Looking ahead." One of the twin stars of Gemini.' },
+  { id:'nanahope', h:'Nānā-hope',        w:'Pollux',      ra: 7.755, dec: 28.03, mag: 1.14,
+    desc:'"Looking behind." The other twin of Gemini, slightly brighter than Castor.' },
+];
+
+/* ── HAWAIIAN COMPASS DIRECTIONS ────────────────────────────── */
+function compassHawaiian(deg) {
+  // 32-house Polynesian star compass is overkill for Level 1 — use the 8 main directions
+  const labels = [
+    { d:   0, name: 'ʻĀkau · North' },
+    { d:  45, name: 'Hikina Akau' },
+    { d:  90, name: 'Hikina · East' },
+    { d: 135, name: 'Hikina Hema' },
+    { d: 180, name: 'Hema · South' },
+    { d: 225, name: 'Komohana Hema' },
+    { d: 270, name: 'Komohana · West' },
+    { d: 315, name: 'Komohana Akau' },
+    { d: 360, name: 'ʻĀkau · North' }
+  ];
+  let best = labels[0], bestD = 999;
+  labels.forEach(l => {
+    const d = Math.min(Math.abs(deg - l.d), Math.abs(deg - l.d + 360), Math.abs(deg - l.d - 360));
+    if (d < bestD) { bestD = d; best = l; }
+  });
+  return best.name;
+}
+
+function altitudeLabel(alt) {
+  if (alt < -2) return 'below horizon';
+  if (alt < 8)  return 'near horizon';
+  if (alt < 25) return 'low in sky';
+  if (alt < 50) return 'mid sky';
+  if (alt < 75) return 'high overhead';
+  return 'near zenith';
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ASTRONOMY MATH
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+function julianDate(d) {
+  return d.getTime() / 86400000 + 2440587.5;
+}
+
+// Greenwich Mean Sidereal Time (hours)
+function gmst(date) {
+  const jd = julianDate(date);
+  const T = (jd - 2451545.0) / 36525.0;
+  let gmstH = 6.697374558 + 0.06570982441908 * (jd - 2451545.0)
+            + 1.00273790935 * (date.getUTCHours() + date.getUTCMinutes()/60 + date.getUTCSeconds()/3600)
+            + 0.000026 * T * T;
+  gmstH = ((gmstH % 24) + 24) % 24;
+  return gmstH;
+}
+
+// Local sidereal time (hours)
+function lst(date, longitudeDeg) {
+  return (gmst(date) + longitudeDeg / 15 + 24) % 24;
+}
+
+// Convert RA/Dec → Alt/Az (all in degrees, RA in hours)
+function raDecToAltAz(raHr, decDeg, latDeg, lstHr) {
+  const haRad = ((lstHr - raHr) * 15) * Math.PI / 180;
+  const dec = decDeg * Math.PI / 180;
+  const lat = latDeg * Math.PI / 180;
+  const sinAlt = Math.sin(dec) * Math.sin(lat) + Math.cos(dec) * Math.cos(lat) * Math.cos(haRad);
+  const alt = Math.asin(Math.max(-1, Math.min(1, sinAlt)));
+  const cosAz = (Math.sin(dec) - Math.sin(alt) * Math.sin(lat)) / (Math.cos(alt) * Math.cos(lat));
+  let az = Math.acos(Math.max(-1, Math.min(1, cosAz)));
+  if (Math.sin(haRad) > 0) az = 2 * Math.PI - az;
+  return { alt: alt * 180 / Math.PI, az: az * 180 / Math.PI };
+}
+
+// Angular distance between two (alt, az) points, in degrees
+function angularDist(alt1, az1, alt2, az2) {
+  const a1 = alt1 * Math.PI / 180, a2 = alt2 * Math.PI / 180;
+  const az1r = az1 * Math.PI / 180, az2r = az2 * Math.PI / 180;
+  const c = Math.sin(a1) * Math.sin(a2) + Math.cos(a1) * Math.cos(a2) * Math.cos(az1r - az2r);
+  return Math.acos(Math.max(-1, Math.min(1, c))) * 180 / Math.PI;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   STATE
+   ═══════════════════════════════════════════════════════════════════════════ */
+const state = {
+  // Observer
+  lat: DEFAULT_LOC.lat,
+  lng: DEFAULT_LOC.lng,
+  locLabel: DEFAULT_LOC.label,
+  locFromGPS: false,
+  // Pointing
+  azimuth: 180,       // degrees clockwise from north
+  altitude: 45,       // degrees above horizon
+  heading: 180,       // smoothed compass heading
+  tilt: 45,           // smoothed tilt
+  // Sensors
+  hasSensors: false,
+  simMode: false,
+  // Smoothing
+  headingPrev: null,
+  tiltPrev: null,
+};
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ATMOSPHERIC BACKGROUND
+   ═══════════════════════════════════════════════════════════════════════════ */
+const bgCanvas = document.getElementById('bg-canvas');
+const bgCtx = bgCanvas.getContext('2d');
+let bgStars = [];
+function sizeBg() {
+  bgCanvas.width = innerWidth;
+  bgCanvas.height = innerHeight;
+  bgStars = [];
+  for (let i = 0; i < 160; i++) {
+    bgStars.push({
+      x: Math.random() * bgCanvas.width,
+      y: Math.random() * bgCanvas.height,
+      r: Math.random() * 1.2 + 0.2,
+      a: Math.random() * 0.4 + 0.1,
+      tw: Math.random() * Math.PI * 2,
+      sp: Math.random() * 0.015 + 0.004
+    });
+  }
+}
+function drawBg() {
+  bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+  bgStars.forEach(s => {
+    s.tw += s.sp;
+    bgCtx.beginPath();
+    bgCtx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    bgCtx.fillStyle = `rgba(220,228,255,${s.a * (0.6 + 0.4 * Math.sin(s.tw))})`;
+    bgCtx.fill();
+  });
+  requestAnimationFrame(drawBg);
+}
+sizeBg();
+requestAnimationFrame(drawBg);
+addEventListener('resize', sizeBg);
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SENSOR HANDLING
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+async function requestSensors() {
+  let permGranted = true;
+
+  // iOS 13+: orientation requires explicit permission
+  if (typeof DeviceOrientationEvent !== 'undefined'
+   && typeof DeviceOrientationEvent.requestPermission === 'function') {
+    try {
+      const resp = await DeviceOrientationEvent.requestPermission();
+      if (resp !== 'granted') permGranted = false;
+    } catch (err) {
+      console.warn('Orientation permission error:', err);
+      permGranted = false;
+    }
+  }
+
+  // Geolocation (optional but improves accuracy)
+  if ('geolocation' in navigator) {
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        state.lat = pos.coords.latitude;
+        state.lng = pos.coords.longitude;
+        state.locFromGPS = true;
+        state.locLabel = `${Math.abs(state.lat).toFixed(2)}°${state.lat>=0?'N':'S'}, ${Math.abs(state.lng).toFixed(2)}°${state.lng<0?'W':'E'}`;
+      },
+      err => console.log('Location unavailable, using default'),
+      { enableHighAccuracy: true, timeout: 5000, maximumAge: 60000 }
+    );
+  }
+
+  // Attach orientation listener — prefer absolute frame if available
+  let attached = false;
+  if (permGranted) {
+    const handler = handleOrientation;
+    if ('ondeviceorientationabsolute' in window) {
+      window.addEventListener('deviceorientationabsolute', handler, true);
+      attached = true;
+    }
+    window.addEventListener('deviceorientation', handler, true);
+    attached = true;
+  }
+
+  // Show active view either way; fall back to simulator if no sensor data arrives
+  document.getElementById('gate').hidden = true;
+  document.getElementById('compass-view').hidden = false;
+
+  // If after 2 seconds we haven't received any sensor data, show simulator
+  setTimeout(() => {
+    if (!state.hasSensors) {
+      state.simMode = true;
+      document.getElementById('simulator').hidden = false;
+      document.getElementById('tilt-help').textContent = 'No phone sensors detected — using simulator below.';
+      document.getElementById('live-dot').style.display = 'none';
+    } else {
+      document.getElementById('recal-btn').hidden = false;
+    }
+  }, 2000);
+
+  // Begin render loop
+  drawCompass();
+  setInterval(updateAll, 200);
+}
+
+function handleOrientation(event) {
+  // Skip if event has no useful data
+  if (event.alpha === null && event.beta === null) return;
+
+  state.hasSensors = true;
+
+  let heading;
+  // iOS: true heading is provided directly (corrected for magnetic declination)
+  if (typeof event.webkitCompassHeading === 'number') {
+    heading = event.webkitCompassHeading;
+  } else if (event.absolute === true || 'ondeviceorientationabsolute' in window) {
+    // Android absolute: alpha is degrees CCW from north → convert to CW compass heading
+    heading = (360 - event.alpha + HI_MAGDEC) % 360;
+  } else {
+    // Relative orientation only — best effort, may drift
+    heading = (360 - event.alpha + HI_MAGDEC) % 360;
+  }
+
+  // Tilt: when phone is held vertical-portrait (beta ≈ 90°), camera points at horizon.
+  // As user tilts top of phone back (beta → 180°), camera tilts up toward zenith.
+  // Altitude ≈ beta - 90, clamped.
+  const beta = event.beta || 0;
+  let tilt = beta - 90;
+  if (tilt > 90) tilt = 180 - tilt;          // handle upside-down portrait
+  if (tilt < -10) tilt = -10;
+  if (tilt > 90) tilt = 90;
+
+  // Exponential smoothing to reduce sensor jitter
+  const smooth = (prev, curr, factor = 0.18) => {
+    if (prev === null) return curr;
+    // Handle compass wraparound (e.g. 359° → 1°)
+    let delta = curr - prev;
+    if (delta > 180) delta -= 360;
+    if (delta < -180) delta += 360;
+    return ((prev + delta * factor) + 360) % 360;
+  };
+
+  state.heading = state.headingPrev === null ? heading : smooth(state.headingPrev, heading);
+  state.tilt = state.tiltPrev === null ? tilt : (state.tiltPrev * 0.82 + tilt * 0.18);
+  state.headingPrev = state.heading;
+  state.tiltPrev = state.tilt;
+
+  state.azimuth = state.heading;
+  state.altitude = state.tilt;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   COMPASS ROSE (SVG)
+   ═══════════════════════════════════════════════════════════════════════════ */
+function drawCompass() {
+  const svg = document.getElementById('compass-svg');
+  const CX = 130, CY = 130, R = 110;
+  svg.innerHTML = '';
+  const NS = 'http://www.w3.org/2000/svg';
+  const el = (tag, attrs = {}) => {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  };
+
+  // Outer ring
+  svg.appendChild(el('circle', {
+    cx: CX, cy: CY, r: R,
+    fill: 'rgba(8,16,38,0.6)',
+    stroke: 'rgba(232,184,75,0.25)', 'stroke-width': 1
+  }));
+  // Inner ring
+  svg.appendChild(el('circle', {
+    cx: CX, cy: CY, r: R * 0.65,
+    fill: 'none',
+    stroke: 'rgba(232,184,75,0.1)', 'stroke-width': 1
+  }));
+
+  // Tick marks every 10°
+  for (let a = 0; a < 360; a += 10) {
+    const rad = (a - 90) * Math.PI / 180;
+    const r1 = R, r2 = a % 90 === 0 ? R - 16 : (a % 30 === 0 ? R - 10 : R - 5);
+    const x1 = CX + r1 * Math.cos(rad), y1 = CY + r1 * Math.sin(rad);
+    const x2 = CX + r2 * Math.cos(rad), y2 = CY + r2 * Math.sin(rad);
+    svg.appendChild(el('line', {
+      x1, y1, x2, y2,
+      stroke: a % 90 === 0 ? 'rgba(232,184,75,0.55)' : 'rgba(232,184,75,0.18)',
+      'stroke-width': a % 90 === 0 ? 1.5 : 1
+    }));
+  }
+
+  // Cardinal labels
+  const cardinals = [
+    { a: 0,   en: 'N', hw: 'ʻĀkau' },
+    { a: 90,  en: 'E', hw: 'Hikina' },
+    { a: 180, en: 'S', hw: 'Hema' },
+    { a: 270, en: 'W', hw: 'Komohana' }
+  ];
+  cardinals.forEach(c => {
+    const rad = (c.a - 90) * Math.PI / 180;
+    const lx = CX + (R - 28) * Math.cos(rad);
+    const ly = CY + (R - 28) * Math.sin(rad);
+    const enT = el('text', {
+      x: lx, y: ly + 5, 'text-anchor': 'middle',
+      fill: c.en === 'N' ? '#e8b84b' : 'rgba(232,184,75,0.7)',
+      'font-family': 'Cinzel, serif', 'font-size': 14,
+      'font-weight': c.en === 'N' ? 700 : 400
+    });
+    enT.textContent = c.en;
+    svg.appendChild(enT);
+    const hwT = el('text', {
+      x: lx, y: ly + 18, 'text-anchor': 'middle',
+      fill: 'rgba(232,224,208,0.55)',
+      'font-family': 'Space Mono, monospace', 'font-size': 7,
+      'letter-spacing': 1
+    });
+    hwT.textContent = c.hw;
+    svg.appendChild(hwT);
+  });
+
+  // Direction arrow — gold needle pointing to current azimuth
+  const az = state.azimuth;
+  const arrowRad = (az - 90) * Math.PI / 180;
+  const tipX = CX + (R - 6) * Math.cos(arrowRad);
+  const tipY = CY + (R - 6) * Math.sin(arrowRad);
+  const baseRad1 = arrowRad + Math.PI - 0.18;
+  const baseRad2 = arrowRad + Math.PI + 0.18;
+  const baseX1 = CX + 14 * Math.cos(baseRad1);
+  const baseY1 = CY + 14 * Math.sin(baseRad1);
+  const baseX2 = CX + 14 * Math.cos(baseRad2);
+  const baseY2 = CY + 14 * Math.sin(baseRad2);
+
+  const arrow = el('polygon', {
+    points: `${tipX},${tipY} ${baseX1},${baseY1} ${CX},${CY} ${baseX2},${baseY2}`,
+    fill: '#e8b84b', opacity: 0.92,
+    filter: 'drop-shadow(0 0 6px rgba(232,184,75,0.5))'
+  });
+  svg.appendChild(arrow);
+
+  // Center hub
+  svg.appendChild(el('circle', {
+    cx: CX, cy: CY, r: 5,
+    fill: 'rgba(232,184,75,0.9)',
+    stroke: '#0a1024', 'stroke-width': 1
+  }));
+
+  // Altitude arc — small bar at bottom showing how high the phone is pointed
+  const altPct = Math.max(0, Math.min(1, state.altitude / 90));
+  const arcRad = R + 12;
+  svg.appendChild(el('text', {
+    x: CX, y: CY + arcRad + 12, 'text-anchor': 'middle',
+    fill: 'rgba(232,224,208,0.5)',
+    'font-family': 'Space Mono, monospace', 'font-size': 7,
+    'letter-spacing': 1.5
+  })).textContent = `ALT ${state.altitude.toFixed(0)}°`;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   STAR LIST + POINTED-AT
+   ═══════════════════════════════════════════════════════════════════════════ */
+function updateAll() {
+  // Time + LST
+  const now = new Date();
+  const lstHr = lst(now, state.lng);
+  const timeText = now.toLocaleTimeString('en-US', {
+    hour: 'numeric', minute: '2-digit',
+    timeZone: 'Pacific/Honolulu'
+  });
+  document.getElementById('time-text').textContent = timeText + ' HST';
+  document.getElementById('loc-text').textContent =
+    state.locFromGPS ? state.locLabel : state.locLabel + ' (default)';
+
+  // Project all stars to current sky
+  const visible = [];
+  STARS.forEach(s => {
+    const aa = raDecToAltAz(s.ra, s.dec, state.lat, lstHr);
+    if (aa.alt > 0) {
+      const d = angularDist(state.altitude, state.azimuth, aa.alt, aa.az);
+      visible.push({ ...s, alt: aa.alt, az: aa.az, dist: d });
+    }
+  });
+  visible.sort((a, b) => a.dist - b.dist);
+
+  // Pointed-at panel
+  const pt = document.getElementById('pointed-at');
+  if (visible.length > 0) {
+    const closest = visible[0];
+    const within = closest.dist <= POINTED_AT_THRESHOLD;
+    pt.classList.toggle('faded', !within);
+    document.getElementById('pt-name').textContent = closest.h;
+    document.getElementById('pt-western').textContent = `${closest.w} · ${altitudeLabel(closest.alt)}`;
+    document.getElementById('pt-distance').innerHTML = within
+      ? `<span class="deg">${closest.dist.toFixed(1)}°</span> from where you're pointing — on target.`
+      : `Closest named star · <span class="deg">${closest.dist.toFixed(1)}°</span> away. Sweep your phone toward it.`;
+    document.getElementById('pt-desc').textContent = closest.desc;
+  } else {
+    pt.classList.add('faded');
+    document.getElementById('pt-name').textContent = '—';
+    document.getElementById('pt-western').textContent = 'No named stars above the horizon at this time.';
+    document.getElementById('pt-distance').textContent = '';
+    document.getElementById('pt-desc').textContent = 'This is unusual — check your location and time.';
+  }
+
+  // Other stars list (next 7 closest, excluding the pointed-at one)
+  const others = visible.slice(1, 8);
+  const oEl = document.getElementById('other-stars');
+  if (others.length === 0) {
+    oEl.innerHTML = '<div class="star-row" style="color:var(--dim); font-style:italic;">No other named stars visible.</div>';
+  } else {
+    oEl.innerHTML = others.map(s => `
+      <div class="star-row">
+        <span class="name">${s.h}<span class="w">${s.w}</span></span>
+        <span class="dist">${s.dist.toFixed(0)}° away</span>
+      </div>`).join('');
+  }
+
+  // Readouts
+  document.getElementById('az-val').textContent = state.azimuth.toFixed(0) + '°';
+  document.getElementById('az-sub').textContent = compassHawaiian(state.azimuth);
+  document.getElementById('alt-val').textContent = state.altitude.toFixed(0) + '°';
+  document.getElementById('alt-sub').textContent = altitudeLabel(state.altitude);
+
+  drawCompass();
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SIMULATOR INPUTS (desktop fallback)
+   ═══════════════════════════════════════════════════════════════════════════ */
+document.getElementById('sim-az').addEventListener('input', e => {
+  state.azimuth = parseFloat(e.target.value);
+  document.getElementById('sim-az-v').textContent = state.azimuth.toFixed(0) + '°';
+});
+document.getElementById('sim-alt').addEventListener('input', e => {
+  state.altitude = parseFloat(e.target.value);
+  document.getElementById('sim-alt-v').textContent = state.altitude.toFixed(0) + '°';
+});
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RECALIBRATION HELP
+   ═══════════════════════════════════════════════════════════════════════════ */
+document.getElementById('recal-btn').addEventListener('click', () => {
+  alert(
+    'Compass calibration tips:\n\n' +
+    '• Wave the phone in a figure-8 pattern several times\n' +
+    '• Move away from cars, lampposts, and electronics\n' +
+    '• If using iPhone, open Settings → Privacy → Location → Compass Calibration and enable it\n\n' +
+    'On Hawaiʻi, magnetic north is about 10.5° east of true north, and this app corrects for that automatically.'
+  );
+});
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ENABLE BUTTON
+   ═══════════════════════════════════════════════════════════════════════════ */
+document.getElementById('enable-btn').addEventListener('click', requestSensors);
+</script>
+</body>
+</html>
