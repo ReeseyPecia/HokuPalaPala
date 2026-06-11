@@ -7,40 +7,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hōkū Palapala — The Star Record</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <style>
-:root {
-  --black: #04060f;
-  --ocean: #070d1a;
-  --gold: #e8b84b;
-  --teal: #4ab5a0;
-  --blue-star: #9dc8f0;
-  --red-star: #f08060;
-  --pale: #e8e0d0;
-  --dim: #6a7080;
-  --panel: rgba(8,16,38,0.92);
-  --border: rgba(232,184,75,0.18);
-  --teal-border: rgba(74,181,160,0.25);
-}
+:root{--black:#04060f;--ocean:#070d1a;--gold:#e8b84b;--teal:#4ab5a0;--blue-star:#9dc8f0;--red-star:#f08060;--pale:#e8e0d0;--dim:#6a7080;--panel:rgba(8,16,38,0.92);--border:rgba(232,184,75,0.18);--teal-border:rgba(74,181,160,0.25)}
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{background:var(--black);color:var(--pale);font-family:'EB Garamond',serif;overflow-x:hidden}
-
 #bg-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
-
 .wrap{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:0 20px 80px}
-
-/* NAV TABS */
 nav{position:sticky;top:0;z-index:100;background:rgba(4,6,15,0.97);border-bottom:1px solid var(--border);backdrop-filter:blur(12px)}
 .nav-inner{display:flex;align-items:center;gap:0;overflow-x:auto;max-width:1280px;margin:0 auto;padding:0 20px}
 .nav-title{font-family:'Cinzel',serif;font-size:0.85rem;color:var(--gold);letter-spacing:0.1em;margin-right:24px;white-space:nowrap;padding:16px 0}
 .tab{font-family:'Space Mono',monospace;font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;padding:16px 18px;cursor:pointer;color:var(--dim);border-bottom:2px solid transparent;transition:all 0.25s;white-space:nowrap;background:none;border-left:none;border-right:none;border-top:none}
 .tab:hover,.tab.active{color:var(--gold);border-bottom-color:var(--gold)}
-
-/* SECTIONS */
 .section{display:none;padding:40px 0}
 .section.active{display:block}
-
-/* HEADER HERO */
 .hero{text-align:center;padding:56px 20px 40px;border-bottom:1px solid var(--border)}
 .hero-title{font-family:'Cinzel',serif;font-size:clamp(2rem,6vw,3.5rem);font-weight:700;color:var(--gold);letter-spacing:0.08em;text-shadow:0 0 60px rgba(232,184,75,0.35);line-height:1.1}
 .hero-sub{font-style:italic;font-size:clamp(0.9rem,2.5vw,1.15rem);color:var(--dim);margin-top:10px}
@@ -48,23 +29,15 @@ nav{position:sticky;top:0;z-index:100;background:rgba(4,6,15,0.97);border-bottom
 .tag{font-family:'Space Mono',monospace;font-size:0.6rem;padding:4px 14px;border-radius:20px;letter-spacing:0.08em;text-transform:uppercase}
 .tag.teal{color:var(--teal);border:1px solid var(--teal-border)}
 .tag.gold{color:var(--gold);border:1px solid var(--border)}
-
-/* SECTION HEADINGS */
 .sec-head{font-family:'Cinzel',serif;font-size:1.1rem;color:var(--gold);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:20px;display:flex;align-items:center;gap:14px}
 .sec-head::after{content:'';flex:1;height:1px;background:linear-gradient(to right,rgba(232,184,75,0.3),transparent)}
-
-/* GRID LAYOUTS */
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px}
 .three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px}
 @media(max-width:900px){.two-col,.three-col{grid-template-columns:1fr}}
 .sky-grid{display:grid;grid-template-columns:1fr 360px;gap:28px;align-items:start}
 @media(max-width:860px){.sky-grid{grid-template-columns:1fr}}
-
-/* PANELS */
 .panel{background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:24px;backdrop-filter:blur(8px)}
 .panel.teal-border{border-color:var(--teal-border)}
-
-/* SKY DOME */
 .dome-wrap{position:relative;background:radial-gradient(ellipse at center,#0b1535 0%,#020408 75%);border-radius:50%;aspect-ratio:1;max-width:500px;margin:0 auto;border:1px solid var(--border);box-shadow:0 0 100px rgba(5,15,40,0.9),inset 0 0 60px rgba(0,0,0,0.5);overflow:hidden}
 .dome-wrap::before{content:'';position:absolute;inset:0;border-radius:50%;background:radial-gradient(ellipse at 30% 20%,rgba(30,60,120,0.12),transparent 60%);pointer-events:none}
 #sky-svg{width:100%;height:100%}
@@ -73,8 +46,6 @@ nav{position:sticky;top:0;z-index:100;background:rgba(4,6,15,0.97);border-bottom
 .dome-label.s{bottom:20px;left:50%;transform:translateX(-50%)}
 .dome-label.e{right:8px;top:50%;transform:translateY(-50%)}
 .dome-label.w{left:8px;top:50%;transform:translateY(-50%)}
-
-/* CONTROLS */
 .ctrl-group{display:flex;flex-direction:column;gap:8px;margin-bottom:18px}
 .ctrl-label{font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--teal);letter-spacing:0.1em;text-transform:uppercase}
 .ctrl-input{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:var(--pale);font-family:'Space Mono',monospace;font-size:0.75rem;padding:8px 12px;border-radius:3px;width:100%;transition:border-color 0.2s}
@@ -86,8 +57,6 @@ nav{position:sticky;top:0;z-index:100;background:rgba(4,6,15,0.97);border-bottom
 .btn.gold{background:rgba(232,184,75,0.12);border:1px solid var(--gold);color:var(--gold)}
 .btn.gold:hover{background:rgba(232,184,75,0.22)}
 .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
-
-/* STAR DETAIL */
 .star-name-h{font-family:'Cinzel',serif;font-size:1.4rem;color:var(--gold);margin-bottom:3px}
 .star-name-w{font-family:'Space Mono',monospace;font-size:0.65rem;color:var(--blue-star);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:16px}
 .star-meaning{font-style:italic;font-size:1rem;color:var(--pale);border-left:2px solid var(--gold);padding-left:12px;margin-bottom:18px;line-height:1.6}
@@ -99,8 +68,6 @@ nav{position:sticky;top:0;z-index:100;background:rgba(4,6,15,0.97);border-bottom
 .nav-badge{display:inline-block;margin-top:12px;padding:4px 12px;border-radius:2px;font-family:'Space Mono',monospace;font-size:0.58rem;letter-spacing:0.08em;text-transform:uppercase}
 .nav-badge.primary{background:rgba(232,130,58,0.12);border:1px solid rgba(232,130,58,0.4);color:#e8823a}
 .nav-badge.seasonal{background:rgba(74,181,160,0.1);border:1px solid var(--teal-border);color:var(--teal)}
-
-/* BORTLE CALCULATOR */
 .bortle-scale{display:grid;grid-template-columns:repeat(9,1fr);gap:4px;margin:16px 0}
 .bortle-cell{text-align:center;padding:10px 4px;border-radius:3px;cursor:pointer;transition:all 0.2s;border:1px solid transparent}
 .bortle-cell.active{border-color:var(--gold)}
@@ -113,8 +80,6 @@ nav{position:sticky;top:0;z-index:100;background:rgba(4,6,15,0.97);border-bottom
 .vis-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 .vis-name{font-family:'Cinzel',serif;font-size:0.8rem}
 .vis-status{font-family:'Space Mono',monospace;font-size:0.58rem;margin-left:auto}
-
-/* SUBMISSION FORM */
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
 @media(max-width:600px){.form-row{grid-template-columns:1fr}}
 .form-field{display:flex;flex-direction:column;gap:6px}
@@ -130,23 +95,11 @@ nav{position:sticky;top:0;z-index:100;background:rgba(4,6,15,0.97);border-bottom
 .star-check{display:flex;align-items:center;gap:8px;font-size:0.82rem;cursor:pointer;padding:4px 8px;border-radius:3px;border:1px solid transparent;transition:border-color 0.2s}
 .star-check:hover{border-color:var(--border)}
 .star-check input{accent-color:var(--gold)}
-
-/* ISLAND MAP */
-#map-container{height:480px;border-radius:4px;overflow:hidden;border:1px solid var(--border);position:relative;background:#06101e}
-.map-legend{position:absolute;bottom:16px;left:16px;background:rgba(4,6,15,0.9);border:1px solid var(--border);border-radius:4px;padding:14px;z-index:10;font-size:0.78rem}
-.legend-title{font-family:'Space Mono',monospace;font-size:0.58rem;color:var(--teal);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px}
-.legend-row{display:flex;align-items:center;gap:8px;margin-bottom:5px}
-.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-#map-svg{width:100%;height:100%}
-
-/* STATS BAR */
 .stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:24px 0}
 @media(max-width:700px){.stats-bar{grid-template-columns:repeat(2,1fr)}}
 .stat-card{background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:20px;text-align:center}
 .stat-num{font-family:'Cinzel',serif;font-size:2rem;color:var(--gold);line-height:1}
 .stat-lbl{font-family:'Space Mono',monospace;font-size:0.58rem;color:var(--dim);letter-spacing:0.08em;text-transform:uppercase;margin-top:6px}
-
-/* KAULANA MAHINA */
 .moon-calendar{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-top:16px}
 .moon-phase{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:3px;padding:14px 10px;text-align:center;cursor:pointer;transition:all 0.25s}
 .moon-phase:hover,.moon-phase.active{border-color:var(--gold);background:rgba(232,184,75,0.06)}
@@ -154,44 +107,177 @@ nav{position:sticky;top:0;z-index:100;background:rgba(4,6,15,0.97);border-bottom
 .moon-name{font-family:'Cinzel',serif;font-size:0.75rem;color:var(--gold)}
 .moon-meaning{font-size:0.7rem;color:var(--dim);font-style:italic;margin-top:3px}
 .moon-nav{font-family:'Space Mono',monospace;font-size:0.58rem;color:var(--teal);margin-top:6px}
-
-/* TOOLTIP */
 #tip{position:fixed;pointer-events:none;background:rgba(2,4,14,0.97);border:1px solid rgba(232,184,75,0.5);padding:10px 14px;border-radius:3px;font-family:'Space Mono',monospace;font-size:0.62rem;color:var(--pale);z-index:9999;display:none;max-width:220px;line-height:1.6;box-shadow:0 4px 24px rgba(0,0,0,0.6)}
 #tip .tn{color:var(--gold);font-size:0.72rem;display:block;margin-bottom:2px}
-
-/* PULSE */
 @keyframes starPulse{0%,100%{opacity:1}50%{opacity:0.45}}
 .sp{animation:starPulse 3s ease-in-out infinite}
-
-/* FADE */
 @keyframes fi{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 .fi{animation:fi 0.6s ease forwards}
-
-/* SUCCESS MESSAGE */
 .success-msg{background:rgba(74,181,160,0.1);border:1px solid var(--teal-border);color:var(--teal);padding:12px 16px;border-radius:3px;font-family:'Space Mono',monospace;font-size:0.7rem;margin-top:12px;display:none}
 #sky-svg .constellation-label{font-family:'Cinzel',serif;font-size:0.6rem;fill:#e8b84b;opacity:0.55;pointer-events:none}
+.placeholder-pending{text-align:center;color:var(--dim);font-style:italic;padding:80px 20px;font-size:0.95rem;line-height:1.7}
+.placeholder-pending::before{content:'◐';display:block;font-size:2.2rem;color:var(--gold);opacity:0.5;margin-bottom:16px}
+.voy-grid{display:grid;grid-template-columns:1fr 360px;gap:28px;align-items:start}
+@media(max-width:1000px){.voy-grid{grid-template-columns:1fr}}
+.voy-dome-wrap{position:relative;width:100%;max-width:540px;margin:0 auto;aspect-ratio:1}
+.voy-dome{width:100%;height:100%;border-radius:50%;background:radial-gradient(ellipse at center,#0b1535 0%,#020408 75%);border:1px solid var(--border);box-shadow:0 0 100px rgba(5,15,40,0.9),inset 0 0 60px rgba(0,0,0,0.5);overflow:hidden;transition:box-shadow 0.5s ease,border-color 0.5s ease}
+.voy-dome.crossing{box-shadow:0 0 140px rgba(232,184,75,0.5),inset 0 0 60px rgba(0,0,0,0.5);border-color:rgba(232,184,75,0.55)}
+#voy-sky-svg{width:100%;height:100%;display:block;position:relative;z-index:1}
+.voy-dome-label{position:absolute;font-family:'Space Mono',monospace;font-size:0.58rem;color:rgba(232,184,75,0.45);letter-spacing:0.12em;text-transform:uppercase;pointer-events:none;z-index:2}
+.voy-dome-label.n{top:12px;left:50%;transform:translateX(-50%)}
+.voy-dome-label.s{bottom:14px;left:50%;transform:translateX(-50%)}
+.voy-dome-label.e{right:10px;top:50%;transform:translateY(-50%)}
+.voy-dome-label.w{left:10px;top:50%;transform:translateY(-50%)}
+.voy-time-note{text-align:center;font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--dim);letter-spacing:0.08em;margin-top:16px}
+.voy-side{display:flex;flex-direction:column;gap:16px}
+.voy-panel{background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:18px;backdrop-filter:blur(8px)}
+.voy-panel-label{font-family:'Space Mono',monospace;font-size:0.58rem;color:var(--teal);letter-spacing:0.14em;text-transform:uppercase;margin-bottom:12px}
+.voy-route-picker{display:flex;flex-direction:column;gap:6px}
+.voy-route-btn{font-family:'Cinzel',serif;font-size:0.78rem;letter-spacing:0.04em;padding:10px 14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:var(--pale);border-radius:3px;cursor:pointer;transition:all 0.2s;text-align:left}
+.voy-route-btn:hover{border-color:var(--gold)}
+.voy-route-btn.active{background:rgba(232,184,75,0.12);border-color:var(--gold);color:var(--gold)}
+.voy-route-meta{display:block;font-family:'Space Mono',monospace;font-size:0.55rem;color:var(--dim);letter-spacing:0.08em;text-transform:uppercase;margin-top:3px}
+.voy-route-btn.active .voy-route-meta{color:rgba(232,184,75,0.6)}
+.voy-map-inset{width:100%;aspect-ratio:4/5;border-radius:3px;overflow:hidden;background:#050a18;border:1px solid rgba(255,255,255,0.05)}
+.voy-map-inset svg{width:100%;height:100%;display:block}
+.voy-readouts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.voy-readout{background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.06);border-radius:3px;padding:12px;min-height:78px}
+.voy-readout-label{font-family:'Space Mono',monospace;font-size:0.55rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--dim);margin-bottom:6px}
+.voy-readout-value{font-family:'Cinzel',serif;font-size:1.35rem;color:var(--gold);line-height:1.1}
+.voy-readout-value.compact{font-size:1rem;padding-top:4px}
+.voy-readout-sub{font-family:'Space Mono',monospace;font-size:0.58rem;color:var(--pale);margin-top:4px;letter-spacing:0.04em;opacity:0.85}
+.voy-narration{font-style:italic;font-size:0.95rem;line-height:1.7;color:var(--pale);border-left:2px solid var(--gold);padding:2px 0 2px 16px;transition:opacity 0.35s ease;min-height:110px}
+.voy-narration.fading{opacity:0}
+.voy-nar-key{font-style:normal;font-family:'Cinzel',serif;color:var(--gold);text-transform:uppercase;letter-spacing:0.08em;font-size:0.78rem;display:block;margin-bottom:8px}
+.voy-controls{margin-top:32px;padding:22px;background:var(--panel);border:1px solid var(--border);border-radius:4px;display:grid;grid-template-columns:auto 1fr auto;gap:22px;align-items:center}
+@media(max-width:800px){.voy-controls{grid-template-columns:1fr;gap:16px}}
+.voy-play-btn{font-family:'Space Mono',monospace;font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;padding:14px 22px;background:rgba(232,184,75,0.12);border:1px solid var(--gold);color:var(--gold);border-radius:3px;cursor:pointer;transition:all 0.2s;white-space:nowrap;min-width:160px}
+.voy-play-btn:hover{background:rgba(232,184,75,0.22)}
+.voy-slider-wrap{display:flex;flex-direction:column;gap:10px}
+.voy-lat-slider{width:100%;-webkit-appearance:none;appearance:none;height:4px;background:linear-gradient(to right,rgba(157,200,240,0.4) 0%,rgba(157,200,240,0.5) 45%,rgba(232,184,75,0.7) 50%,rgba(240,128,96,0.5) 55%,rgba(240,128,96,0.4) 100%);border-radius:2px;outline:none;cursor:pointer}
+.voy-lat-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;background:var(--gold);border:2px solid #0a1024;border-radius:50%;cursor:pointer;box-shadow:0 0 14px rgba(232,184,75,0.6)}
+.voy-lat-slider::-moz-range-thumb{width:18px;height:18px;background:var(--gold);border:2px solid #0a1024;border-radius:50%;cursor:pointer;box-shadow:0 0 14px rgba(232,184,75,0.6)}
+.voy-slider-labels{display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:0.55rem;color:var(--dim);letter-spacing:0.08em;text-transform:uppercase}
+.voy-slider-labels .equator{color:var(--gold)}
+.voy-speed-controls{display:flex;gap:6px}
+.voy-speed-btn{font-family:'Space Mono',monospace;font-size:0.62rem;padding:8px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:var(--pale);border-radius:3px;cursor:pointer;min-width:40px;transition:all 0.2s}
+.voy-speed-btn:hover{border-color:var(--gold)}
+.voy-speed-btn.active{background:rgba(232,184,75,0.15);border-color:var(--gold);color:var(--gold)}
+@keyframes voy-zen-pulse{0%,100%{stroke-opacity:0.6}50%{stroke-opacity:1}}
+.voy-zenith-ring.active{animation:voy-zen-pulse 2.6s ease-in-out infinite}
+.ds-grid{display:grid;grid-template-columns:1fr 360px;gap:20px;align-items:start}
+@media(max-width:1000px){.ds-grid{grid-template-columns:1fr}}
+.ds-map-wrap{position:relative;height:72vh;min-height:560px;border:1px solid var(--border);border-radius:4px;overflow:hidden;background:#050a18;box-shadow:0 0 80px rgba(5,15,40,0.6)}
+#ds-map{width:100%;height:100%;background:#050a18}
+.leaflet-container{background:#050a18 !important;font-family:'EB Garamond',serif}
+.leaflet-control-attribution{background:rgba(8,16,38,0.85) !important;color:var(--dim) !important;font-family:'Space Mono',monospace !important;font-size:0.55rem !important;border:1px solid var(--border) !important;border-radius:2px !important;padding:3px 8px !important}
+.leaflet-control-attribution a{color:var(--gold) !important}
+.leaflet-control-zoom{border:1px solid var(--border) !important;background:var(--panel) !important;border-radius:3px !important}
+.leaflet-control-zoom a{background:transparent !important;color:var(--gold) !important;border:none !important;border-bottom:1px solid var(--border) !important;font-family:'Cinzel',serif !important}
+.leaflet-control-zoom a:last-child{border-bottom:none !important}
+.leaflet-control-zoom a:hover{background:rgba(232,184,75,0.1) !important}
+.leaflet-popup-content-wrapper{background:var(--panel) !important;border:1px solid var(--border) !important;border-radius:4px !important;color:var(--pale) !important;box-shadow:0 8px 32px rgba(0,0,0,0.6) !important}
+.leaflet-popup-tip{background:var(--panel) !important;border:1px solid var(--border) !important}
+.leaflet-popup-close-button{color:var(--gold) !important}
+.ds-popup-title{font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;margin-bottom:4px;letter-spacing:0.04em}
+.ds-popup-subtitle{font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--teal);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px}
+.ds-popup-body{font-size:0.85rem;line-height:1.5;font-style:italic}
+.ds-popup-data{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-family:'Space Mono',monospace;font-size:0.62rem;margin-top:10px;padding-top:10px;border-top:1px solid rgba(232,184,75,0.15)}
+.ds-popup-data .ddl{color:var(--dim);letter-spacing:0.06em;text-transform:uppercase}
+.ds-popup-data .ddv{color:var(--pale)}
+.ds-popup-bortle{display:inline-block;font-family:'Cinzel',serif;font-size:1.4rem;color:var(--gold);margin-right:8px;vertical-align:middle}
+.ds-popup-bortle-sub{display:inline-block;font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--pale);letter-spacing:0.06em;vertical-align:middle;text-transform:uppercase}
+.ds-marker{background:transparent !important;border:none !important}
+.ds-marker-best{width:26px;height:26px;display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:22px;text-shadow:0 0 8px rgba(232,184,75,0.8),0 0 16px rgba(232,184,75,0.4);line-height:1}
+.ds-marker-obs{width:18px;height:18px;background:rgba(74,181,160,0.25);border:2px solid var(--teal);transform:rotate(45deg);box-shadow:0 0 10px rgba(74,181,160,0.5)}
+.ds-marker-voy{width:16px;height:16px;background:rgba(232,224,208,0.2);border:1.5px solid var(--pale);transform:rotate(45deg);box-shadow:0 0 8px rgba(232,224,208,0.4)}
+.ds-marker-reading{width:12px;height:12px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.6);box-shadow:0 0 6px rgba(0,0,0,0.5)}
+.ds-marker-you{width:22px;height:22px;border-radius:50%;background:rgba(232,184,75,0.35);border:2px solid var(--gold);box-shadow:0 0 18px rgba(232,184,75,0.7);animation:ds-youpulse 2s ease-in-out infinite}
+@keyframes ds-youpulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.15);opacity:0.85}}
+.ds-side{display:flex;flex-direction:column;gap:14px;max-height:72vh;min-height:560px;overflow-y:auto;padding-right:4px}
+@media(max-width:1000px){.ds-side{max-height:none;min-height:0;overflow-y:visible}}
+.ds-side::-webkit-scrollbar{width:6px}
+.ds-side::-webkit-scrollbar-thumb{background:rgba(232,184,75,0.2);border-radius:3px}
+.ds-panel{background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:16px;backdrop-filter:blur(8px)}
+.ds-panel-label{font-family:'Space Mono',monospace;font-size:0.58rem;color:var(--teal);letter-spacing:0.14em;text-transform:uppercase;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.ds-right-actions{display:flex;gap:6px}
+.ds-tiny-btn{font-family:'Space Mono',monospace;font-size:0.5rem;letter-spacing:0.08em;text-transform:uppercase;padding:4px 8px;background:transparent;border:1px solid rgba(232,184,75,0.25);color:var(--gold);border-radius:2px;cursor:pointer;transition:all 0.18s}
+.ds-tiny-btn:hover{background:rgba(232,184,75,0.1)}
+.ds-layer-list{display:flex;flex-direction:column;gap:6px}
+.ds-layer-row{display:flex;align-items:center;padding:8px 10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:3px;cursor:pointer;transition:all 0.18s;user-select:none}
+.ds-layer-row:hover{border-color:rgba(232,184,75,0.4);background:rgba(232,184,75,0.04)}
+.ds-layer-row.active{border-color:var(--gold);background:rgba(232,184,75,0.08)}
+.ds-layer-check{width:14px;height:14px;border:1px solid var(--dim);border-radius:2px;margin-right:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ds-layer-row.active .ds-layer-check{background:var(--gold);border-color:var(--gold)}
+.ds-layer-row.active .ds-layer-check::after{content:'✓';color:var(--black);font-size:11px;font-weight:bold}
+.ds-layer-info{flex:1;min-width:0}
+.ds-layer-name{font-family:'Cinzel',serif;font-size:0.85rem;color:var(--pale)}
+.ds-layer-row.active .ds-layer-name{color:var(--gold)}
+.ds-layer-desc{font-family:'Space Mono',monospace;font-size:0.55rem;color:var(--dim);letter-spacing:0.04em;margin-top:2px}
+.ds-cf-list{display:flex;flex-direction:column;gap:4px}
+.ds-cf-row{display:flex;align-items:center;padding:6px 10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:3px;cursor:pointer;transition:all 0.18s;user-select:none}
+.ds-cf-row:hover{border-color:rgba(232,184,75,0.3)}
+.ds-cf-row.active{border-color:rgba(232,184,75,0.5);background:rgba(232,184,75,0.04)}
+.ds-cf-check{width:12px;height:12px;border:1px solid var(--dim);border-radius:2px;margin-right:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ds-cf-row.active .ds-cf-check{background:var(--gold);border-color:var(--gold)}
+.ds-cf-row.active .ds-cf-check::after{content:'✓';color:var(--black);font-size:9px;font-weight:bold}
+.ds-cf-swatch{width:26px;height:14px;border-radius:7px;margin-right:10px;border:1px solid rgba(255,255,255,0.15);flex-shrink:0;box-shadow:inset 0 0 8px rgba(0,0,0,0.25),0 0 6px rgba(0,0,0,0.3)}
+.ds-bortle-blurred{filter:blur(5px);opacity:0.88}
+.ds-land-pane{opacity:0.55}
+.ds-cf-text{display:flex;gap:8px;align-items:baseline;flex:1;min-width:0}
+.ds-cf-num{font-family:'Cinzel',serif;font-size:0.85rem;color:var(--gold);min-width:18px}
+.ds-cf-row:not(.active) .ds-cf-num{color:var(--dim)}
+.ds-cf-name{font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--pale);letter-spacing:0.04em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ds-cf-row:not(.active) .ds-cf-name{color:var(--dim)}
+.ds-cf-presets{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}
+.ds-cf-preset{font-family:'Space Mono',monospace;font-size:0.55rem;letter-spacing:0.06em;text-transform:uppercase;padding:7px 8px;background:rgba(255,255,255,0.03);border:1px solid rgba(232,184,75,0.2);color:var(--gold);border-radius:2px;cursor:pointer;transition:all 0.18s}
+.ds-cf-preset:hover{background:rgba(232,184,75,0.1)}
+.ds-season-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:4px;margin-bottom:14px}
+.ds-season-btn{font-family:'Cinzel',serif;font-size:0.72rem;padding:9px 6px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:var(--pale);border-radius:3px;cursor:pointer;transition:all 0.18s;letter-spacing:0.04em}
+.ds-season-btn:hover{border-color:var(--gold)}
+.ds-season-btn.active{background:rgba(232,184,75,0.12);border-color:var(--gold);color:var(--gold)}
+.ds-season-btn.current::before{content:'◆';color:var(--teal);margin-right:4px;font-size:0.7em;vertical-align:middle}
+.ds-season-info{font-size:0.85rem;line-height:1.55}
+.ds-season-title{font-family:'Cinzel',serif;color:var(--gold);font-size:1.1rem;letter-spacing:0.05em;display:flex;justify-content:space-between;align-items:baseline}
+.ds-season-months{font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--dim);letter-spacing:0.08em;font-weight:normal}
+.ds-season-hawaiian{font-style:italic;color:var(--teal);font-size:0.75rem;margin-top:2px;margin-bottom:12px}
+.ds-season-section{display:grid;grid-template-columns:80px 1fr;gap:10px;margin-bottom:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+.ds-season-section:last-of-type{border-bottom:none}
+.ds-ss-label{font-family:'Space Mono',monospace;font-size:0.55rem;color:var(--gold);letter-spacing:0.08em;text-transform:uppercase;padding-top:2px}
+.ds-ss-text{font-size:0.82rem;line-height:1.45;color:var(--pale)}
+.ds-season-notes{margin-top:10px;padding-top:10px;border-top:1px solid rgba(232,184,75,0.15);font-size:0.82rem;line-height:1.55;color:var(--pale)}
+.ds-info-empty{text-align:center;font-style:italic;color:var(--dim);padding:16px 8px;font-size:0.85rem;line-height:1.5}
+.ds-info-empty::before{content:'◐';display:block;font-size:1.5rem;color:var(--gold);opacity:0.4;margin-bottom:8px}
+.ds-info-result{text-align:center}
+.ds-info-place{font-family:'Cinzel',serif;font-size:1.1rem;color:var(--pale);margin-bottom:4px}
+.ds-info-bortle-big{font-family:'Cinzel',serif;font-size:2.2rem;color:var(--gold);line-height:1;margin:8px 0 4px}
+.ds-info-bortle-desc{font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--pale);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:10px}
+.ds-info-meta{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;text-align:left;font-family:'Space Mono',monospace;font-size:0.62rem;padding-top:10px;border-top:1px solid rgba(232,184,75,0.15)}
+.ds-info-meta .ml{color:var(--dim);letter-spacing:0.06em;text-transform:uppercase}
+.ds-info-meta .mv{color:var(--pale)}
+.ds-map-controls{position:absolute;top:14px;right:14px;z-index:500;display:flex;flex-direction:column;gap:6px}
+.ds-map-btn{background:var(--panel);border:1px solid var(--border);border-radius:3px;color:var(--gold);font-family:'Space Mono',monospace;font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;padding:8px 14px;cursor:pointer;transition:background 0.2s}
+.ds-map-btn:hover{background:rgba(232,184,75,0.12)}
+@media(max-width:1000px){.ds-map-wrap{height:60vh;min-height:440px}}
 </style>
 </head>
 <body>
 <canvas id="bg-canvas"></canvas>
 <div id="tip"><span class="tn"></span><span class="tw"></span></div>
 
-<!-- NAV -->
 <nav>
   <div class="nav-inner">
     <div class="nav-title">Hōkū Palapala</div>
     <button class="tab active" onclick="showTab('sky')">Sky Dome</button>
-    <a class="tab" href="voyage.html" style="text-decoration:none;">Voyage</a>
-    <a class="tab" href="compass.html" style="text-decoration:none;">Compass</a>
+    <button class="tab" onclick="showTab('voyage')">Voyage</button>
+    <button class="tab" onclick="showTab('darksky')">Dark Sky</button>
     <button class="tab" onclick="showTab('bortle')">Sky Brightness</button>
     <button class="tab" onclick="showTab('mahina')">Kaulana Mahina</button>
     <button class="tab" onclick="showTab('submit')">Submit Reading</button>
-    <button class="tab" onclick="showTab('map')">Island Map</button>
     <button class="tab" onclick="showTab('about')">About</button>
   </div>
 </nav>
 
-<!-- HERO -->
 <div class="wrap">
 <div class="hero">
   <div class="hero-title">Hōkū Palapala</div>
@@ -206,7 +292,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(4,6,15,0.97);border-bottom
   </div>
 </div>
 
-<!-- ══ SKY DOME TAB ══ -->
+<!-- SKY DOME TAB -->
 <div class="section active" id="tab-sky">
   <div style="margin-top:32px">
     <div class="sec-head">Interactive Sky Dome — 20°N Latitude, Hawaiʻi</div>
@@ -234,7 +320,6 @@ nav{position:sticky;top:0;z-index:100;background:rgba(4,6,15,0.97);border-bottom
               <option value="seasonal">Makahiki Sky</option>
               <option value="constellations">Constellation</option>
             </select>
-            </select>
           </div>
         </div>
         <div class="dome-wrap">
@@ -257,7 +342,132 @@ nav{position:sticky;top:0;z-index:100;background:rgba(4,6,15,0.97);border-bottom
   </div>
 </div>
 
-<!-- ══ BORTLE TAB ══ -->
+<!-- VOYAGE TAB -->
+<div class="section" id="tab-voyage">
+  <div style="margin-top:32px">
+    <div class="sec-head">Hoʻokele — Voyage Simulation</div>
+    <div style="font-style:italic;color:var(--dim);font-size:0.92rem;margin-bottom:22px;margin-top:-8px">Sailing the latitudes our ancestors knew</div>
+    <div class="voy-grid">
+      <div>
+        <div class="voy-dome-wrap">
+          <div class="voy-dome" id="voy-dome">
+            <svg id="voy-sky-svg" viewBox="0 0 500 500"></svg>
+          </div>
+          <div class="voy-dome-label n">N — Hōkūpaʻa</div>
+          <div class="voy-dome-label s">S — Nā Leo</div>
+          <div class="voy-dome-label e">E — Koʻolau</div>
+          <div class="voy-dome-label w">W — Kona</div>
+        </div>
+        <div class="voy-time-note">Simulated: late April evening · LST 14h 30m</div>
+      </div>
+      <div class="voy-side">
+        <div class="voy-panel">
+          <div class="voy-panel-label">Voyage</div>
+          <div class="voy-route-picker">
+            <button class="voy-route-btn active" data-route="marquesas">Hawaiʻi → Marquesas<span class="voy-route-meta">The Ancestral Crossing · 19.6°N to 8.9°S</span></button>
+            <button class="voy-route-btn" data-route="tahiti">Hawaiʻi → Tahiti<span class="voy-route-meta">The Southern Voyage · 19.6°N to 17.6°S</span></button>
+          </div>
+        </div>
+        <div class="voy-panel" style="padding:14px">
+          <div class="voy-panel-label">Position</div>
+          <div class="voy-map-inset"><svg id="voy-map-svg" viewBox="0 0 240 300"></svg></div>
+        </div>
+        <div class="voy-panel">
+          <div class="voy-readouts">
+            <div class="voy-readout">
+              <div class="voy-readout-label">Latitude</div>
+              <div class="voy-readout-value" id="voy-readout-lat">19.6°N</div>
+              <div class="voy-readout-sub" id="voy-readout-lat-sub">Kawaihae</div>
+            </div>
+            <div class="voy-readout">
+              <div class="voy-readout-label">Zenith Star</div>
+              <div class="voy-readout-value compact" id="voy-readout-zenith">Hōkūleʻa</div>
+              <div class="voy-readout-sub" id="voy-readout-zenith-sub">Arcturus · Hawaiʻi</div>
+            </div>
+          </div>
+        </div>
+        <div class="voy-panel">
+          <div class="voy-panel-label">Wayfinding Notes</div>
+          <div class="voy-narration" id="voy-narration">
+            <span class="voy-nar-key">Departing Kawaihae</span>
+            Hōkūpaʻa hangs 20° above the northern horizon — its altitude is your latitude. Hōkūleʻa rides directly overhead.
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="voy-controls">
+      <button class="voy-play-btn" id="voy-play-btn">▶ Begin Voyage</button>
+      <div class="voy-slider-wrap">
+        <input type="range" class="voy-lat-slider" id="voy-lat-slider" min="-25" max="25" step="0.1" value="19.6">
+        <div class="voy-slider-labels">
+          <span>25°N</span><span>Hawaiʻi</span><span class="equator">EQUATOR</span><span>Marquesas</span><span>25°S</span>
+        </div>
+      </div>
+      <div class="voy-speed-controls">
+        <button class="voy-speed-btn" data-speed="0.5">½×</button>
+        <button class="voy-speed-btn active" data-speed="1">1×</button>
+        <button class="voy-speed-btn" data-speed="2">2×</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DARK SKY TAB -->
+<div class="section" id="tab-darksky">
+  <div style="margin-top:32px">
+    <div class="sec-head">Pō Lani — Dark Sky Map</div>
+    <div style="font-style:italic;color:var(--dim);font-size:0.92rem;margin-bottom:22px;margin-top:-8px">Where the stars are still bright across Hawaiʻi</div>
+    <div class="ds-grid">
+      <div class="ds-map-wrap">
+        <div id="ds-map"></div>
+        <div class="ds-map-controls">
+          <button class="ds-map-btn" id="ds-btn-fit">Show All Islands</button>
+          <button class="ds-map-btn" id="ds-btn-locate">Find Me</button>
+        </div>
+      </div>
+      <div class="ds-side">
+        <div class="ds-panel">
+          <div class="ds-panel-label">Map Layers</div>
+          <div class="ds-layer-list" id="ds-layer-list"></div>
+        </div>
+        <div class="ds-panel">
+          <div class="ds-panel-label">
+            <span>Bortle Class Filter</span>
+            <div class="ds-right-actions">
+              <button class="ds-tiny-btn" id="ds-cf-all">All</button>
+              <button class="ds-tiny-btn" id="ds-cf-none">None</button>
+            </div>
+          </div>
+          <div class="ds-cf-list" id="ds-cf-list"></div>
+          <div class="ds-cf-presets">
+            <button class="ds-cf-preset" id="ds-preset-dark">Only Dark (1–3)</button>
+            <button class="ds-cf-preset" id="ds-preset-rural">Rural (3–5)</button>
+            <button class="ds-cf-preset" id="ds-preset-urban">Urban (6–9)</button>
+            <button class="ds-cf-preset" id="ds-preset-extreme">Extremes (1 &amp; 9)</button>
+          </div>
+        </div>
+        <div class="ds-panel">
+          <div class="ds-panel-label">Seasonal Sky</div>
+          <div class="ds-season-row">
+            <button class="ds-season-btn" data-season="spring">Spring</button>
+            <button class="ds-season-btn" data-season="summer">Summer</button>
+            <button class="ds-season-btn" data-season="fall">Fall</button>
+            <button class="ds-season-btn" data-season="winter">Winter</button>
+          </div>
+          <div class="ds-season-info" id="ds-season-content"></div>
+        </div>
+        <div class="ds-panel">
+          <div class="ds-panel-label">Location Detail</div>
+          <div id="ds-info-content">
+            <div class="ds-info-empty">Click anywhere on the map for an estimate, or tap "Find Me" to identify your location.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BORTLE TAB -->
 <div class="section" id="tab-bortle">
   <div style="margin-top:32px">
     <div class="sec-head">Sky Brightness Calculator</div>
@@ -310,7 +520,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(4,6,15,0.97);border-bottom
   </div>
 </div>
 
-<!-- ══ KAULANA MAHINA TAB ══ -->
+<!-- KAULANA MAHINA TAB -->
 <div class="section" id="tab-mahina">
   <div style="margin-top:32px">
     <div class="sec-head">Kaulana Mahina — The Hawaiian Lunar Calendar</div>
@@ -351,7 +561,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(4,6,15,0.97);border-bottom
   </div>
 </div>
 
-<!-- ══ SUBMIT TAB ══ -->
+<!-- SUBMIT TAB -->
 <div class="section" id="tab-submit">
   <div style="margin-top:32px">
     <div class="sec-head">Submit a Sky Brightness Reading</div>
@@ -414,7 +624,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(4,6,15,0.97);border-bottom
             <button class="btn primary" onclick="submitReading()">Submit Reading</button>
             <button class="btn gold" onclick="clearForm()">Clear</button>
           </div>
-          <div class="success-msg" id="success-msg">✓ Reading submitted! It will appear in the archive and island map below.</div>
+          <div class="success-msg" id="success-msg">✓ Reading submitted! It will appear in the archive.</div>
         </div>
       </div>
       <div>
@@ -439,38 +649,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(4,6,15,0.97);border-bottom
   </div>
 </div>
 
-<!-- ══ MAP TAB ══ -->
-<div class="section" id="tab-map">
-  <div style="margin-top:32px">
-    <div class="sec-head">Hawaiʻi Island — Sky Brightness &amp; Cultural Sites</div>
-    <div id="map-container">
-      <svg id="map-svg" viewBox="0 0 800 600"></svg>
-      <div class="map-legend">
-        <div class="legend-title">Legend</div>
-        <div class="legend-row"><div class="legend-dot" style="background:#4ab5a0"></div><span style="font-size:0.72rem;color:#a0b0b8">Community reading</span></div>
-        <div class="legend-row"><div class="legend-dot" style="background:#e8b84b;border:2px solid #fff3"></div><span style="font-size:0.72rem;color:#a0b0b8">Traditional voyaging site</span></div>
-        <div class="legend-row"><div class="legend-dot" style="background:#9dc8f0"></div><span style="font-size:0.72rem;color:#a0b0b8">Observatory</span></div>
-        <div class="legend-row"><div class="legend-dot" style="background:rgba(232,130,58,0.7)"></div><span style="font-size:0.72rem;color:#a0b0b8">Light pollution concern</span></div>
-      </div>
-    </div>
-    <div class="three-col" style="margin-top:24px">
-      <div class="panel teal-border">
-        <div class="ctrl-label" style="margin-bottom:8px">Traditional Voyaging Sites</div>
-        <div style="font-size:0.82rem;color:#9099aa;line-height:1.65">Key launch points historically used by Polynesian voyagers to depart or arrive at Hawaiʻi Island. These sites anchor the cultural layer of the sky brightness archive.</div>
-      </div>
-      <div class="panel">
-        <div class="ctrl-label" style="margin-bottom:8px">Observatories</div>
-        <div style="font-size:0.82rem;color:#9099aa;line-height:1.65">Maunakea summit (4,207m) hosts 10 active observatories. The Daniel K. Inouye Solar Telescope sits on Haleakalā, Maui. Both depend on dark skies this map helps protect.</div>
-      </div>
-      <div class="panel">
-        <div class="ctrl-label" style="margin-bottom:8px">Light Pollution Zones</div>
-        <div style="font-size:0.82rem;color:#9099aa;line-height:1.65">Kona and Hilo metro areas produce the most light pollution. Readings from these zones track whether observatory-grade dark skies on the summit are threatened by expanding development.</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ══ ABOUT TAB ══ -->
+<!-- ABOUT TAB -->
 <div class="section" id="tab-about">
   <div style="margin-top:32px">
     <div class="sec-head">About Hōkū Palapala</div>
@@ -481,45 +660,43 @@ nav{position:sticky;top:0;z-index:100;background:rgba(4,6,15,0.97);border-bottom
           <div style="font-style:italic;color:var(--dim);font-size:0.9rem;margin-bottom:16px">"The Star Record" — a living archive of dark skies and ancestral stars</div>
           <div style="font-size:0.9rem;color:#b0bac8;line-height:1.75">
             Hōkū Palapala started with a simple question: can the stars that guided Polynesian voyagers across the Pacific still be seen from the places they once launched from?<br><br>
-            This tool is my attempt to find out — and to build something that lets other people on Hawaiʻi Island ask the same question from their own backyard, beach, or ahupuaʻa.<br><b></b>
-            It sits alongside the work of Maunakea's observatories, not in competition with it. The observatories measure the universe. This measures something smaller and closer — whether the night sky above our own communities is still dark enough to see the stars our ancestors named.
+            This tool is my attempt to find out — and to build something that lets other people on Hawaiʻi Island ask the same question from their own backyard, beach, or ahupuaʻa.<br><br>
+            It sits alongside the work of Maunakea's observatories, not in competition with it. The observatories measure the universe. This measures something smaller and closer — whether the night sky above our own communities is still dark enough to see the stars our ancestors named.<br><br>
             Built by <strong style="color:var(--pale)">Reese Reilly</strong>, as part of a passion project that brings together all my interests.
-          </div>
           </div>
         </div>
         <div class="panel teal-border" style="margin-bottom:20px">
           <div class="ctrl-label" style="margin-bottom:10px">Stewardship Partners</div>
           <div style="font-size:0.85rem;color:#9099aa;line-height:1.75;font-style:italic">
-          Community partnerships currently in development.
-        </div>
+            Community partnerships currently in development.
+          </div>
         </div>
       </div>
       <div>
-<div class="panel" style="margin-bottom:20px">
-  <div class="ctrl-label" style="margin-bottom:10px">About the Builder</div>
-  <div style="font-size:0.88rem;color:#9099aa;line-height:1.75">
-    <strong style="color:var(--pale)">Reese Reilly</strong> — Hello! I am a student from Mid-Pacific Institute on Oahu with a passion for astronomy, coding, and the cultural heritage of the Pacific. Hōkū Palapala grew out of a desire to build something that belongs to the community — a tool that uses computational methods to serve Hawaiian ways of knowing the sky, not the other way around.<br><br>
-    This project combines four things I care about deeply:
-  </div>
-  <div style="margin-top:14px">
-    <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px">
-      <span style="color:var(--gold);font-family:'Space Mono',monospace;font-size:0.7rem;margin-top:2px;flex-shrink:0">01</span>
-      <div><strong style="color:var(--pale)">Cultural Astronomy</strong><div style="font-size:0.82rem;color:#9099aa">Hawaiian star names, navigation lore, the star compass, and the Kaulana Mahina lunar calendar</div></div>
-    </div>
-    <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px">
-      <span style="color:var(--gold);font-family:'Space Mono',monospace;font-size:0.7rem;margin-top:2px;flex-shrink:0">02</span>
-      <div><strong style="color:var(--pale)">Astrophysics</strong><div style="font-size:0.82rem;color:#9099aa">I am hoping to major in astrophysics in college — I used real math for sky brightness physics, NELM and Bortle scale conversions, and spherical astronomy</div></div>
-    </div>
-    <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px">
-      <span style="color:var(--gold);font-family:'Space Mono',monospace;font-size:0.7rem;margin-top:2px;flex-shrink:0">03</span>
-      <div><strong style="color:var(--pale)">Coding</strong><div style="font-size:0.82rem;color:#9099aa">Vanilla JavaScript, HTML, CSS — built from scratch without frameworks</div></div>
-    </div>
-    <div style="display:flex;align-items:flex-start;gap:12px">
-      <span style="color:var(--gold);font-family:'Space Mono',monospace;font-size:0.7rem;margin-top:2px;flex-shrink:0">04</span>
-      <div><strong style="color:var(--pale)">Community Stewardship</strong><div style="font-size:0.82rem;color:#9099aa">Ahupuaʻa geography, traditional voyaging sites, and the belief that data should serve the people it comes from</div></div>
-    </div>
-  </div>
-</div>
+        <div class="panel" style="margin-bottom:20px">
+          <div class="ctrl-label" style="margin-bottom:10px">About the Builder</div>
+          <div style="font-size:0.88rem;color:#9099aa;line-height:1.75">
+            <strong style="color:var(--pale)">Reese Reilly</strong> — Hello! I am a student from Mid-Pacific Institute on Oahu with a passion for astronomy, coding, and the cultural heritage of the Pacific. Hōkū Palapala grew out of a desire to build something that belongs to the community — a tool that uses computational methods to serve Hawaiian ways of knowing the sky, not the other way around.<br><br>
+            This project combines four things I care about deeply:
+          </div>
+          <div style="margin-top:14px">
+            <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px">
+              <span style="color:var(--gold);font-family:'Space Mono',monospace;font-size:0.7rem;margin-top:2px;flex-shrink:0">01</span>
+              <div><strong style="color:var(--pale)">Cultural Astronomy</strong><div style="font-size:0.82rem;color:#9099aa">Hawaiian star names, navigation lore, the star compass, and the Kaulana Mahina lunar calendar</div></div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px">
+              <span style="color:var(--gold);font-family:'Space Mono',monospace;font-size:0.7rem;margin-top:2px;flex-shrink:0">02</span>
+              <div><strong style="color:var(--pale)">Astrophysics</strong><div style="font-size:0.82rem;color:#9099aa">I am hoping to major in astrophysics in college — I used real math for sky brightness physics, NELM and Bortle scale conversions, and spherical astronomy</div></div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px">
+              <span style="color:var(--gold);font-family:'Space Mono',monospace;font-size:0.7rem;margin-top:2px;flex-shrink:0">03</span>
+              <div><strong style="color:var(--pale)">Coding</strong><div style="font-size:0.82rem;color:#9099aa">Vanilla JavaScript, HTML, CSS — built from scratch without frameworks</div></div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:12px">
+              <span style="color:var(--gold);font-family:'Space Mono',monospace;font-size:0.7rem;margin-top:2px;flex-shrink:0">04</span>
+              <div><strong style="color:var(--pale)">Community Stewardship</strong><div style="font-size:0.82rem;color:#9099aa">Ahupuaʻa geography, traditional voyaging sites, and the belief that data should serve the people it comes from</div></div>
+            </div>
+          </div>
         </div>
         <div class="panel">
           <div class="ctrl-label" style="margin-bottom:10px">Key Sources</div>
@@ -539,12 +716,10 @@ nav{position:sticky;top:0;z-index:100;background:rgba(4,6,15,0.97);border-bottom
   </div>
 </div>
 
-</div><!-- .wrap -->
+</div>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
-// ══════════════════════════════════════════
-// BACKGROUND STARS
-// ══════════════════════════════════════════
 const cv = document.getElementById('bg-canvas');
 const cx = cv.getContext('2d');
 let bgs = [];
@@ -568,19 +743,31 @@ function drawBG() {
 resizeCV(); window.addEventListener('resize',()=>{resizeCV();initBG();});
 initBG(); requestAnimationFrame(drawBG);
 
-// ══════════════════════════════════════════
-// TAB NAVIGATION
-// ══════════════════════════════════════════
-function showTab(t) {
+function showTab(t, ev) {
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
-  document.getElementById('tab-'+t).classList.add('active');
-  event.target.classList.add('active');
+  const sec = document.getElementById('tab-'+t);
+  if (sec) sec.classList.add('active');
+  const btn = [...document.querySelectorAll('.tab')].find(b => {
+    const oc = b.getAttribute('onclick') || '';
+    return oc.includes(`'${t}'`);
+  });
+  if (btn) btn.classList.add('active');
+  else if (ev && ev.target) ev.target.classList.add('active');
+  if (t === 'voyage' && typeof initVoyage === 'function' && !window.__voyInited) {
+    window.__voyInited = true;
+    setTimeout(() => initVoyage(), 50);
+  }
+  if (t === 'darksky' && typeof initDarkSky === 'function') {
+    if (!window.__dsInited) {
+      window.__dsInited = true;
+      setTimeout(() => initDarkSky(), 50);
+    } else if (window.__dsMap) {
+      setTimeout(() => window.__dsMap.invalidateSize(), 50);
+    }
+  }
 }
 
-// ══════════════════════════════════════════
-// STAR DATA (loaded from stars.json v2.1 — see corrections_log in JSON)
-// ══════════════════════════════════════════
 let STARS = [];
 let CONSTELLATION_GRAPHICS = {};
 const SKY_LAT = 20;
@@ -612,9 +799,7 @@ async function loadStars() {
 
 function hexToRgba(hex, alpha) {
   if (!hex || hex[0] !== '#') return `rgba(232,184,75,${alpha})`;
-  const h = hex.length === 4
-    ? hex.slice(1).split('').map(c => c + c).join('')
-    : hex.slice(1);
+  const h = hex.length === 4 ? hex.slice(1).split('').map(c => c + c).join('') : hex.slice(1);
   const r = parseInt(h.slice(0, 2), 16);
   const g = parseInt(h.slice(2, 4), 16);
   const b = parseInt(h.slice(4, 6), 16);
@@ -680,9 +865,6 @@ function starDotRadius(type) {
   return 4;
 }
 
-// ══════════════════════════════════════════
-// SKY DOME
-// ══════════════════════════════════════════
 let currentMonth = new Date().getMonth();
 
 function updateSky() {
@@ -711,62 +893,41 @@ function drawConstellationLines(svg, placed, layer) {
   if (layer !== 'constellations') return;
   const byId = Object.fromEntries(placed.map(p => [p.star.id, p]));
   const groups = {};
-
   placed.forEach(({ star, x, y }) => {
     const g = star.constellationGroup;
     if (!g) return;
     if (!groups[g]) {
-      groups[g] = {
-        color: star.color,
-        label: star.constellationLabel || CONSTELLATION_GRAPHICS[g]?.label || g,
-        pts: []
-      };
+      groups[g] = { color: star.color, label: star.constellationLabel || CONSTELLATION_GRAPHICS[g]?.label || g, pts: [] };
     }
     groups[g].pts.push({ id: star.id, x, y });
   });
-
   Object.keys(groups).forEach(groupKey => {
     const group = groups[groupKey];
     const def = CONSTELLATION_GRAPHICS[groupKey] || {};
     const stroke = hexToRgba(group.color, 0.2);
     const edges = def.edges || [];
-
     if (!edges.length && group.pts.length >= 2) {
-      const sorted = [...group.pts].sort(
-        (a, b) => Math.atan2(a.y - SKY_CY, a.x - SKY_CX) - Math.atan2(b.y - SKY_CY, b.x - SKY_CX)
-      );
-      for (let i = 0; i < sorted.length - 1; i++) {
-        edges.push([sorted[i].id, sorted[i + 1].id]);
-      }
+      const sorted = [...group.pts].sort((a, b) => Math.atan2(a.y - SKY_CY, a.x - SKY_CX) - Math.atan2(b.y - SKY_CY, b.x - SKY_CX));
+      for (let i = 0; i < sorted.length - 1; i++) edges.push([sorted[i].id, sorted[i + 1].id]);
     }
-
     edges.forEach(([idA, idB]) => {
-      const a = byId[idA];
-      const b = byId[idB];
+      const a = byId[idA], b = byId[idB];
       if (!a || !b) return;
       const line = mkEl('line');
-      line.setAttribute('x1', a.x);
-      line.setAttribute('y1', a.y);
-      line.setAttribute('x2', b.x);
-      line.setAttribute('y2', b.y);
-      line.setAttribute('stroke', stroke);
-      line.setAttribute('stroke-width', '0.75');
-      line.setAttribute('stroke-linecap', 'round');
-      line.setAttribute('fill', 'none');
-      line.setAttribute('clip-path', 'url(#dc)');
-      line.setAttribute('pointer-events', 'none');
+      line.setAttribute('x1', a.x); line.setAttribute('y1', a.y);
+      line.setAttribute('x2', b.x); line.setAttribute('y2', b.y);
+      line.setAttribute('stroke', stroke); line.setAttribute('stroke-width', '0.75');
+      line.setAttribute('stroke-linecap', 'round'); line.setAttribute('fill', 'none');
+      line.setAttribute('clip-path', 'url(#dc)'); line.setAttribute('pointer-events', 'none');
       svg.appendChild(line);
     });
-
     if (group.pts.length >= 1) {
       const cx = group.pts.reduce((s, p) => s + p.x, 0) / group.pts.length;
       const cy = group.pts.reduce((s, p) => s + p.y, 0) / group.pts.length;
       const label = mkEl('text');
       label.setAttribute('class', 'constellation-label');
-      label.setAttribute('x', cx);
-      label.setAttribute('y', cy);
-      label.setAttribute('text-anchor', 'middle');
-      label.setAttribute('dominant-baseline', 'middle');
+      label.setAttribute('x', cx); label.setAttribute('y', cy);
+      label.setAttribute('text-anchor', 'middle'); label.setAttribute('dominant-baseline', 'middle');
       label.setAttribute('clip-path', 'url(#dc)');
       label.textContent = group.label;
       svg.appendChild(label);
@@ -785,20 +946,14 @@ function drawStarLines(svg, placed, layer) {
   Object.keys(byLine).forEach(lineName => {
     const order = STAR_LINE_ORDER[lineName];
     let pts = byLine[lineName];
-    if (order) {
-      pts = order.map(id => pts.find(p => p.id === id)).filter(Boolean);
-    } else {
-      pts = pts.sort((a, b) => Math.atan2(a.y - SKY_CY, a.x - SKY_CX) - Math.atan2(b.y - SKY_CY, b.x - SKY_CX));
-    }
+    if (order) pts = order.map(id => pts.find(p => p.id === id)).filter(Boolean);
+    else pts = pts.sort((a, b) => Math.atan2(a.y - SKY_CY, a.x - SKY_CX) - Math.atan2(b.y - SKY_CY, b.x - SKY_CX));
     if (pts.length < 2) return;
     const path = mkEl('path');
     path.setAttribute('d', pts.map((p, i) => `${i ? 'L' : 'M'}${p.x},${p.y}`).join(' '));
-    path.setAttribute('fill', 'none');
-    path.setAttribute('stroke', 'rgba(232,184,75,0.45)');
-    path.setAttribute('stroke-width', '1.5');
-    path.setAttribute('stroke-dasharray', '6,4');
-    path.setAttribute('clip-path', 'url(#dc)');
-    path.setAttribute('pointer-events', 'none');
+    path.setAttribute('fill', 'none'); path.setAttribute('stroke', 'rgba(232,184,75,0.45)');
+    path.setAttribute('stroke-width', '1.5'); path.setAttribute('stroke-dasharray', '6,4');
+    path.setAttribute('clip-path', 'url(#dc)'); path.setAttribute('pointer-events', 'none');
     svg.appendChild(path);
   });
 }
@@ -807,7 +962,6 @@ function renderSkyDome(month, layer, hourHST) {
   const svg = document.getElementById('sky-svg');
   svg.innerHTML = '';
   const CX = SKY_CX, CY = SKY_CY, R = SKY_R;
-
   const defs = mkEl('defs');
   const g = mkGrad('dG','50%','40%','60%',[[0,'#0b1535'],[100,'#020408']]);
   defs.appendChild(g);
@@ -825,10 +979,8 @@ function renderSkyDome(month, layer, hourHST) {
   const cc=mkEl('circle');cc.setAttribute('cx',CX);cc.setAttribute('cy',CY);cc.setAttribute('r',R-2);
   clip.appendChild(cc);defs.appendChild(clip);
   svg.appendChild(defs);
-
   const bg=mkEl('circle');bg.setAttribute('cx',CX);bg.setAttribute('cy',CY);bg.setAttribute('r',R);bg.setAttribute('fill','url(#dG)');svg.appendChild(bg);
   const mw=mkEl('ellipse');mw.setAttribute('cx',CX+20);mw.setAttribute('cy',CY);mw.setAttribute('rx',28);mw.setAttribute('ry',215);mw.setAttribute('fill','rgba(180,200,255,0.035)');mw.setAttribute('transform',`rotate(-22,${CX},${CY})`);svg.appendChild(mw);
-
   [0.28,0.52,0.76].forEach(f=>{
     const r=mkEl('circle');r.setAttribute('cx',CX);r.setAttribute('cy',CY);r.setAttribute('r',R*f);
     r.setAttribute('fill','none');r.setAttribute('stroke','rgba(232,184,75,0.055)');r.setAttribute('stroke-width','1');svg.appendChild(r);
@@ -836,16 +988,13 @@ function renderSkyDome(month, layer, hourHST) {
   ['M10,250L490,250','M250,10L250,490'].forEach(d=>{
     const l=mkEl('path');l.setAttribute('d',d);l.setAttribute('stroke','rgba(232,184,75,0.055)');l.setAttribute('stroke-width','1');l.setAttribute('clip-path','url(#dc)');svg.appendChild(l);
   });
-
   for(let i=0;i<55;i++){
     const a=Math.random()*Math.PI*2,d=Math.random()*(R-12);
     const bs=mkEl('circle');bs.setAttribute('cx',CX+Math.cos(a)*d);bs.setAttribute('cy',CY+Math.sin(a)*d);
     bs.setAttribute('r',Math.random()*0.75+0.25);bs.setAttribute('fill',`rgba(200,215,255,${Math.random()*0.35+0.08})`);bs.setAttribute('clip-path','url(#dc)');svg.appendChild(bs);
   }
-
   const visible = STARS.filter(s => s.months.includes(month) && starMatchesLayer(s, layer));
   const placed = [];
-
   visible.forEach(star => {
     const pos = getStarSkyPos(star, month, hourHST);
     if (!pos) return;
@@ -854,10 +1003,8 @@ function renderSkyDome(month, layer, hourHST) {
     if (Math.sqrt(dx * dx + dy * dy) > R - 5) return;
     placed.push({ star, x: px, y: py });
   });
-
   drawConstellationLines(svg, placed, layer);
   drawStarLines(svg, placed, layer);
-
   placed.forEach(({ star, x: px, y: py }) => {
     if (star.type !== 'starline') {
       const halo = mkEl('circle');
@@ -866,7 +1013,6 @@ function renderSkyDome(month, layer, hourHST) {
       halo.setAttribute('fill', star.color); halo.setAttribute('opacity', '0.07');
       halo.setAttribute('clip-path', 'url(#dc)');
       svg.appendChild(halo);
-
       const dot = mkEl('circle');
       dot.setAttribute('cx', px); dot.setAttribute('cy', py);
       dot.setAttribute('r', starDotRadius(star.type));
@@ -877,7 +1023,6 @@ function renderSkyDome(month, layer, hourHST) {
       if (star.type === 'nav' || star.type === 'planet') dot.classList.add('sp');
       svg.appendChild(dot);
     }
-
     const lbl = mkEl('text');
     lbl.setAttribute('x', px + 8); lbl.setAttribute('y', py + 4);
     lbl.setAttribute('fill', star.color); lbl.setAttribute('opacity', '0.82');
@@ -886,7 +1031,6 @@ function renderSkyDome(month, layer, hourHST) {
     lbl.setAttribute('clip-path', 'url(#dc)');
     lbl.textContent = star.h;
     svg.appendChild(lbl);
-
     const hit = mkEl('circle');
     hit.setAttribute('cx', px); hit.setAttribute('cy', py); hit.setAttribute('r', 20);
     hit.setAttribute('fill', 'transparent'); hit.setAttribute('cursor', 'pointer');
@@ -894,7 +1038,6 @@ function renderSkyDome(month, layer, hourHST) {
     bindStarHitArea(hit, star);
     svg.appendChild(hit);
   });
-
   const z=mkEl('circle');z.setAttribute('cx',CX);z.setAttribute('cy',CY);z.setAttribute('r',3);z.setAttribute('fill','rgba(232,184,75,0.3)');svg.appendChild(z);
 }
 
@@ -918,58 +1061,46 @@ function selectStar(star) {
   }[star.type] || '🌟 Sky Object';
   const obsLabel = isPlanet ? 'Planets' : 'Observatory Connection';
   const astroTitle = isPlanet ? 'Planetary Data' : 'Astrophysics — Maunakea Observatory Data';
-  const distVal = star.dist != null
-    ? (isPlanet ? `${star.dist} light-years (approx.)` : `${star.dist} light-years`)
-    : '—';
-    p.innerHTML = `
+  const distVal = star.dist != null ? (isPlanet ? `${star.dist} light-years (approx.)` : `${star.dist} light-years`) : '—';
+  p.innerHTML = `
     ${buildConstellationDiagram(star)}
-    <motion class="star-name-h">${star.h}</motion>
-    <motion class="star-name-w">✦ ${star.w}</motion>
-    <motion class="star-meaning">${star.meaning}</motion>
-    <motion class="data-sec">Navigation Role</motion>
-    <motion style="font-size:0.88rem;color:#a0aabb;line-height:1.7;margin-bottom:12px">${star.navRole}</motion>
-    ${star.starLine ? `<motion class="data-row"><span class="dl">Hawaiian Star Line</span><span class="dv hi">${star.starLine}</span></motion>` : ''}
-    <motion class="data-sec">${astroTitle}</motion>
-    ${star.mag != null ? `<motion class="data-row"><span class="dl">Apparent Magnitude</span><span class="dv hi">${star.mag}</span></motion>` : ''}
-    ${star.dist != null ? `<motion class="data-row"><span class="dl">Distance from Earth</span><span class="dv">${distVal}</span></motion>` : ''}
-    <motion class="data-row"><span class="dl">Spectral Type</span><span class="dv">${star.spec}</span></motion>
-    ${star.rsun ? `<motion class="data-row"><span class="dl">Radius (Solar)</span><span class="dv">${star.rsun} R☉</span></motion>` : ''}
-    ${star.ra && star.ra !== 'varies' ? `<motion class="data-row"><span class="dl">Right Ascension</span><span class="dv">${star.ra}</span></motion>` : ''}
-    ${star.dec && star.dec !== 'varies' ? `<motion class="data-row"><span class="dl">Declination</span><span class="dv">${star.dec}</span></motion>` : ''}
-    <motion class="data-row"><span class="dl">Rise House</span><span class="dv">${star.riseHouse}</span></motion>
-    ${star.setHouse ? `<motion class="data-row"><span class="dl">Set House</span><span class="dv">${star.setHouse}</span></motion>` : ''}
-    <motion class="data-sec">${obsLabel}</motion>
-    <motion style="font-size:0.82rem;color:#9099aa;line-height:1.6;margin-bottom:10px">${star.obsNote}</motion>
+    <div class="star-name-h">${star.h}</div>
+    <div class="star-name-w">✦ ${star.w}</div>
+    <div class="star-meaning">${star.meaning}</div>
+    <div class="data-sec">Navigation Role</div>
+    <div style="font-size:0.88rem;color:#a0aabb;line-height:1.7;margin-bottom:12px">${star.navRole}</div>
+    ${star.starLine ? `<div class="data-row"><span class="dl">Hawaiian Star Line</span><span class="dv hi">${star.starLine}</span></div>` : ''}
+    <div class="data-sec">${astroTitle}</div>
+    ${star.mag != null ? `<div class="data-row"><span class="dl">Apparent Magnitude</span><span class="dv hi">${star.mag}</span></div>` : ''}
+    ${star.dist != null ? `<div class="data-row"><span class="dl">Distance from Earth</span><span class="dv">${distVal}</span></div>` : ''}
+    <div class="data-row"><span class="dl">Spectral Type</span><span class="dv">${star.spec}</span></div>
+    ${star.rsun ? `<div class="data-row"><span class="dl">Radius (Solar)</span><span class="dv">${star.rsun} R☉</span></div>` : ''}
+    ${star.ra && star.ra !== 'varies' ? `<div class="data-row"><span class="dl">Right Ascension</span><span class="dv">${star.ra}</span></div>` : ''}
+    ${star.dec && star.dec !== 'varies' ? `<div class="data-row"><span class="dl">Declination</span><span class="dv">${star.dec}</span></div>` : ''}
+    <div class="data-row"><span class="dl">Rise House</span><span class="dv">${star.riseHouse}</span></div>
+    ${star.setHouse ? `<div class="data-row"><span class="dl">Set House</span><span class="dv">${star.setHouse}</span></div>` : ''}
+    <div class="data-sec">${obsLabel}</div>
+    <div style="font-size:0.82rem;color:#9099aa;line-height:1.6;margin-bottom:10px">${star.obsNote}</div>
     <span class="nav-badge ${badgeClass}">${badgeLabel}</span>
-  `.replace('<motion', '<div').replace('</motion>', '</div>');
+  `;
 }
 
 const tip = document.getElementById('tip');
-function isCoarsePointerDevice() {
-  return window.matchMedia('(hover: none) and (pointer: coarse)').matches;
-}
+function isCoarsePointerDevice() { return window.matchMedia('(hover: none) and (pointer: coarse)').matches; }
 function showTip(e,star){tip.querySelector('.tn').textContent=star.h;tip.querySelector('.tw').textContent=star.w;tip.style.display='block';moveTip(e);}
 function hideTip(){tip.style.display='none';}
 function bindStarHitArea(hit, star) {
   hit.addEventListener('click', () => selectStar(star));
-  hit.addEventListener('mouseenter', e => {
-    if (!isCoarsePointerDevice()) showTip(e, star);
-  });
-  hit.addEventListener('mouseleave', () => {
-    if (!isCoarsePointerDevice()) hideTip();
-  });
+  hit.addEventListener('mouseenter', e => { if (!isCoarsePointerDevice()) showTip(e, star); });
+  hit.addEventListener('mouseleave', () => { if (!isCoarsePointerDevice()) hideTip(); });
   hit.addEventListener('touchstart', e => {
     if (!isCoarsePointerDevice()) return;
-    selectStar(star);
-    hideTip();
+    selectStar(star); hideTip();
   }, { passive: true });
 }
 document.addEventListener('mousemove',e=>{if(tip.style.display==='block')moveTip(e);});
 function moveTip(e){tip.style.left=(e.clientX+14)+'px';tip.style.top=(e.clientY-10)+'px';}
 
-// ══════════════════════════════════════════
-// BORTLE CALCULATOR
-// ══════════════════════════════════════════
 const BORTLE_DATA = [
   {b:1,color:'#0a0a2e',label:'Perfect',nelm:7.6,sqm:21.9,mw:'Faint airglow, M33 naked eye',threat:'None',zodiacal:'Brilliant cone'},
   {b:2,color:'#0f1a3a',label:'Truly Dark',nelm:7.1,sqm:21.5,mw:'M33 easy, zodiacal clearly seen',threat:'None',zodiacal:'Bright, obvious'},
@@ -990,8 +1121,7 @@ function renderBortleScale() {
     <div class="bortle-cell ${d.b===selectedBortle?'active':''}" style="background:${d.color}" onclick="selectBortle(${d.b})">
       <div class="bortle-val" style="color:${d.b<=4?'#e8e0d0':'#f0d0a0'}">${d.b}</div>
       <div class="bortle-lbl" style="color:${d.b<=4?'#a0b0c0':'#c09060'}">${d.label}</div>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
 function selectBortle(b) {
@@ -1027,15 +1157,9 @@ function updateVisibilityGrid(nelm) {
 
 function useReadingInSubmission() {
   document.getElementById('f-bortle').value = selectedBortle;
-  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
-  document.querySelectorAll('.tab')[4].classList.add('active');
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.getElementById('tab-submit').classList.add('active');
+  showTab('submit');
 }
 
-// ══════════════════════════════════════════
-// KAULANA MAHINA
-// ══════════════════════════════════════════
 const MOON_PHASES = [
   {name:'Hilo',sym:'🌑',meaning:'New moon — beginning',nav:'Begin voyage planning'},
   {name:'Hoʻonui',sym:'🌒',meaning:'Growing — canoe preparation',nav:'Prepare provisions'},
@@ -1054,8 +1178,7 @@ function renderMoonCalendar() {
       <div class="moon-name">${p.name}</div>
       <div class="moon-meaning">${p.meaning}</div>
       <div class="moon-nav">${p.nav}</div>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
 function calcMahina() {
@@ -1077,13 +1200,9 @@ function calcMahina() {
     <div class="data-row"><span class="dl">Makahiki Season</span><span class="dv ${isMakahikiSeason?'hi':''}">${isMakahikiSeason?'✓ Yes — Hoʻoilo (wet season)':'Not yet — Kau (dry season)'}</span></div>
     <div class="data-row"><span class="dl">Makaliʻi (Pleiades)</span><span class="dv ${makaliVisible?'hi':''}">${makaliVisible?'✓ Visible at night':'Not visible this month'}</span></div>
     <div class="data-row"><span class="dl">Navigation Guidance</span><span class="dv">${mp.illumination>70?'Moonlight aids night sailing':'Dark sky — star navigation optimal'}</span></div>
-    <div class="data-row"><span class="dl">Moon Effect on NELM</span><span class="dv">${mp.illumination>80?'−2.5 mag (bright moon reduces visible stars)':mp.illumination>40?'−1.0 mag (moderate reduction)':'Minimal — good night for readings'}</span></div>
-  `;
+    <div class="data-row"><span class="dl">Moon Effect on NELM</span><span class="dv">${mp.illumination>80?'−2.5 mag (bright moon reduces visible stars)':mp.illumination>40?'−1.0 mag (moderate reduction)':'Minimal — good night for readings'}</span></div>`;
 }
 
-// ══════════════════════════════════════════
-// SUBMISSION FORM
-// ══════════════════════════════════════════
 let submissions = [];
 
 function renderStarCheckboxes() {
@@ -1091,8 +1210,7 @@ function renderStarCheckboxes() {
     <label class="star-check">
       <input type="checkbox" name="stars" value="${s.h}">
       <span style="color:${s.color}">${s.h}</span>
-    </label>
-  `).join('');
+    </label>`).join('');
 }
 
 function submitReading() {
@@ -1109,10 +1227,8 @@ function submitReading() {
     id: Date.now()
   };
   submissions.unshift(sub);
-  // Also persist to localStorage so readings survive a refresh
   try { localStorage.setItem('hoku_submissions', JSON.stringify(submissions)); } catch(e) {}
   renderSubmissions();
-  renderMapReadings();
   document.getElementById('success-msg').style.display = 'block';
   setTimeout(()=>document.getElementById('success-msg').style.display='none', 3000);
   clearForm();
@@ -1135,111 +1251,17 @@ function renderSubmissions() {
       <div class="sub-bortle">Bortle ${s.bortle} · NELM ${BORTLE_DATA[s.bortle-1].nelm}</div>
       ${s.stars.length?`<div class="sub-stars">Stars visible: ${s.stars.join(', ')}</div>`:''}
       ${s.notes?`<div style="font-size:0.78rem;color:var(--dim);margin-top:4px;font-style:italic">${s.notes}</div>`:''}
-    </div>
-  `).join('');
+    </div>`).join('');
   document.getElementById('total-readings').textContent = submissions.length;
   const avg = (submissions.reduce((a,s)=>a+s.bortle,0)/submissions.length).toFixed(1);
   document.getElementById('avg-bortle').textContent = avg;
 }
 
-// ══════════════════════════════════════════
-// ISLAND MAP
-// ══════════════════════════════════════════
-const TRAD_SITES = [
-  {name:'Kawaihae Harbor',x:230,y:165,type:'voyaging',note:'Primary voyaging launch site — Hōkūleʻa departed from here'},
-  {name:'Ka Lae / South Point',x:310,y:490,type:'voyaging',note:'Southernmost point — first landfall for some Polynesian voyagers'},
-  {name:'Waipio Valley',x:200,y:135,type:'voyaging',note:'Sacred valley — traditional launching and arrival point'},
-  {name:'Kealakekua Bay',x:215,y:340,type:'voyaging',note:'Historic anchorage — western coastal navigation site'},
-  {name:'Leleiwi Beach, Hilo',x:445,y:240,type:'voyaging',note:'Eastern coastal traditional gathering and fishing site'},
-];
-
-const LIGHT_ZONES = [
-  {name:'Kailua-Kona',x:210,y:320,r:40,note:'Major light pollution source — Bortle 5-6'},
-  {name:'Hilo Metro',x:430,y:220,r:35,note:'Bortle 5-6 — eastern light dome'},
-  {name:'Waimea',x:260,y:175,r:22,note:'Bortle 4 — moderate suburban'},
-];
-
-function renderMap() {
-  const svg = document.getElementById('map-svg');
-  let html = `
-    <defs>
-      <radialGradient id="mgLight" cx="50%" cy="50%" r="50%">
-        <stop offset="0%" stop-color="rgba(232,130,58,0.35)"/>
-        <stop offset="100%" stop-color="rgba(232,130,58,0)"/>
-      </radialGradient>
-    </defs>
-    <rect width="800" height="600" fill="#060e1e"/>
-  `;
-  for (let i=0;i<80;i++) {
-    const x=Math.random()*800,y=Math.random()*600;
-    html+=`<circle cx="${x}" cy="${y}" r="${Math.random()*1.5+0.3}" fill="rgba(74,120,181,${Math.random()*0.12+0.04})"/>`;
-  }
-  html += `<polygon points="
-    200,120 220,110 250,108 280,112 310,108 340,115 370,125 400,140 430,155 455,170
-    470,195 475,220 468,245 455,265 440,280 420,295 405,315 390,335 370,360
-    350,385 340,410 325,435 315,455 308,475 305,495 300,510 295,490 288,465
-    278,445 268,425 260,405 250,385 238,365 225,345 215,325 207,305 200,280
-    192,255 188,230 190,205 195,180 198,155 200,135 200,120
-  " fill="#0f1e10" stroke="#2a4a2a" stroke-width="1.5"/>`;
-
-  LIGHT_ZONES.forEach(z=>{
-    html+=`<circle cx="${z.x}" cy="${z.y}" r="${z.r*1.8}" fill="rgba(232,130,58,0.08)"/>`;
-    html+=`<circle cx="${z.x}" cy="${z.y}" r="${z.r}" fill="rgba(232,130,58,0.14)"/>`;
-    html+=`<text x="${z.x}" y="${z.y+z.r+14}" text-anchor="middle" fill="rgba(232,130,58,0.5)" font-size="9" font-family="Space Mono">${z.name}</text>`;
-  });
-
-  html+=`<circle cx="310" cy="210" r="18" fill="none" stroke="rgba(157,200,240,0.2)" stroke-width="1" stroke-dasharray="3,3"/>`;
-  html+=`<circle cx="310" cy="210" r="8" fill="rgba(157,200,240,0.15)" stroke="rgba(157,200,240,0.5)" stroke-width="1.5"/>`;
-  html+=`<text x="330" y="208" fill="#9dc8f0" font-size="9.5" font-family="Cinzel">Maunakea</text>`;
-  html+=`<text x="330" y="220" fill="rgba(157,200,240,0.5)" font-size="8" font-family="Space Mono">4,207m · 10 observatories</text>`;
-
-  TRAD_SITES.forEach(s=>{
-    html+=`<circle cx="${s.x}" cy="${s.y}" r="7" fill="rgba(232,184,75,0.15)" stroke="#e8b84b" stroke-width="1.5"/>`;
-    html+=`<circle cx="${s.x}" cy="${s.y}" r="3" fill="#e8b84b"/>`;
-    html+=`<text x="${s.x+10}" y="${s.y+4}" fill="rgba(232,184,75,0.8)" font-size="8.5" font-family="Cinzel">${s.name}</text>`;
-  });
-
-  renderMapReadings(svg, html);
-}
-
-let mapSVGBase = '';
-function renderMapReadings(svgEl, base) {
-  const svg = svgEl || document.getElementById('map-svg');
-  let html = base || mapSVGBase;
-  if (!base) { html = svg.innerHTML; }
-  submissions.forEach(s=>{
-    const siteMap = {
-      'Maunakea Summit (4,207m)':{x:310,y:210},
-      'Maunakea VIS (2,800m)':{x:305,y:245},
-      'Hilo — Waiākea':{x:430,y:220},
-      'Hilo — Leleiwi Beach':{x:445,y:240},
-      'Kailua-Kona':{x:210,y:320},
-      'South Point / Ka Lae':{x:310,y:490},
-      'Waipio Valley':{x:200,y:135},
-      'Kohala Coast':{x:235,y:150},
-      'Kawaihae Harbor':{x:230,y:165},
-    };
-    const pos = siteMap[s.site] || {x:310,y:300};
-    const col = s.bortle<=3?'#4ab5a0':s.bortle<=5?'#e8b84b':'#f06868';
-    html+=`<circle cx="${pos.x}" cy="${pos.y}" r="9" fill="${col}" opacity="0.7" stroke="white" stroke-width="0.8"/>`;
-    html+=`<text x="${pos.x}" y="${pos.y+4}" text-anchor="middle" fill="white" font-size="7.5" font-family="Space Mono" font-weight="bold">${s.bortle}</text>`;
-  });
-  svg.innerHTML = html;
-  mapSVGBase = mapSVGBase || html;
-}
-
-// ══════════════════════════════════════════
-// INIT
-// ══════════════════════════════════════════
 document.getElementById('obs-date').value = new Date().toISOString().split('T')[0];
 document.getElementById('mahina-date').value = new Date().toISOString().split('T')[0];
 document.getElementById('f-date').value = new Date().toISOString().split('T')[0];
 
-// Restore saved submissions from localStorage
-try {
-  const saved = localStorage.getItem('hoku_submissions');
-  if (saved) submissions = JSON.parse(saved);
-} catch(e) {}
+try { const saved = localStorage.getItem('hoku_submissions'); if (saved) submissions = JSON.parse(saved); } catch(e) {}
 
 async function initApp() {
   await loadStars();
@@ -1250,444 +1272,754 @@ async function initApp() {
   renderMoonCalendar();
   renderStarCheckboxes();
   renderSubmissions();
-  renderMap();
-  setTimeout(() => { mapSVGBase = document.getElementById('map-svg').innerHTML; }, 100);
 }
 initApp();
+
 const DETAIL_CONSTELLATIONS = {
- 
- nahiku: {
-   h: 'Nāhiku', w: 'Big Dipper',
-   starIds: ['na_hiku'],
-   stars: [
-     {x:130,y:52},{x:142,y:68},{x:122,y:74},{x:112,y:58},
-     {x:90,y:52},{x:68,y:44},{x:44,y:32}
-   ],
-   lines:[[0,1],[1,2],[2,3],[3,0],[3,4],[4,5],[5,6]],
-   pointer:{from:0,to:{x:90,y:18}},
-   highlightIdx:null
- },
-
- // ── HŌKŪPA'A / URSA MINOR (Little Dipper) ────────────────────
- // From Bishop Museum image: small dipper, handle curves DOWN-RIGHT
- // Polaris at END of handle (top-left), bowl opens to the right
- // The Little Dipper is like a mirror-image of the Big Dipper
- ursa_minor: {
-   h: 'Hōkūpaʻa', w: 'Ursa Minor',
-   starIds: ['hokupaa'],
-   stars: [
-     {x:55,y:38},   // 0 polaris — tip of handle = Hōkūpaʻa
-     {x:72,y:52},   // 1 handle
-     {x:88,y:62},   // 2 handle
-     {x:105,y:75},  // 3 bowl corner — handle meets bowl
-     {x:118,y:88},  // 4 bowl — bottom right (kochab area)
-     {x:105,y:100}, // 5 bowl — bottom
-     {x:92,y:88},   // 6 bowl — completes rectangle
-   ],
-   lines:[
-     [0,1],[1,2],[2,3],      // handle from polaris
-     [3,6],[6,5],[5,4],[4,3] // bowl rectangle
-   ],
-   highlightIdx:0
- },
-
- // ── KA MŌ'Ī (Cepheus) ────────────────────────────────────────
- // House/crown shape — 5 stars forming a pentagon with a pointed top
- // Sits between Nāhiku and Ursa Minor in the north
- ka_moi: {
-   h: 'Ka Mōʻī', w: 'Cepheus',
-   starIds: ['ka_moi'],
-   stars: [
-     {x:90,y:25},   // 0 alpha — pointed top of house
-     {x:55,y:58},   // 1 beta  — upper left
-     {x:62,y:95},   // 2 gamma — lower left
-     {x:118,y:95},  // 3 delta — lower right
-     {x:125,y:58},  // 4 epsilon — upper right
-   ],
-   lines:[
-     [0,1],[1,2],[2,3],[3,4],[4,0], // pentagon
-     [1,4]                           // cross brace
-   ],
-   highlightIdx:0
- },
-
- // ── PIRAʻETEA / CYGNUS (Northern Cross) ──────────────────────
- // Clear cross shape — Deneb at TOP, Albireo at BOTTOM
- // Horizontal bar crosses through center (Sadr)
- cygnus: {
-   h: 'Piraʻetea', w: 'Cygnus',
-   starIds: ['piraetea'],
-   stars: [
-     {x:90,y:18},   // 0 deneb  — TOP = Piraʻetea
-     {x:90,y:68},   // 1 sadr   — center of cross
-     {x:90,y:148},  // 2 albireo — BOTTOM
-     {x:32,y:68},   // 3 left wing
-     {x:148,y:68},  // 4 right wing
-   ],
-   lines:[
-     [0,1],[1,2],   // vertical spine top to bottom
-     [3,1],[1,4]    // horizontal wings
-   ],
-   highlightIdx:0
- },
-
- // ── KEOE / LYRA ───────────────────────────────────────────────
- // Vega at top + small parallelogram of 4 stars below
- lyra: {
-   h: 'Keoe', w: 'Lyra',
-   starIds: ['kawelo'],
-   stars: [
-     {x:90,y:25},   // 0 vega = Keoe — BRIGHTEST at top
-     {x:62,y:72},   // 1 beta  — left of parallelogram
-     {x:70,y:108},  // 2 gamma — bottom left
-     {x:110,y:108}, // 3 delta — bottom right
-     {x:118,y:72},  // 4 epsilon — right of parallelogram
-   ],
-   lines:[
-     [0,1],[0,4],          // vega connects to both sides
-     [1,2],[2,3],[3,4],[4,1] // parallelogram
-   ],
-   highlightIdx:0
- },
-
- // ── HUMU / AQUILA (Eagle) ─────────────────────────────────────
- // Altair at center with stars above and below + wings spreading
- // Looks like a diamond with a line through it
- aquila: {
-   h: 'Humu', w: 'Aquila',
-   starIds: ['humu'],
-   stars: [
-     {x:90,y:75},   // 0 altair  — center = Humu
-     {x:90,y:38},   // 1 tarazed — directly above
-     {x:90,y:112},  // 2 alshain — directly below
-     {x:128,y:95},  // 3 delta   — right wing
-     {x:90,y:138},  // 4 eta     — bottom point
-     {x:52,y:95},   // 5 lambda  — left wing
-     {x:115,y:118}, // 6 zeta    — lower right
-   ],
-   lines:[
-     [1,0],[0,2],[2,4],  // vertical spine
-     [5,0],[0,3],        // wings through altair
-     [2,6],[6,3]         // lower body
-   ],
-   highlightIdx:0
- },
-
- // ── HŌKŪ'IWA / BOÖTES ────────────────────────────────────────
- // ALREADY FIXED — keeping corrected kite shape
- hokūiwa: {
-   h: 'Hōkūʻiwa', w: 'Boötes',
-   starIds: ['hokulea'],
-   stars: [
-     {x:90,y:145},  // 0 arcturus — BOTTOM point = Hōkūleʻa
-     {x:60,y:110},  // 1 eta — left
-     {x:68,y:72},   // 2 beta — upper left
-     {x:90,y:55},   // 3 gamma — TOP point
-     {x:112,y:72},  // 4 delta — upper right
-     {x:120,y:110}, // 5 epsilon — right
-     {x:100,y:145}, // 6 rho — lower right
-   ],
-   lines:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,0],[2,5]],
-   highlightIdx:0
- },
-
- // ── KAUAMEA / CORONA BOREALIS ─────────────────────────────────
- // Small arc/crown — 7 stars in a shallow U shape
- // Alphecca is the brightest at the top of the arc
- kauamea: {
-   h: 'Kauamea', w: 'Corona Borealis',
-   starIds: ['kauamea_alphecca'],
-   stars: [
-     {x:90,y:48},   // 0 alphecca — TOP of arc, brightest
-     {x:65,y:62},   // 1 beta
-     {x:45,y:88},   // 2 gamma — left end
-     {x:55,y:115},  // 3 delta
-     {x:90,y:128},  // 4 epsilon — bottom of U
-     {x:125,y:115}, // 5 iota
-     {x:135,y:88},  // 6 theta — right end
-     {x:115,y:62},  // 7 nu
-   ],
-   lines:[
-     [2,1],[1,0],[0,7],[7,6],[6,5],[5,4],[4,3],[3,2]
-   ],
-   highlightIdx:0
- },
-
- // ── IKIIKI / LEO (Sickle + body) ─────────────────────────────
- // Backward question mark (sickle) on left + triangle on right
- // Regulus/Ikiiki at bottom of sickle
- leo: {
-   h: 'Ikiiki', w: 'Leo',
-   starIds: ['ikiiki'],
-   stars: [
-     {x:72,y:128},  // 0 regulus  — BOTTOM of sickle = Ikiiki
-     {x:65,y:105},  // 1 eta leo
-     {x:52,y:82},   // 2 gamma    — top of sickle
-     {x:62,y:55},   // 3 zeta
-     {x:82,y:45},   // 4 mu       — top right of sickle
-     {x:102,y:58},  // 5 epsilon
-     {x:108,y:82},  // 6 theta    — closes sickle loop
-     {x:65,y:135},  // 7 delta    — body
-     {x:138,y:128}, // 8 beta leo — TAIL = Denebola
-   ],
-   lines:[
-     [0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,0], // sickle
-     [7,0],[7,8]                                  // body to tail
-   ],
-   highlightIdx:0
- },
-
- // ── HIKIANALIA / VIRGO ────────────────────────────────────────
- // Large Y shape — Spica/Hikianalia at the bottom point
- virgo: {
-   h: 'Hikianalia', w: 'Virgo',
-   starIds: ['hikianalia'],
-   stars: [
-     {x:90,y:148},  // 0 spica    — BOTTOM = Hikianalia
-     {x:95,y:115},  // 1 gamma    — stem
-     {x:115,y:90},  // 2 delta    — right branch
-     {x:132,y:65},  // 3 epsilon  — right tip
-     {x:108,y:78},  // 4 zeta
-     {x:75,y:90},   // 5 beta     — left branch
-     {x:55,y:72},   // 6 eta
-     {x:38,y:52},   // 7 tau      — left tip
-   ],
-   lines:[
-     [0,1],         // stem up
-     [1,2],[2,3],   // right arm
-     [1,4],[4,5],   // middle
-     [5,6],[6,7]    // left arm
-   ],
-   highlightIdx:0
- },
-
- // ── MEʻE / CORVUS (Compact trapezoid) ────────────────────────
- // Four stars in a compact trapezoid — like a small kite/sail
- // From the June sky chart it's a clear quadrilateral
- mee: {
-   h: 'Meʻe', w: 'Corvus',
-   starIds: ['mee'],
-   stars: [
-     {x:62,y:55},   // 0 gienah   — top left
-     {x:118,y:48},  // 1 eta crv  — top right
-     {x:128,y:112}, // 2 epsilon  — bottom right
-     {x:55,y:118},  // 3 delta    — bottom left
-   ],
-   lines:[
-     [0,1],[1,2],[2,3],[3,0], // trapezoid
-     [0,2]                    // diagonal
-   ],
-   highlightIdx:null
- },
-
- // ── KAMAKAUNUIAMĀUI / SCORPIUS ────────────────────────────────
- // The FULL fishhook — head, body, and dramatic curling tail
- // More curved and hooky than before — matches the iconic shape
- // Lehuakona (Antares) is the bright heart at index 3
- scorpius: {
-   h: 'Kamakaunuiamāui', w: 'Scorpius — The Great Fishhook',
-   starIds: ['kamakaunuiamāui','lehuakona'],
-   stars: [
-     {x:50,y:22},   // 0  graffias  — head left
-     {x:72,y:28},   // 1  dschubba  — head right
-     {x:85,y:40},   // 2  pi sco    — neck
-     {x:92,y:58},   // 3  ANTARES   — heart = Lehuakona ★
-     {x:98,y:75},   // 4  tau sco
-     {x:104,y:90},  // 5  epsilon
-     {x:110,y:105}, // 6  mu sco
-     {x:114,y:118}, // 7  zeta      — tail starts curving
-     {x:115,y:130}, // 8  eta
-     {x:112,y:142}, // 9  theta     — curve begins RIGHT to LEFT
-     {x:102,y:150}, // 10 iota      — curling inward
-     {x:88,y:155},  // 11 kappa
-     {x:72,y:152},  // 12 shaula    — tail tip (curves back left)
-     {x:58,y:145},  // 13 upsilon   — end of hook
-   ],
-   lines:[
-     [0,1],[1,2],[2,3],              // head to heart
-     [3,4],[4,5],[5,6],[6,7],        // body going down-right
-     [7,8],[8,9],[9,10],[10,11],     // tail curving
-     [11,12],[12,13]                 // hook tip curling back left
-   ],
-   highlightIdx:3
- },
-
- // ── PĪMOE / SAGITTARIUS (Teapot) ─────────────────────────────
- // Classic teapot asterism — spout on left, handle on right
- sagittarius: {
-   h: 'Pīmoe', w: 'Sagittarius — The Teapot',
-   starIds: ['pimoe_kaus_australis'],
-   stars: [
-     {x:105,y:128}, // 0 kaus aus  — bottom right of teapot
-     {x:88,y:105},  // 1 kaus med  — right side
-     {x:68,y:78},   // 2 kaus bor  — top of teapot
-     {x:45,y:92},   // 3 phi       — spout LEFT tip
-     {x:78,y:140},  // 4 sigma     — base
-     {x:52,y:128},  // 5 zeta      — lower spout
-     {x:38,y:105},  // 6 epsilon   — spout tip
-   ],
-   lines:[
-     [0,1],[1,2],           // right wall up
-     [2,3],[3,6],[6,5],     // spout
-     [0,4],[4,5],           // base
-     [2,1],[1,4]            // body braces
-   ],
-   highlightIdx:0
- },
-
- // ── CENTAURUS POINTER STARS ───────────────────────────────────
- // Just two bright stars with a dashed line pointing to the Cross
- // Kamailehope (alpha) is brighter, Kamailemua (beta) is the pointer
- centaurus: {
-   h: 'Kamailemua me Kamailehope', w: 'Centaurus Pointer Stars',
-   starIds: ['kamailehope','kamailemua'],
-   stars: [
-     {x:62,y:108},  // 0 alpha cen = Kamailehope — left/lower
-     {x:118,y:62},  // 1 beta cen  = Kamailemua  — right/upper
-   ],
-   lines:[[0,1]],
-   pointer:{from:0,to:{x:90,y:148}},
-   highlightIdx:null
- },
-
- // ── HĀNAIAKAMALAMA / CRUX (Southern Cross) ───────────────────
- // Clean CROSS shape — long axis runs top to bottom (pointing south)
- // Short axis runs left to right
- // This is the key navigation constellation for sailing south
- crux: {
-   h: 'Hānaiakamalama', w: 'Southern Cross',
-   starIds: ['hanaiakamalama'],
-   stars: [
-     {x:90,y:148},  // 0 acrux   — BOTTOM (southernmost, brightest)
-     {x:90,y:32},   // 1 gacrux  — TOP
-     {x:148,y:90},  // 2 mimosa  — RIGHT (brightest in cross)
-     {x:32,y:90},   // 3 delta   — LEFT
-     {x:98,y:78},   // 4 epsilon — small inner star near center
-   ],
-   lines:[
-     [0,1],  // long vertical axis — points to south pole
-     [2,3],  // short horizontal axis
-     [1,4]   // epsilon to top (slightly off-center)
-   ],
-   highlightIdx:0
- }
-
+ nahiku:{h:'Nāhiku',w:'Big Dipper',starIds:['na_hiku'],stars:[{x:130,y:52},{x:142,y:68},{x:122,y:74},{x:112,y:58},{x:90,y:52},{x:68,y:44},{x:44,y:32}],lines:[[0,1],[1,2],[2,3],[3,0],[3,4],[4,5],[5,6]],pointer:{from:0,to:{x:90,y:18}},highlightIdx:null},
+ ursa_minor:{h:'Hōkūpaʻa',w:'Ursa Minor',starIds:['hokupaa'],stars:[{x:55,y:38},{x:72,y:52},{x:88,y:62},{x:105,y:75},{x:118,y:88},{x:105,y:100},{x:92,y:88}],lines:[[0,1],[1,2],[2,3],[3,6],[6,5],[5,4],[4,3]],highlightIdx:0},
+ ka_moi:{h:'Ka Mōʻī',w:'Cepheus',starIds:['ka_moi'],stars:[{x:90,y:25},{x:55,y:58},{x:62,y:95},{x:118,y:95},{x:125,y:58}],lines:[[0,1],[1,2],[2,3],[3,4],[4,0],[1,4]],highlightIdx:0},
+ cygnus:{h:'Piraʻetea',w:'Cygnus',starIds:['piraetea'],stars:[{x:90,y:18},{x:90,y:68},{x:90,y:148},{x:32,y:68},{x:148,y:68}],lines:[[0,1],[1,2],[3,1],[1,4]],highlightIdx:0},
+ lyra:{h:'Keoe',w:'Lyra',starIds:['kawelo'],stars:[{x:90,y:25},{x:62,y:72},{x:70,y:108},{x:110,y:108},{x:118,y:72}],lines:[[0,1],[0,4],[1,2],[2,3],[3,4],[4,1]],highlightIdx:0},
+ aquila:{h:'Humu',w:'Aquila',starIds:['humu'],stars:[{x:90,y:75},{x:90,y:38},{x:90,y:112},{x:128,y:95},{x:90,y:138},{x:52,y:95},{x:115,y:118}],lines:[[1,0],[0,2],[2,4],[5,0],[0,3],[2,6],[6,3]],highlightIdx:0},
+ hokūiwa:{h:'Hōkūʻiwa',w:'Boötes',starIds:['hokulea'],stars:[{x:90,y:145},{x:60,y:110},{x:68,y:72},{x:90,y:55},{x:112,y:72},{x:120,y:110},{x:100,y:145}],lines:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,0],[2,5]],highlightIdx:0},
+ kauamea:{h:'Kauamea',w:'Corona Borealis',starIds:['kauamea_alphecca'],stars:[{x:90,y:48},{x:65,y:62},{x:45,y:88},{x:55,y:115},{x:90,y:128},{x:125,y:115},{x:135,y:88},{x:115,y:62}],lines:[[2,1],[1,0],[0,7],[7,6],[6,5],[5,4],[4,3],[3,2]],highlightIdx:0},
+ leo:{h:'Ikiiki',w:'Leo',starIds:['ikiiki'],stars:[{x:72,y:128},{x:65,y:105},{x:52,y:82},{x:62,y:55},{x:82,y:45},{x:102,y:58},{x:108,y:82},{x:65,y:135},{x:138,y:128}],lines:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,0],[7,0],[7,8]],highlightIdx:0},
+ virgo:{h:'Hikianalia',w:'Virgo',starIds:['hikianalia'],stars:[{x:90,y:148},{x:95,y:115},{x:115,y:90},{x:132,y:65},{x:108,y:78},{x:75,y:90},{x:55,y:72},{x:38,y:52}],lines:[[0,1],[1,2],[2,3],[1,4],[4,5],[5,6],[6,7]],highlightIdx:0},
+ mee:{h:'Meʻe',w:'Corvus',starIds:['mee'],stars:[{x:62,y:55},{x:118,y:48},{x:128,y:112},{x:55,y:118}],lines:[[0,1],[1,2],[2,3],[3,0],[0,2]],highlightIdx:null},
+ scorpius:{h:'Kamakaunuiamāui',w:'Scorpius — The Great Fishhook',starIds:['kamakaunuiamāui','lehuakona'],stars:[{x:50,y:22},{x:72,y:28},{x:85,y:40},{x:92,y:58},{x:98,y:75},{x:104,y:90},{x:110,y:105},{x:114,y:118},{x:115,y:130},{x:112,y:142},{x:102,y:150},{x:88,y:155},{x:72,y:152},{x:58,y:145}],lines:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,8],[8,9],[9,10],[10,11],[11,12],[12,13]],highlightIdx:3},
+ sagittarius:{h:'Pīmoe',w:'Sagittarius — The Teapot',starIds:['pimoe_kaus_australis'],stars:[{x:105,y:128},{x:88,y:105},{x:68,y:78},{x:45,y:92},{x:78,y:140},{x:52,y:128},{x:38,y:105}],lines:[[0,1],[1,2],[2,3],[3,6],[6,5],[0,4],[4,5],[2,1],[1,4]],highlightIdx:0},
+ centaurus:{h:'Kamailemua me Kamailehope',w:'Centaurus Pointer Stars',starIds:['kamailehope','kamailemua'],stars:[{x:62,y:108},{x:118,y:62}],lines:[[0,1]],pointer:{from:0,to:{x:90,y:148}},highlightIdx:null},
+ crux:{h:'Hānaiakamalama',w:'Southern Cross',starIds:['hanaiakamalama'],stars:[{x:90,y:148},{x:90,y:32},{x:148,y:90},{x:32,y:90},{x:98,y:78}],lines:[[0,1],[2,3],[1,4]],highlightIdx:0}
 };
+
 const STAR_TO_CONSTELLATION = {
-  'hokupaa': 'ursa_minor',
-  'na_hiku': 'nahiku',
-  'ka_moi': 'ka_moi',
-  'piraetea': 'cygnus',
-  'kawelo': 'lyra',
-  'humu': 'aquila',
-  'hokulea': 'hokūiwa',
-  'lehuakona': 'scorpius',
-  'kamakaunuiamāui': 'scorpius',
-  'hikianalia': 'virgo',
-  'mee': 'mee',
-  'ikiiki': 'leo',
-  'hanaiakamalama': 'crux',
-  'kamailehope': 'centaurus',
-  'kamailemua': 'centaurus',
-  'aa': null,
-  'makali_i': null,
-  'hokulei': null,
-  'nanamua': null,
-  'nanahope': null,
-  'puana': null,
-  'miloii': null,
-  'newe': null,
-  'ikaika': null,
-  'venus': null,
-  'mars': null,
-  'saturn': null,
-  'milky_way': null,
-  'ke_ka_o_makali_i': null,
-  'ka_iwikuamo_o': null,
-  'ka_lupe_o_kawelo': null,
-  'manaiakalani_line': null
+  'hokupaa':'ursa_minor','na_hiku':'nahiku','ka_moi':'ka_moi','piraetea':'cygnus',
+  'kawelo':'lyra','humu':'aquila','hokulea':'hokūiwa','lehuakona':'scorpius',
+  'kamakaunuiamāui':'scorpius','hikianalia':'virgo','mee':'mee','ikiiki':'leo',
+  'hanaiakamalama':'crux','kamailehope':'centaurus','kamailemua':'centaurus',
+  'aa':null,'makali_i':null,'hokulei':null,'nanamua':null,'nanahope':null,
+  'puana':null,'miloii':null,'newe':null,'ikaika':null,'venus':null,'mars':null,
+  'saturn':null,'milky_way':null,'ke_ka_o_makali_i':null,'ka_iwikuamo_o':null,
+  'ka_lupe_o_kawelo':null,'manaiakalani_line':null
 };
 
 function buildConstellationDiagram(star) {
-  const conKey = STAR_TO_CONSTELLATION[star.id] ||
-    (star.constellationGroup ? star.constellationGroup : null);
+  const conKey = STAR_TO_CONSTELLATION[star.id] || (star.constellationGroup ? star.constellationGroup : null);
   const con = conKey ? DETAIL_CONSTELLATIONS[conKey] : null;
-
   if (!con) {
-    return `
-      <div style="width:100%;background:rgba(4,8,24,0.8);border:1px solid var(--border);
-                  border-radius:4px;margin-bottom:16px;display:flex;flex-direction:column;
-                  align-items:center;padding:20px 0 12px">
-        <svg viewBox="0 0 180 80" style="width:80px;height:35px">
-          <circle cx="90" cy="40" r="12" fill="${star.color}" opacity="0.12"/>
-          <circle cx="90" cy="40" r="6"  fill="${star.color}" opacity="0.18"/>
-          <circle cx="90" cy="40" r="3"  fill="${star.color}" opacity="0.9"/>
-        </svg>
-        <div style="font-family:'Space Mono',monospace;font-size:0.58rem;
-                    color:var(--dim);letter-spacing:0.08em;text-transform:uppercase">
-          ${star.h}
-        </div>
-      </div>`;
+    return `<div style="width:100%;background:rgba(4,8,24,0.8);border:1px solid var(--border);border-radius:4px;margin-bottom:16px;display:flex;flex-direction:column;align-items:center;padding:20px 0 12px">
+      <svg viewBox="0 0 180 80" style="width:80px;height:35px">
+        <circle cx="90" cy="40" r="12" fill="${star.color}" opacity="0.12"/>
+        <circle cx="90" cy="40" r="6" fill="${star.color}" opacity="0.18"/>
+        <circle cx="90" cy="40" r="3" fill="${star.color}" opacity="0.9"/>
+      </svg>
+      <div style="font-family:'Space Mono',monospace;font-size:0.58rem;color:var(--dim);letter-spacing:0.08em;text-transform:uppercase">${star.h}</div>
+    </div>`;
   }
-
   let hilite = con.highlightIdx;
   if (hilite === null || hilite === undefined) {
     const idx = (con.starIds || []).indexOf(star.id);
     if (idx >= 0) hilite = idx;
   }
-
   const linesSVG = con.lines.map(([a,b]) => {
     const sa = con.stars[a], sb = con.stars[b];
-    return `<line x1="${sa.x}" y1="${sa.y}" x2="${sb.x}" y2="${sb.y}"
-              stroke="${star.color}" stroke-width="1" opacity="0.35"
-              stroke-linecap="round"/>`;
+    return `<line x1="${sa.x}" y1="${sa.y}" x2="${sb.x}" y2="${sb.y}" stroke="${star.color}" stroke-width="1" opacity="0.35" stroke-linecap="round"/>`;
   }).join('');
-
   const pointerSVG = con.pointer ? (() => {
-    const src = con.stars[con.pointer.from];
-    const dst = con.pointer.to;
-    return `<line x1="${src.x}" y1="${src.y}" x2="${dst.x}" y2="${dst.y}"
-              stroke="${star.color}" stroke-width="0.7"
-              stroke-dasharray="4,3" opacity="0.22"/>`;
+    const src = con.stars[con.pointer.from], dst = con.pointer.to;
+    return `<line x1="${src.x}" y1="${src.y}" x2="${dst.x}" y2="${dst.y}" stroke="${star.color}" stroke-width="0.7" stroke-dasharray="4,3" opacity="0.22"/>`;
   })() : '';
-
   const dotsSVG = con.stars.map((s, idx) => {
     const isHit = idx === hilite;
     const r = isHit ? 4 : 2.2;
     const op = isHit ? '1' : '0.65';
-    const ring = isHit
-      ? `<circle cx="${s.x}" cy="${s.y}" r="7"
-           fill="none" stroke="${star.color}" stroke-width="0.8" opacity="0.4"/>`
-      : '';
-    return `
-      <circle cx="${s.x}" cy="${s.y}" r="${r+5}" fill="${star.color}" opacity="0.06"/>
-      ${ring}
-      <circle cx="${s.x}" cy="${s.y}" r="${r}" fill="${star.color}" opacity="${op}"/>`;
+    const ring = isHit ? `<circle cx="${s.x}" cy="${s.y}" r="7" fill="none" stroke="${star.color}" stroke-width="0.8" opacity="0.4"/>` : '';
+    return `<circle cx="${s.x}" cy="${s.y}" r="${r+5}" fill="${star.color}" opacity="0.06"/>${ring}<circle cx="${s.x}" cy="${s.y}" r="${r}" fill="${star.color}" opacity="${op}"/>`;
   }).join('');
-
-  return `
-    <div style="width:100%;background:rgba(4,8,24,0.85);
-                border:1px solid var(--border);border-radius:4px;
-                margin-bottom:16px;overflow:hidden">
-      <svg viewBox="0 0 180 170" style="width:100%;display:block">
-        ${linesSVG}
-        ${pointerSVG}
-        ${dotsSVG}
-        <text x="90" y="165" text-anchor="middle"
-              font-family="Cinzel, serif" font-size="7.5"
-              fill="${star.color}" opacity="0.6"
-              letter-spacing="0.06em">
-          ${star.h.toUpperCase()}
-        </text>
-      </svg>
-    </div>`;
+  return `<div style="width:100%;background:rgba(4,8,24,0.85);border:1px solid var(--border);border-radius:4px;margin-bottom:16px;overflow:hidden">
+    <svg viewBox="0 0 180 170" style="width:100%;display:block">
+      ${linesSVG}${pointerSVG}${dotsSVG}
+      <text x="90" y="165" text-anchor="middle" font-family="Cinzel, serif" font-size="7.5" fill="${star.color}" opacity="0.6" letter-spacing="0.06em">${star.h.toUpperCase()}</text>
+    </svg>
+  </div>`;
 }
 </script>
 <script>
+// ═════════════════ VOYAGE SIMULATION ═════════════════
+const VOY_STARS = [
+  { id:'hokupaa', h:'Hōkūpaʻa', w:'Polaris', ra:2.530, dec:89.27, mag:1.97, color:'#c8e0ff' },
+  { id:'dubhe', h:'', w:'Dubhe', ra:11.06, dec:61.75, mag:1.79, color:'#a8c8e8' },
+  { id:'merak', h:'', w:'Merak', ra:11.03, dec:56.38, mag:2.37, color:'#a8c8e8' },
+  { id:'alkaid', h:'', w:'Alkaid', ra:13.79, dec:49.31, mag:1.85, color:'#a8c8e8' },
+  { id:'mizar', h:'', w:'Mizar', ra:13.40, dec:54.92, mag:2.23, color:'#a8c8e8' },
+  { id:'kawelo', h:'Kāwelo', w:'Vega', ra:18.62, dec:38.78, mag:0.03, color:'#d0eeff' },
+  { id:'ikua', h:'ʻIkuā', w:'Deneb', ra:20.69, dec:45.28, mag:1.25, color:'#e0f0ff' },
+  { id:'altair', h:'Kēkūaʻōnohi', w:'Altair', ra:19.85, dec:8.87, mag:0.76, color:'#e8f4ff' },
+  { id:'hokulea', h:'Hōkūleʻa', w:'Arcturus', ra:14.26, dec:19.18, mag:-0.05, color:'#f4a050', zenithLat:19.18, zenithLabel:'Hawaiʻi' },
+  { id:'hikianalia', h:'Mānaiakalani', w:'Spica', ra:13.42, dec:-11.16, mag:0.97, color:'#b8d8ff', zenithLat:-11.16, zenithLabel:'Marquesas' },
+  { id:'aa', h:'Aʻā', w:'Sirius', ra:6.75, dec:-16.72, mag:-1.46, color:'#aad4ff', zenithLat:-16.72, zenithLabel:'Tahiti' },
+  { id:'lehua', h:'Lehua', w:'Antares', ra:16.49, dec:-26.43, mag:1.06, color:'#ff7060' },
+  { id:'shaula', h:'', w:'Shaula', ra:17.56, dec:-37.10, mag:1.62, color:'#c8d8e8' },
+  { id:'newe', h:'Newe', w:'Fomalhaut', ra:22.96, dec:-29.62, mag:1.16, color:'#d0e8ff' },
+  { id:'haamea', h:'Haʻamea', w:'α Cen', ra:14.66, dec:-60.83, mag:-0.27, color:'#ffe8b0' },
+  { id:'hadar', h:'', w:'β Cen', ra:14.06, dec:-60.37, mag:0.61, color:'#c8d8e8' },
+  { id:'acrux', h:'Ka Mole Honua', w:'Acrux', ra:12.44, dec:-63.10, mag:0.76, color:'#c0f0e0' },
+  { id:'gacrux', h:'Kaulia', w:'Gacrux', ra:12.52, dec:-57.11, mag:1.59, color:'#c8e8f0' },
+  { id:'mimosa', h:'', w:'Mimosa', ra:12.80, dec:-59.69, mag:1.25, color:'#c8e8e0' },
+  { id:'delta_cru', h:'', w:'δ Cru', ra:12.25, dec:-58.75, mag:2.79, color:'#a0d0c0' },
+];
+const VOY_CRUX_LINES = [['acrux','gacrux'],['mimosa','delta_cru']];
+const VOY_DIPPER_LINES = [['dubhe','merak'],['mizar','alkaid']];
+const VOY_ROUTES = {
+  marquesas: { label:'Hawaiʻi → Marquesas', origin:{lat:19.6,lng:-155.8,name:'Kawaihae'}, dest:{lat:-8.9,lng:-140.0,name:'Nuku Hiva'} },
+  tahiti: { label:'Hawaiʻi → Tahiti', origin:{lat:19.6,lng:-155.8,name:'Kawaihae'}, dest:{lat:-17.6,lng:-149.5,name:'Papeʻete'} },
+};
+const VOY_NARRATIONS = {
+  marquesas: [
+    { lat:19.0, key:'Departing Kawaihae', text:"Hōkūpaʻa hangs 20° above the northern horizon — its altitude is your latitude. Hōkūleʻa rides directly overhead." },
+    { lat:14.0, key:'Day Three', text:"The North Star sinks. The trade winds carry the canoe south. Hōkūleʻa drifts from zenith — Hawaiʻi falls behind." },
+    { lat:9.0, key:'Day Seven', text:"Hōkūpaʻa is half its old height. Unfamiliar stars climb out of the southern horizon. Hānaiakamālama, the Southern Cross, begins to rise." },
+    { lat:4.0, key:'The Doldrums', text:"The wind fails. You enter the windless belt that straddles the equator. Hōkūpaʻa skims the sea." },
+    { lat:0.5, key:'The Crossing', text:"Hōkūpaʻa touches the horizon — and is gone. You have entered the southern skies. The old compass no longer works." },
+    { lat:-4.0, key:'Southern Waters', text:"Hānaiakamālama climbs higher each night. Its long axis points to true south. You learn to read the sky anew." },
+    { lat:-8.5, key:'Landfall', text:"Mānaiakalani — Spica — passes directly overhead. You are at the latitude of the Marquesas, where your ancestors began their voyage to Hawaiʻi a thousand years ago." }
+  ],
+  tahiti: [
+    { lat:19.0, key:'Departing Kawaihae', text:"Hōkūpaʻa hangs 20° above the northern horizon — its altitude is your latitude. Hōkūleʻa rides directly overhead." },
+    { lat:14.0, key:'Day Three', text:"The North Star sinks. The trade winds carry the canoe south. Hōkūleʻa drifts from zenith." },
+    { lat:9.0, key:'Day Eight', text:"Hōkūpaʻa is half its old height. The Southern Cross begins to climb out of the south." },
+    { lat:4.0, key:'The Doldrums', text:"The wind fails. You enter the windless belt near the equator. Hōkūpaʻa skims the horizon." },
+    { lat:0.5, key:'The Crossing', text:"Hōkūpaʻa touches the sea — and is gone. The old navigation has ended." },
+    { lat:-5.0, key:'Southern Waters', text:"Hānaiakamālama climbs higher each night. The Southern Cross becomes the new compass." },
+    { lat:-11.0, key:'Past the Marquesas', text:"Mānaiakalani passes overhead. You continue south past the Marquesas, the trade winds turning easterly." },
+    { lat:-16.5, key:'Tahiti', text:"Land. At this latitude in December, Aʻā — Sirius — would pass directly overhead. Tonight your ancestors took its bearing from memory." }
+  ]
+};
+const voyState = { lat:19.6, route:'marquesas', isPlaying:false, lastTickTime:0, speed:1.0, lastNarrationIdx:-1 };
+const VOY_LST = 14.5, VOY_CX = 250, VOY_CY = 250, VOY_R = 240;
+const VOY_ZENITH_THRESHOLD = 3.0, VOY_DURATION = 45;
+let voyNarrationTimeout = null;
+let voyBgStars = [];
+
+function voyRaDecToAltAz(ra, dec, lat) {
+  const raRad = ra * 15 * Math.PI / 180, decRad = dec * Math.PI / 180, latRad = lat * Math.PI / 180;
+  const lstRad = VOY_LST * 15 * Math.PI / 180;
+  const ha = lstRad - raRad;
+  const sinAlt = Math.sin(decRad) * Math.sin(latRad) + Math.cos(decRad) * Math.cos(latRad) * Math.cos(ha);
+  const alt = Math.asin(Math.max(-1, Math.min(1, sinAlt)));
+  const cosAlt = Math.cos(alt);
+  let az;
+  if (Math.abs(cosAlt) < 1e-9) az = 0;
+  else {
+    const cosAzNum = Math.sin(decRad) - Math.sin(alt) * Math.sin(latRad);
+    const cosAzDen = cosAlt * Math.cos(latRad);
+    az = Math.acos(Math.max(-1, Math.min(1, cosAzNum / cosAzDen)));
+    if (Math.sin(ha) > 0) az = 2 * Math.PI - az;
+  }
+  return { alt: alt * 180 / Math.PI, az: az * 180 / Math.PI };
+}
+function voyAltAzToScreen(alt, az) {
+  if (alt < -1) return null;
+  const zd = (90 - alt) / 90;
+  const r = VOY_R * zd * 0.92;
+  const azRad = az * Math.PI / 180;
+  return { x: VOY_CX + r * Math.sin(azRad), y: VOY_CY - r * Math.cos(azRad), alt };
+}
+function voyProjectStar(star, lat) {
+  const aa = voyRaDecToAltAz(star.ra, star.dec, lat);
+  const pos = voyAltAzToScreen(aa.alt, aa.az);
+  if (!pos) return null;
+  return { x: pos.x, y: pos.y, alt: aa.alt, az: aa.az };
+}
+function voySeedBg() {
+  let s = 12345;
+  const rng = () => { s = (s * 9301 + 49297) % 233280; return s / 233280; };
+  voyBgStars = [];
+  for (let i = 0; i < 160; i++) {
+    voyBgStars.push({ ra: rng()*24, dec: Math.asin(2*rng()-1)*180/Math.PI, mag: rng()*2.5+2.5 });
+  }
+}
+function voyEl(tag, attrs={}) {
+  const e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+}
+function voyRenderSky() {
+  const svg = document.getElementById('voy-sky-svg');
+  if (!svg) return;
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+  const defs = voyEl('defs');
+  defs.innerHTML = `<radialGradient id="voyDG" cx="50%" cy="40%" r="60%"><stop offset="0%" stop-color="#0b1535"/><stop offset="100%" stop-color="#020408"/></radialGradient><clipPath id="voyDC"><circle cx="${VOY_CX}" cy="${VOY_CY}" r="${VOY_R-2}"/></clipPath>`;
+  svg.appendChild(defs);
+  svg.appendChild(voyEl('circle', { cx:VOY_CX, cy:VOY_CY, r:VOY_R, fill:'url(#voyDG)' }));
+  [0.28,0.52,0.76].forEach(f => {
+    svg.appendChild(voyEl('circle', { cx:VOY_CX, cy:VOY_CY, r:VOY_R*f, fill:'none', stroke:'rgba(232,184,75,0.045)', 'stroke-width':1 }));
+  });
+  voyBgStars.forEach(bs => {
+    const aa = voyRaDecToAltAz(bs.ra, bs.dec, voyState.lat);
+    if (aa.alt < 0) return;
+    const pos = voyAltAzToScreen(aa.alt, aa.az);
+    if (!pos) return;
+    if (Math.hypot(pos.x-VOY_CX, pos.y-VOY_CY) > VOY_R-5) return;
+    const horizonFade = Math.min(1, aa.alt/8);
+    svg.appendChild(voyEl('circle', { cx:pos.x, cy:pos.y, r:Math.max(0.4,1.6-bs.mag*0.3), fill:`rgba(200,215,255,${0.55*horizonFade})`, 'clip-path':'url(#voyDC)' }));
+  });
+  const placed = {};
+  VOY_STARS.forEach(star => {
+    const p = voyProjectStar(star, voyState.lat);
+    if (!p) return;
+    if (Math.hypot(p.x-VOY_CX, p.y-VOY_CY) > VOY_R-5) return;
+    placed[star.id] = { ...p, star };
+  });
+  if (['acrux','gacrux','mimosa','delta_cru'].every(k => placed[k])) {
+    VOY_CRUX_LINES.forEach(([a,b]) => {
+      svg.appendChild(voyEl('line', { x1:placed[a].x, y1:placed[a].y, x2:placed[b].x, y2:placed[b].y, stroke:'#c0f0e0', 'stroke-width':1.2, opacity:0.5, 'stroke-linecap':'round', 'clip-path':'url(#voyDC)' }));
+    });
+  }
+  VOY_DIPPER_LINES.forEach(([a,b]) => {
+    if (!placed[a] || !placed[b]) return;
+    svg.appendChild(voyEl('line', { x1:placed[a].x, y1:placed[a].y, x2:placed[b].x, y2:placed[b].y, stroke:'#a8c8e8', 'stroke-width':0.8, opacity:0.32, 'stroke-linecap':'round', 'stroke-dasharray':'2,3', 'clip-path':'url(#voyDC)' }));
+  });
+  let zenithStar = null, zenithBest = VOY_ZENITH_THRESHOLD;
+  Object.values(placed).forEach(({alt, star}) => {
+    if (star.zenithLat === undefined) return;
+    const zd = Math.abs(90-alt);
+    if (zd < zenithBest) { zenithBest = zd; zenithStar = star; }
+  });
+  Object.values(placed).forEach(({x, y, alt, star}) => {
+    const horizonFade = Math.min(1, alt/4);
+    const radius = Math.max(2, 4.5-star.mag*0.5);
+    const isZenith = (zenithStar && star.id === zenithStar.id);
+    svg.appendChild(voyEl('circle', { cx:x, cy:y, r:radius*3, fill:star.color, opacity:0.08*horizonFade, 'clip-path':'url(#voyDC)' }));
+    svg.appendChild(voyEl('circle', { cx:x, cy:y, r:radius, fill:star.color, stroke:'rgba(255,255,255,0.3)', 'stroke-width':0.5, 'clip-path':'url(#voyDC)', opacity:horizonFade }));
+    if (star.h || star.w) {
+      const lbl = voyEl('text', { x:x+8, y:y+4, fill:star.color, opacity:(star.h?0.9:0.5)*horizonFade, 'font-family':'Cinzel, serif', 'font-size':isZenith?10:(star.h?8.5:7), 'clip-path':'url(#voyDC)' });
+      lbl.textContent = star.h || star.w;
+      svg.appendChild(lbl);
+    }
+  });
+  const ring = voyEl('circle', { cx:VOY_CX, cy:VOY_CY, r:24, fill:'none', stroke:'#e8b84b', 'stroke-width':1.5, opacity:zenithStar?0.85:0 });
+  ring.classList.add('voy-zenith-ring');
+  if (zenithStar) ring.classList.add('active');
+  svg.appendChild(ring);
+  if (zenithStar && placed[zenithStar.id]) {
+    const zs = placed[zenithStar.id];
+    svg.appendChild(voyEl('line', { x1:VOY_CX, y1:VOY_CY, x2:zs.x, y2:zs.y, stroke:'#e8b84b', 'stroke-width':0.7, opacity:0.4, 'stroke-dasharray':'3,3' }));
+  }
+  svg.appendChild(voyEl('circle', { cx:VOY_CX, cy:VOY_CY, r:2, fill:'rgba(232,184,75,0.55)' }));
+}
+const VOY_MAP_VIEW = { lngMin:-170, lngMax:-130, latMax:30, latMin:-30, w:240, h:300 };
+function voyLngLatToMap(lng, lat) {
+  return {
+    x: ((lng-VOY_MAP_VIEW.lngMin)/(VOY_MAP_VIEW.lngMax-VOY_MAP_VIEW.lngMin))*VOY_MAP_VIEW.w,
+    y: ((VOY_MAP_VIEW.latMax-lat)/(VOY_MAP_VIEW.latMax-VOY_MAP_VIEW.latMin))*VOY_MAP_VIEW.h
+  };
+}
+function voyRenderMap() {
+  const svg = document.getElementById('voy-map-svg');
+  if (!svg) return;
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+  svg.appendChild(voyEl('rect', { x:0, y:0, width:VOY_MAP_VIEW.w, height:VOY_MAP_VIEW.h, fill:'#040814' }));
+  for (let i = 0; i < 60; i++) {
+    svg.appendChild(voyEl('circle', { cx:(i*67)%VOY_MAP_VIEW.w, cy:(i*113)%VOY_MAP_VIEW.h, r:((i*17)%10)*0.06+0.2, fill:`rgba(120,150,200,${0.1+((i*7)%20)*0.015})` }));
+  }
+  const eq = voyLngLatToMap(VOY_MAP_VIEW.lngMin, 0);
+  svg.appendChild(voyEl('line', { x1:0, y1:eq.y, x2:VOY_MAP_VIEW.w, y2:eq.y, stroke:'rgba(232,184,75,0.3)', 'stroke-width':0.7, 'stroke-dasharray':'3,3' }));
+  const eqLbl = voyEl('text', { x:5, y:eq.y-4, fill:'rgba(232,184,75,0.6)', 'font-family':'Space Mono, monospace', 'font-size':7, 'letter-spacing':1 });
+  eqLbl.textContent = 'EQUATOR';
+  svg.appendChild(eqLbl);
+  const hi = voyLngLatToMap(-155.5, 20);
+  svg.appendChild(voyEl('ellipse', { cx:hi.x, cy:hi.y, rx:7, ry:3.5, fill:'rgba(74,181,160,0.35)', stroke:'rgba(74,181,160,0.8)', 'stroke-width':0.7 }));
+  const hiLbl = voyEl('text', { x:hi.x+10, y:hi.y-2, fill:'#4ab5a0', 'font-family':'Cinzel, serif', 'font-size':8.5 });
+  hiLbl.textContent = 'Hawaiʻi';
+  svg.appendChild(hiLbl);
+  const route = VOY_ROUTES[voyState.route];
+  const dest = voyLngLatToMap(route.dest.lng, route.dest.lat);
+  svg.appendChild(voyEl('ellipse', { cx:dest.x, cy:dest.y, rx:4.5, ry:2.5, fill:'rgba(232,184,75,0.35)', stroke:'rgba(232,184,75,0.8)', 'stroke-width':0.7 }));
+  const dLbl = voyEl('text', { x:dest.x+7, y:dest.y+3, fill:'#e8b84b', 'font-family':'Cinzel, serif', 'font-size':8.5 });
+  dLbl.textContent = route.dest.name;
+  svg.appendChild(dLbl);
+  const origin = voyLngLatToMap(route.origin.lng, route.origin.lat);
+  svg.appendChild(voyEl('line', { x1:origin.x, y1:origin.y, x2:dest.x, y2:dest.y, stroke:'rgba(232,184,75,0.3)', 'stroke-width':0.8, 'stroke-dasharray':'4,3' }));
+  const t = (voyState.lat-route.origin.lat)/(route.dest.lat-route.origin.lat);
+  const tC = Math.max(0, Math.min(1, t));
+  const canoeLng = route.origin.lng + tC*(route.dest.lng-route.origin.lng);
+  const canoe = voyLngLatToMap(canoeLng, voyState.lat);
+  if (tC > 0.01) svg.appendChild(voyEl('line', { x1:origin.x, y1:origin.y, x2:canoe.x, y2:canoe.y, stroke:'#e8b84b', 'stroke-width':1.3, opacity:0.75 }));
+  svg.appendChild(voyEl('circle', { cx:canoe.x, cy:canoe.y, r:7, fill:'rgba(232,184,75,0.18)' }));
+  svg.appendChild(voyEl('circle', { cx:canoe.x, cy:canoe.y, r:3.5, fill:'#e8b84b', stroke:'#fff8e0', 'stroke-width':1 }));
+}
+function voyFindZenithStar() {
+  let best = null, bestDist = VOY_ZENITH_THRESHOLD;
+  for (const s of VOY_STARS) {
+    if (s.zenithLat === undefined) continue;
+    const d = Math.abs(s.zenithLat - voyState.lat);
+    if (d < bestDist) { bestDist = d; best = s; }
+  }
+  return best;
+}
+function voyLocCtx() {
+  const lat = voyState.lat, route = VOY_ROUTES[voyState.route];
+  if (Math.abs(lat-19.6) < 0.4) return 'Kawaihae';
+  if (Math.abs(lat-route.dest.lat) < 0.4) return route.dest.name;
+  if (Math.abs(lat) < 1.0) return 'The Equator';
+  if (lat > 15) return 'Hawaiian Latitudes';
+  if (lat > 5) return 'Northern Trades';
+  if (lat > -5) return 'Doldrums';
+  return 'Southern Trades';
+}
+function voyUpdateReadouts() {
+  const latAbs = Math.abs(voyState.lat);
+  const hemi = voyState.lat >= 0 ? 'N' : 'S';
+  document.getElementById('voy-readout-lat').textContent = `${latAbs.toFixed(1)}°${hemi}`;
+  document.getElementById('voy-readout-lat-sub').textContent = voyLocCtx();
+  const zs = voyFindZenithStar();
+  if (zs) {
+    document.getElementById('voy-readout-zenith').textContent = zs.h;
+    document.getElementById('voy-readout-zenith-sub').textContent = `${zs.w} · ${zs.zenithLabel}`;
+  } else {
+    document.getElementById('voy-readout-zenith').textContent = '—';
+    document.getElementById('voy-readout-zenith-sub').textContent = 'No star at zenith';
+  }
+}
+function voyUpdateNarration() {
+  const arr = VOY_NARRATIONS[voyState.route];
+  let idx = 0;
+  for (let i = arr.length-1; i >= 0; i--) {
+    if (voyState.lat <= arr[i].lat) { idx = i; break; }
+  }
+  if (voyState.lat > arr[0].lat) idx = 0;
+  if (idx === voyState.lastNarrationIdx) return;
+  voyState.lastNarrationIdx = idx;
+  const narEl = document.getElementById('voy-narration');
+  narEl.classList.add('fading');
+  if (voyNarrationTimeout) clearTimeout(voyNarrationTimeout);
+  voyNarrationTimeout = setTimeout(() => {
+    narEl.innerHTML = `<span class="voy-nar-key">${arr[idx].key}</span>${arr[idx].text}`;
+    narEl.classList.remove('fading');
+  }, 220);
+  if (arr[idx].key === 'The Crossing') {
+    const dome = document.getElementById('voy-dome');
+    dome.classList.add('crossing');
+    setTimeout(() => dome.classList.remove('crossing'), 1400);
+  }
+}
+function voyRender() { voyRenderSky(); voyRenderMap(); voyUpdateReadouts(); voyUpdateNarration(); }
+function voyStart() {
+  const route = VOY_ROUTES[voyState.route];
+  const atDest = (route.dest.lat < route.origin.lat) ? voyState.lat <= route.dest.lat+0.1 : voyState.lat >= route.dest.lat-0.1;
+  if (atDest) {
+    voyState.lat = route.origin.lat;
+    voyState.lastNarrationIdx = -1;
+    document.getElementById('voy-lat-slider').value = voyState.lat;
+  }
+  voyState.isPlaying = true;
+  voyState.lastTickTime = performance.now();
+  document.getElementById('voy-play-btn').textContent = '⏸ Pause';
+  requestAnimationFrame(voyTick);
+}
+function voyPause() {
+  voyState.isPlaying = false;
+  document.getElementById('voy-play-btn').textContent = '▶ Resume';
+}
+function voyTick(now) {
+  if (!voyState.isPlaying) return;
+  const dt = Math.min(0.05, (now-voyState.lastTickTime)/1000);
+  voyState.lastTickTime = now;
+  const route = VOY_ROUTES[voyState.route];
+  const totalDelta = route.dest.lat - route.origin.lat;
+  const ratePerSec = totalDelta * voyState.speed / VOY_DURATION;
+  voyState.lat += ratePerSec * dt;
+  const done = (totalDelta < 0) ? voyState.lat <= route.dest.lat : voyState.lat >= route.dest.lat;
+  if (done) {
+    voyState.lat = route.dest.lat;
+    voyState.isPlaying = false;
+    document.getElementById('voy-play-btn').textContent = '↺ Replay Voyage';
+  }
+  document.getElementById('voy-lat-slider').value = voyState.lat;
+  voyRender();
+  if (voyState.isPlaying) requestAnimationFrame(voyTick);
+}
+function initVoyage() {
+  voySeedBg();
+  document.getElementById('voy-lat-slider').addEventListener('input', e => {
+    if (voyState.isPlaying) voyPause();
+    voyState.lat = parseFloat(e.target.value);
+    voyRender();
+  });
+  document.getElementById('voy-play-btn').addEventListener('click', () => {
+    if (voyState.isPlaying) voyPause(); else voyStart();
+  });
+  document.querySelectorAll('.voy-route-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.voy-route-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      voyState.route = btn.dataset.route;
+      voyState.lat = VOY_ROUTES[voyState.route].origin.lat;
+      voyState.lastNarrationIdx = -1;
+      document.getElementById('voy-lat-slider').value = voyState.lat;
+      if (voyState.isPlaying) voyPause();
+      document.getElementById('voy-play-btn').textContent = '▶ Begin Voyage';
+      voyRender();
+    });
+  });
+  document.querySelectorAll('.voy-speed-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.voy-speed-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      voyState.speed = parseFloat(btn.dataset.speed);
+    });
+  });
+  voyRender();
+}
+</script>
+
+<script>
+// ═════════════════ DARK SKY MAP ═════════════════
+const DS_HAWAII_BOUNDS = [[18.85,-160.30],[22.30,-154.75]];
+const DS_HAWAII_CENTER = [20.6,-157.5];
+const DS_BORTLE_COLOR = {
+  1:'rgba(60,60,80,0.55)', 2:'rgba(40,60,130,0.50)', 3:'rgba(40,100,200,0.45)',
+  4:'rgba(40,180,120,0.42)', 5:'rgba(220,220,40,0.42)', 6:'rgba(255,140,40,0.48)',
+  7:'rgba(220,60,60,0.50)', 8:'rgba(255,120,200,0.55)', 9:'rgba(255,255,255,0.60)',
+};
+const DS_BORTLE_DESC = {
+  1:'Pristine sky', 2:'Truly dark', 3:'Rural', 4:'Rural / suburban transition',
+  5:'Suburban', 6:'Bright suburban', 7:'Suburban / urban transition',
+  8:'City sky', 9:'Inner city',
+};
+const DS_BORTLE_LONG = {
+  1:'Full Milky Way detail visible', 2:'Observatory-grade darkness',
+  3:'Milky Way clearly visible', 4:'Milky Way visible but lacks detail',
+  5:'Milky Way faint near horizon', 6:'Milky Way invisible, only bright constellations',
+  7:'Sky has grayish-yellow glow', 8:'Sky bright enough to read by', 9:'Sky is brightly lit',
+};
+const DS_BORTLE_ZONES = [
+  [1,'Maunakea Summit Region',[[19.88,-155.55],[19.88,-155.40],[19.74,-155.35],[19.62,-155.42],[19.65,-155.58],[19.78,-155.62]]],
+  [1,'Haleakalā Summit',[[20.78,-156.27],[20.78,-156.19],[20.68,-156.18],[20.65,-156.26]]],
+  [1,'Kahoʻolawe',[[20.61,-156.75],[20.61,-156.55],[20.49,-156.52],[20.48,-156.74]]],
+  [2,'Maunakea VIS & slopes',[[19.95,-155.65],[19.95,-155.30],[19.55,-155.25],[19.40,-155.42],[19.50,-155.70]]],
+  [2,'Mauna Loa slopes',[[19.62,-155.62],[19.62,-155.40],[19.35,-155.40],[19.30,-155.65]]],
+  [2,'Ka Lae / South Point',[[19.04,-155.78],[19.04,-155.58],[18.88,-155.55],[18.88,-155.82]]],
+  [2,'Hawaiʻi Volcanoes NP',[[19.50,-155.40],[19.50,-155.15],[19.25,-155.10],[19.20,-155.40]]],
+  [2,'Niʻihau',[[22.05,-160.25],[22.05,-160.05],[21.74,-159.99],[21.74,-160.25]]],
+  [2,'Polihale / Nāpali',[[22.20,-159.83],[22.20,-159.66],[22.00,-159.65],[21.94,-159.78]]],
+  [2,'Haleakalā upper slopes',[[20.82,-156.32],[20.82,-156.12],[20.62,-156.10],[20.60,-156.30]]],
+  [2,'Hālawa (East Molokaʻi)',[[21.18,-156.78],[21.18,-156.70],[21.10,-156.70],[21.10,-156.78]]],
+  [3,'Hāmākua Coast',[[20.18,-155.85],[20.20,-155.45],[19.95,-155.30],[19.85,-155.65]]],
+  [3,'Kohala',[[20.27,-156.05],[20.27,-155.75],[20.05,-155.75],[20.02,-156.00]]],
+  [3,'Puna',[[19.55,-155.10],[19.55,-154.80],[19.30,-154.80],[19.30,-155.10]]],
+  [3,'Lānaʻi',[[20.92,-157.05],[20.92,-156.83],[20.70,-156.80],[20.70,-157.05]]],
+  [3,'West Molokaʻi',[[21.22,-157.32],[21.22,-157.05],[21.05,-157.05],[21.04,-157.30]]],
+  [3,'Hāna Coast',[[20.92,-156.05],[20.92,-155.95],[20.60,-155.95],[20.60,-156.10]]],
+  [3,'Kauaʻi interior',[[22.10,-159.70],[22.10,-159.50],[21.92,-159.45],[21.90,-159.65]]],
+  [4,'Big Island base',[[20.30,-156.10],[20.30,-154.75],[18.85,-154.75],[18.85,-156.10]]],
+  [4,'Maui base',[[21.05,-156.75],[21.05,-155.95],[20.55,-155.95],[20.55,-156.75]]],
+  [4,'Kauaʻi base',[[22.25,-159.85],[22.25,-159.25],[21.85,-159.25],[21.85,-159.85]]],
+  [4,'Oʻahu Windward & North Shore',[[21.75,-158.30],[21.75,-157.62],[21.55,-157.62],[21.55,-158.30]]],
+  [4,'Kaʻena Point',[[21.62,-158.32],[21.62,-158.20],[21.50,-158.18],[21.50,-158.32]]],
+  [5,'Kailua-Kona',[[19.72,-156.05],[19.72,-155.95],[19.55,-155.95],[19.55,-156.05]]],
+  [5,'Waimea / Kamuela',[[20.05,-155.74],[20.05,-155.62],[19.97,-155.62],[19.97,-155.74]]],
+  [5,'Kīhei',[[20.78,-156.50],[20.78,-156.42],[20.68,-156.42],[20.68,-156.50]]],
+  [5,'Lahaina',[[20.92,-156.71],[20.92,-156.63],[20.84,-156.63],[20.84,-156.71]]],
+  [5,'Līhuʻe + Kapaʻa',[[22.10,-159.40],[22.10,-159.28],[21.93,-159.28],[21.93,-159.40]]],
+  [5,'Princeville / Hanalei',[[22.23,-159.55],[22.23,-159.45],[22.17,-159.45],[22.17,-159.55]]],
+  [6,'Hilo',[[19.78,-155.15],[19.78,-155.00],[19.65,-155.00],[19.65,-155.15]]],
+  [6,'Kahului / Wailuku',[[20.93,-156.52],[20.93,-156.42],[20.84,-156.42],[20.84,-156.52]]],
+  [6,'Kāneʻohe + Kailua',[[21.45,-157.85],[21.45,-157.70],[21.36,-157.70],[21.36,-157.85]]],
+  [7,'Pearl City area',[[21.50,-158.04],[21.50,-157.91],[21.36,-157.91],[21.36,-158.04]]],
+  [7,'Oʻahu suburban',[[21.65,-158.18],[21.65,-157.85],[21.50,-157.85],[21.50,-158.18]]],
+  [8,'Honolulu Metro',[[21.36,-158.04],[21.36,-157.74],[21.25,-157.72],[21.24,-158.02]]],
+];
+const DS_BEST_SPOTS = [
+  { lat:19.7596, lng:-155.4567, name:'Maunakea VIS', bortle:2, elev:'9,200 ft', note:'Public visitor station with stargazing programs. Among the darkest accessible sites on Earth.' },
+  { lat:20.7204, lng:-156.2570, name:'Haleakalā Summit', bortle:2, elev:'10,023 ft', note:'Sunrise reservation required; night access free. Above most of the atmosphere.' },
+  { lat:18.9117, lng:-155.6810, name:'Ka Lae (South Point)', bortle:2, elev:'sea level', note:'Southernmost point in the United States. Open horizon to the south.' },
+  { lat:22.0810, lng:-159.7615, name:'Polihale State Park', bortle:2, elev:'sea level', note:'Kauaʻi\'s remote west coast. Long beach, no nearby towns.' },
+  { lat:21.5759, lng:-158.2811, name:'Kaʻena Point', bortle:3, elev:'sea level', note:'Westernmost tip of Oʻahu. Darkest accessible spot from Honolulu.' },
+  { lat:20.9337, lng:-156.3580, name:'Hoʻokipa Beach', bortle:4, elev:'sea level', note:'Maui north shore. Decent darkness east of Pāʻia.' },
+  { lat:21.1556, lng:-156.7320, name:'Hālawa Valley', bortle:2, elev:'sea level', note:'Molokaʻi\'s remote east end. One of the darkest skies in the main islands.' },
+  { lat:20.7370, lng:-156.8902, name:'Hulopoʻe Bay (Lānaʻi)', bortle:3, elev:'sea level', note:'Lānaʻi has minimal light pollution overall.' },
+  { lat:20.1170, lng:-155.5826, name:'Waipiʻo Valley', bortle:3, elev:'1,200 ft', note:'Deep valley shields ambient light.' },
+  { lat:19.4188, lng:-155.2885, name:'Volcanoes NP', bortle:2, elev:'4,000 ft', note:'Within Hawaiʻi Volcanoes National Park. Excellent darkness.' },
+];
+const DS_OBSERVATORIES = [
+  { lat:19.8228, lng:-155.4717, name:'Maunakea Observatories', note:'Cluster of 13 telescopes including Keck I/II, Subaru, Gemini North.' },
+  { lat:20.7080, lng:-156.2569, name:'Haleakalā Observatory', note:'Home to the Daniel K. Inouye Solar Telescope and Pan-STARRS.' },
+];
+const DS_VOYAGING_SITES = [
+  { lat:20.0414, lng:-155.8268, name:'Kawaihae Harbor', note:'Traditional voyaging launch site on the Kohala Coast.' },
+  { lat:18.9117, lng:-155.6810, name:'Ka Lae', note:'Southernmost point of the islands.' },
+  { lat:20.1170, lng:-155.5826, name:'Waipiʻo Valley', note:'Sacred valley with deep navigational significance.' },
+  { lat:19.4796, lng:-155.9266, name:'Kealakekua Bay', note:'Major harbor and place of cultural exchange.' },
+  { lat:19.7373, lng:-155.0247, name:'Leleiwi Beach', note:'Hilo-side voyaging site.' },
+];
+const DS_COMMUNITY_READINGS = [
+  { lat:19.7297, lng:-155.0890, bortle:5, observer:'Hilo waterfront', date:'2026-03-12' },
+  { lat:19.6406, lng:-155.9961, bortle:5, observer:'Kailua-Kona pier', date:'2026-02-18' },
+  { lat:19.7596, lng:-155.4567, bortle:2, observer:'Maunakea VIS', date:'2026-04-04' },
+  { lat:18.9117, lng:-155.6810, bortle:3, observer:'Ka Lae', date:'2026-03-22' },
+  { lat:20.1170, lng:-155.5826, bortle:3, observer:'Waipiʻo', date:'2026-02-05' },
+  { lat:20.7204, lng:-156.2570, bortle:2, observer:'Haleakalā Summit', date:'2026-04-10' },
+  { lat:20.8783, lng:-156.4639, bortle:6, observer:'Kahului', date:'2026-03-01' },
+  { lat:20.7644, lng:-156.4458, bortle:5, observer:'Kīhei', date:'2026-03-15' },
+  { lat:21.3099, lng:-157.8581, bortle:8, observer:'Honolulu downtown', date:'2026-04-08' },
+  { lat:21.5759, lng:-158.2811, bortle:4, observer:'Kaʻena Point', date:'2026-03-29' },
+  { lat:21.4022, lng:-157.7394, bortle:6, observer:'Kailua, Oʻahu', date:'2026-04-12' },
+  { lat:22.0810, lng:-159.7615, bortle:2, observer:'Polihale', date:'2026-03-18' },
+  { lat:22.0640, lng:-159.3192, bortle:5, observer:'Līhuʻe', date:'2026-04-02' },
+];
+const DS_SEASONS = {
+  spring:{ name:'Spring', months:'March – May', hawaiian:'Kupulau · late Hoʻoilo into early Kau',
+    overhead:'Hōkūleʻa (Arcturus) climbing toward zenith. Leo, Virgo, Boötes high in evening.',
+    south:'Hānaiakamālama (Southern Cross) low in south — best evening months to see it.',
+    weather:'Variable. Kona winds possible. Trade winds returning. Cloudier than summer.',
+    bestRegions:'Maunakea and Haleakalā summits on clear nights. West Hawaiʻi coast often clearer than East.',
+    notes:'Excellent for catching the transition between Northern and Southern Hemisphere sky.' },
+  summer:{ name:'Summer', months:'June – August', hawaiian:'Kau · the dry season',
+    overhead:'Milky Way core directly overhead in late evening — among the best displays in the world. Lehua (Antares) high in south.',
+    south:'Maui\'s Fishhook (Scorpius) at zenith. Sagittarius reveals the galactic center.',
+    weather:'Strong consistent trade winds. Clear most nights. Windward (east) sides especially clear.',
+    bestRegions:'All islands excellent. Maunakea, Mauna Loa, Haleakalā, Ka Lae are world-class right now.',
+    notes:'The best season for dark-sky observation in Hawaiʻi. The Milky Way is at its most spectacular.' },
+  fall:{ name:'Fall', months:'September – November', hawaiian:'Hāʻulelau · late Kau into early Hoʻoilo',
+    overhead:'Pegasus high in east. Andromeda Galaxy rises in evening. ʻIkuā (Deneb) overhead.',
+    south:'Newe (Fomalhaut) low in south. Sky is quieter between the rich summer Milky Way and bright winter stars.',
+    weather:'Trade winds continue. Cooler nights = drier, clearer air.',
+    bestRegions:'All islands good. East-facing sites slightly preferred.',
+    notes:'Around November 17, the rising of Makaliʻi (the Pleiades) at sunset traditionally begins Makahiki.' },
+  winter:{ name:'Winter', months:'December – February', hawaiian:'Hoʻoilo · the wet season',
+    overhead:'Orion dominates. Aʻā (Sirius), Hōkūlei (Capella), Puanakau (Rigel) brilliant. Winter Triangle prominent.',
+    south:'Miloliʻi (Canopus) visible low in south — only seen from Hawaiian latitudes.',
+    weather:'More variable. Kona storms possible. When clear, very dry cold air = excellent transparency.',
+    bestRegions:'Maunakea and Haleakalā summits best when clear. Kona side often clearer than windward in winter.',
+    notes:'Plan around storm fronts. Excellent for distant galaxies and the Andromeda Galaxy.' }
+};
+const DS_ISLAND_BOUNDS = [
+  { name:'Hawaiʻi Island', latMin:18.85, latMax:20.30, lngMin:-156.10, lngMax:-154.75 },
+  { name:'Maui', latMin:20.55, latMax:21.05, lngMin:-156.75, lngMax:-155.95 },
+  { name:'Kahoʻolawe', latMin:20.48, latMax:20.62, lngMin:-156.75, lngMax:-156.50 },
+  { name:'Lānaʻi', latMin:20.70, latMax:20.92, lngMin:-157.07, lngMax:-156.80 },
+  { name:'Molokaʻi', latMin:21.04, latMax:21.22, lngMin:-157.32, lngMax:-156.70 },
+  { name:'Oʻahu', latMin:21.25, latMax:21.75, lngMin:-158.30, lngMax:-157.62 },
+  { name:'Kauaʻi', latMin:21.85, latMax:22.25, lngMin:-159.85, lngMax:-159.25 },
+  { name:'Niʻihau', latMin:21.74, latMax:22.05, lngMin:-160.30, lngMax:-159.99 },
+];
+const DS_ISLAND_OUTLINES = [
+  // Hawaiʻi Island (Big Island)
+  [[20.27,-155.88],[20.20,-155.74],[20.10,-155.41],[19.97,-155.22],[19.84,-155.08],[19.72,-155.05],[19.52,-154.81],[19.32,-154.99],[19.13,-155.30],[18.96,-155.51],[18.91,-155.68],[19.04,-155.84],[19.18,-155.91],[19.40,-155.92],[19.56,-155.99],[19.75,-156.05],[19.92,-156.04],[20.05,-155.91]],
+  // Maui
+  [[20.92,-156.37],[20.87,-156.15],[20.76,-155.99],[20.66,-156.04],[20.59,-156.13],[20.59,-156.27],[20.63,-156.45],[20.74,-156.46],[20.81,-156.62],[20.88,-156.68],[21.00,-156.66],[20.99,-156.55],[20.95,-156.45]],
+  // Oʻahu
+  [[21.58,-158.28],[21.48,-158.22],[21.34,-158.05],[21.30,-157.86],[21.26,-157.81],[21.31,-157.65],[21.40,-157.79],[21.71,-157.97],[21.63,-158.25]],
+  // Kauaʻi
+  [[22.08,-159.76],[22.21,-159.65],[22.21,-159.49],[22.21,-159.40],[22.13,-159.31],[22.00,-159.36],[21.87,-159.45],[21.92,-159.59],[22.00,-159.71]],
+  // Molokaʻi
+  [[21.16,-156.71],[21.20,-156.85],[21.21,-157.06],[21.21,-157.30],[21.10,-157.30],[21.06,-157.08],[21.05,-156.85],[21.10,-156.70]],
+  // Lānaʻi
+  [[20.92,-156.92],[20.90,-156.83],[20.81,-156.81],[20.72,-156.88],[20.74,-157.05],[20.83,-157.05],[20.90,-157.00]],
+  // Kahoʻolawe
+  [[20.62,-156.74],[20.60,-156.55],[20.55,-156.52],[20.49,-156.59],[20.50,-156.71]],
+  // Niʻihau
+  [[22.04,-160.08],[22.00,-159.99],[21.85,-160.07],[21.75,-160.18],[21.77,-160.25],[21.95,-160.25]],
+];
+
+function dsWhichIsland(lat, lng) {
+  for (const b of DS_ISLAND_BOUNDS) {
+    if (lat >= b.latMin && lat <= b.latMax && lng >= b.lngMin && lng <= b.lngMax) return b.name;
+  }
+  return null;
+}
+function dsCurrentSeason() {
+  const m = new Date().getMonth();
+  if (m >= 2 && m <= 4) return 'spring';
+  if (m >= 5 && m <= 7) return 'summer';
+  if (m >= 8 && m <= 10) return 'fall';
+  return 'winter';
+}
+let dsBortleLayers = {}, dsClassFilterState = {}, dsActiveSeason = dsCurrentSeason(), dsYouMarker = null;
+
+function dsPointInPolygon(point, polygon) {
+  const [px, py] = point;
+  let inside = false;
+  for (let i = 0, j = polygon.length-1; i < polygon.length; j = i++) {
+    const [xi, yi] = polygon[i], [xj, yj] = polygon[j];
+    if (((yi > py) !== (yj > py)) && (px < (xj-xi)*(py-yi)/(yj-yi)+xi)) inside = !inside;
+  }
+  return inside;
+}
+function dsEstimateBortle(lat, lng) {
+  const sorted = [...DS_BORTLE_ZONES].sort((a, b) => b[0]-a[0]);
+  for (const [cls, name, coords] of sorted) {
+    if (dsPointInPolygon([lat, lng], coords)) return { cls, name };
+  }
+  return null;
+}
+function dsNearestSite(lat, lng) {
+  let best = null, bestDist = Infinity;
+  DS_BEST_SPOTS.forEach(s => {
+    const d = Math.hypot(s.lat-lat, s.lng-lng);
+    if (d < bestDist) { bestDist = d; best = s; }
+  });
+  return { site: best, distKm: bestDist*111 };
+}
+function dsApplyClassFilter() {
+  for (let i = 1; i <= 9; i++) {
+    if (dsClassFilterState[i]) {
+      if (!window.__dsMap.hasLayer(dsBortleLayers[i])) window.__dsMap.addLayer(dsBortleLayers[i]);
+    } else {
+      if (window.__dsMap.hasLayer(dsBortleLayers[i])) window.__dsMap.removeLayer(dsBortleLayers[i]);
+    }
+  }
+}
+function dsRenderClassFilters() {
+  const list = document.getElementById('ds-cf-list');
+  list.innerHTML = '';
+  for (let i = 1; i <= 9; i++) {
+    const row = document.createElement('div');
+    row.className = 'ds-cf-row' + (dsClassFilterState[i] ? ' active' : '');
+    row.innerHTML = `<div class="ds-cf-check"></div><div class="ds-cf-swatch" style="background:${DS_BORTLE_COLOR[i]}"></div><div class="ds-cf-text"><span class="ds-cf-num">${i}</span><span class="ds-cf-name">${DS_BORTLE_DESC[i]}</span></div>`;
+    row.addEventListener('click', () => {
+      dsClassFilterState[i] = !dsClassFilterState[i];
+      dsApplyClassFilter();
+      dsRenderClassFilters();
+    });
+    list.appendChild(row);
+  }
+}
+function dsSetClassFilter(activeClasses) {
+  for (let i = 1; i <= 9; i++) dsClassFilterState[i] = activeClasses.includes(i);
+  dsApplyClassFilter();
+  dsRenderClassFilters();
+}
+function dsRenderSeason() {
+  document.querySelectorAll('.ds-season-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.season === dsActiveSeason);
+    btn.classList.toggle('current', btn.dataset.season === dsCurrentSeason());
+  });
+  const s = DS_SEASONS[dsActiveSeason];
+  document.getElementById('ds-season-content').innerHTML = `<div class="ds-season-title">${s.name}<span class="ds-season-months">${s.months}</span></div><div class="ds-season-hawaiian">${s.hawaiian}</div><div class="ds-season-section"><span class="ds-ss-label">Overhead</span><span class="ds-ss-text">${s.overhead}</span></div><div class="ds-season-section"><span class="ds-ss-label">Southern Sky</span><span class="ds-ss-text">${s.south}</span></div><div class="ds-season-section"><span class="ds-ss-label">Weather</span><span class="ds-ss-text">${s.weather}</span></div><div class="ds-season-section"><span class="ds-ss-label">Best Regions</span><span class="ds-ss-text">${s.bestRegions}</span></div><div class="ds-season-notes"><em>${s.notes}</em></div>`;
+}
+function dsUpdateInfoPanel(lat, lng) {
+  const est = dsEstimateBortle(lat, lng);
+  const island = dsWhichIsland(lat, lng);
+  const { site, distKm } = dsNearestSite(lat, lng);
+  const info = document.getElementById('ds-info-content');
+  if (est) {
+    info.innerHTML = `<div class="ds-info-result"><div class="ds-info-place">${island || 'Hawaiʻi'}</div><div class="ds-info-bortle-big">Bortle ${est.cls}</div><div class="ds-info-bortle-desc">${DS_BORTLE_DESC[est.cls]}</div></div><div class="ds-info-meta"><span class="ml">Zone</span><span class="mv">${est.name}</span><span class="ml">Coords</span><span class="mv">${lat.toFixed(3)}°N, ${Math.abs(lng).toFixed(3)}°W</span><span class="ml">Nearest dark site</span><span class="mv">${site.name} (${distKm.toFixed(0)} km)</span><span class="ml">Best season</span><span class="mv">${dsActiveSeason} — see panel above</span></div>`;
+  } else {
+    info.innerHTML = `<div class="ds-info-result"><div class="ds-info-place">${island ? island+' (outside mapped zones)' : 'Open Ocean'}</div><div class="ds-info-bortle-big">Bortle 1–2</div><div class="ds-info-bortle-desc">${island ? 'Likely rural/dark' : 'Open sea — naturally dark'}</div></div><div class="ds-info-meta"><span class="ml">Coords</span><span class="mv">${lat.toFixed(3)}°${lat>=0?'N':'S'}, ${Math.abs(lng).toFixed(3)}°${lng<0?'W':'E'}</span><span class="ml">Nearest dark site</span><span class="mv">${site.name} (${distKm.toFixed(0)} km)</span></div>`;
+  }
+}
+function initDarkSky() {
+  const map = L.map('ds-map', { center:DS_HAWAII_CENTER, zoom:7, minZoom:6, maxZoom:12, zoomControl:true });
+  window.__dsMap = map;
+  // Pane for soft island glow (sits between basemap and overlays)
+  map.createPane('landPane');
+  map.getPane('landPane').style.zIndex = 250;
+  map.getPane('landPane').classList.add('ds-land-pane');
+  map.getPane('landPane').style.pointerEvents = 'none';
+  // Pane for Bortle zones with blur applied — softens hard rectangles into organic glows
+  map.createPane('bortlePane');
+  map.getPane('bortlePane').style.zIndex = 410;
+  map.getPane('bortlePane').classList.add('ds-bortle-blurred');
+  // Draw soft warm-tinted island silhouettes so land is visible against the dark ocean
+  DS_ISLAND_OUTLINES.forEach(coords => {
+    L.polygon(coords, {
+      color:'transparent', fillColor:'#d8c890', fillOpacity:0.55,
+      weight:0, pane:'landPane', interactive:false
+    }).addTo(map);
+  });
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution:'© OpenStreetMap, © CARTO', subdomains:'abcd', maxZoom:19,
+  }).addTo(map);
+  const nasaLights = L.tileLayer('https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_Black_Marble/default/2016-01-01/GoogleMapsCompatible_Level8/{z}/{y}/{x}.png', {
+    attribution:'NASA VIIRS Black Marble', maxNativeZoom:8, maxZoom:12, opacity:0.40, bounds:[[-85,-180],[85,180]],
+  });
+  for (let i = 1; i <= 9; i++) { dsBortleLayers[i] = L.layerGroup(); dsClassFilterState[i] = true; }
+  DS_BORTLE_ZONES.forEach(([cls, name, coords]) => {
+    const poly = L.polygon(coords, { color:'transparent', fillColor:DS_BORTLE_COLOR[cls], fillOpacity:1, weight:0, interactive:true, pane:'bortlePane' });
+    poly.bindPopup(`<div class="ds-popup-title">${name}</div><div class="ds-popup-subtitle">Estimated zone</div><span class="ds-popup-bortle">Bortle ${cls}</span><span class="ds-popup-bortle-sub">${DS_BORTLE_DESC[cls]}</span><div class="ds-popup-body" style="margin-top:8px;">${DS_BORTLE_LONG[cls]}</div>`);
+    dsBortleLayers[cls].addLayer(poly);
+  });
+  function dsIcon(htmlClass, content='') {
+    return L.divIcon({ className:'ds-marker', html:`<div class="${htmlClass}">${content}</div>`, iconSize:[24,24], iconAnchor:[12,12] });
+  }
+  const readingIcon = (color) => L.divIcon({ className:'ds-marker', html:`<div class="ds-marker-reading" style="background:${color}"></div>`, iconSize:[16,16], iconAnchor:[8,8] });
+  const bestLayer = L.layerGroup(DS_BEST_SPOTS.map(s =>
+    L.marker([s.lat,s.lng], { icon:dsIcon('ds-marker-best','★') }).bindPopup(`<div class="ds-popup-title">${s.name}</div><div class="ds-popup-subtitle">Dark Sky Viewing Site</div><div class="ds-popup-body">${s.note}</div><div class="ds-popup-data"><span class="ddl">Bortle</span><span class="ddv">${s.bortle} — ${DS_BORTLE_DESC[s.bortle]}</span><span class="ddl">Elevation</span><span class="ddv">${s.elev}</span></div>`)
+  ));
+  const obsLayer = L.layerGroup(DS_OBSERVATORIES.map(o =>
+    L.marker([o.lat,o.lng], { icon:dsIcon('ds-marker-obs') }).bindPopup(`<div class="ds-popup-title">${o.name}</div><div class="ds-popup-subtitle">Observatory</div><div class="ds-popup-body">${o.note}</div>`)
+  ));
+  const voyLayer = L.layerGroup(DS_VOYAGING_SITES.map(v =>
+    L.marker([v.lat,v.lng], { icon:dsIcon('ds-marker-voy') }).bindPopup(`<div class="ds-popup-title">${v.name}</div><div class="ds-popup-subtitle">Traditional Voyaging Site</div><div class="ds-popup-body">${v.note}</div>`)
+  ));
+  const readingsLayer = L.layerGroup(DS_COMMUNITY_READINGS.map(r => {
+    const color = DS_BORTLE_COLOR[r.bortle].replace(/[\d.]+\)$/, '0.9)');
+    return L.marker([r.lat,r.lng], { icon:readingIcon(color) }).bindPopup(`<div class="ds-popup-title">Community Reading</div><div class="ds-popup-subtitle">${r.observer}</div><span class="ds-popup-bortle">Bortle ${r.bortle}</span><span class="ds-popup-bortle-sub">${DS_BORTLE_DESC[r.bortle]}</span><div class="ds-popup-data"><span class="ddl">Observer</span><span class="ddv">${r.observer}</span><span class="ddl">Date</span><span class="ddv">${r.date}</span></div>`);
+  }));
+  const LAYERS = [
+    { id:'nasa', name:'Nighttime Lights', desc:'NASA VIIRS satellite measurements', layer:nasaLights, defaultOn:true },
+    { id:'best', name:'Best Viewing Spots', desc:'Curated stargazing sites — gold ★', layer:bestLayer, defaultOn:true },
+    { id:'obs', name:'Observatories', desc:'Maunakea & Haleakalā — teal ◆', layer:obsLayer, defaultOn:false },
+    { id:'voy', name:'Voyaging Sites', desc:'Traditional launch & landfall — cream ◇', layer:voyLayer, defaultOn:false },
+    { id:'readings', name:'Community Readings', desc:'Submitted brightness measurements', layer:readingsLayer, defaultOn:true },
+  ];
+  const layerList = document.getElementById('ds-layer-list');
+  LAYERS.forEach(L_ => {
+    const row = document.createElement('div');
+    row.className = 'ds-layer-row' + (L_.defaultOn ? ' active' : '');
+    row.innerHTML = `<div class="ds-layer-check"></div><div class="ds-layer-info"><div class="ds-layer-name">${L_.name}</div><div class="ds-layer-desc">${L_.desc}</div></div>`;
+    row.addEventListener('click', () => {
+      if (map.hasLayer(L_.layer)) { map.removeLayer(L_.layer); row.classList.remove('active'); }
+      else { map.addLayer(L_.layer); row.classList.add('active'); }
+    });
+    if (L_.defaultOn) map.addLayer(L_.layer);
+    layerList.appendChild(row);
+  });
+  dsRenderClassFilters();
+  dsApplyClassFilter();
+  document.getElementById('ds-cf-all').addEventListener('click', () => dsSetClassFilter([1,2,3,4,5,6,7,8,9]));
+  document.getElementById('ds-cf-none').addEventListener('click', () => dsSetClassFilter([]));
+  document.getElementById('ds-preset-dark').addEventListener('click', () => dsSetClassFilter([1,2,3]));
+  document.getElementById('ds-preset-rural').addEventListener('click', () => dsSetClassFilter([3,4,5]));
+  document.getElementById('ds-preset-urban').addEventListener('click', () => dsSetClassFilter([6,7,8,9]));
+  document.getElementById('ds-preset-extreme').addEventListener('click', () => dsSetClassFilter([1,9]));
+  document.querySelectorAll('.ds-season-btn').forEach(btn => {
+    btn.addEventListener('click', () => { dsActiveSeason = btn.dataset.season; dsRenderSeason(); });
+  });
+  dsRenderSeason();
+  map.on('click', (e) => {
+    dsUpdateInfoPanel(e.latlng.lat, e.latlng.lng);
+    L.circleMarker(e.latlng, { radius:4, color:'#e8b84b', fillColor:'#e8b84b', fillOpacity:0.8, weight:1 }).addTo(map);
+  });
+  document.getElementById('ds-btn-fit').addEventListener('click', () => map.fitBounds(DS_HAWAII_BOUNDS, { padding:[20,20] }));
+  document.getElementById('ds-btn-locate').addEventListener('click', () => {
+    if (!navigator.geolocation) { alert('Geolocation is not available.'); return; }
+    const btn = document.getElementById('ds-btn-locate');
+    btn.textContent = 'Locating...';
+    navigator.geolocation.getCurrentPosition((pos) => {
+      btn.textContent = 'Find Me';
+      const lat = pos.coords.latitude, lng = pos.coords.longitude;
+      const island = dsWhichIsland(lat, lng);
+      const est = dsEstimateBortle(lat, lng);
+      const { site, distKm } = dsNearestSite(lat, lng);
+      if (dsYouMarker) map.removeLayer(dsYouMarker);
+      dsYouMarker = L.marker([lat,lng], { icon:L.divIcon({ className:'ds-marker', html:'<div class="ds-marker-you"></div>', iconSize:[22,22], iconAnchor:[11,11] }) }).addTo(map).bindPopup(`<div class="ds-popup-title">${island || 'Your Location'}</div><div class="ds-popup-subtitle">From device GPS</div>${est?`<span class="ds-popup-bortle">Bortle ${est.cls}</span><span class="ds-popup-bortle-sub">${DS_BORTLE_DESC[est.cls]}</span>`:''}<div class="ds-popup-body" style="margin-top:8px;">${est?`You are in the <b>${est.name}</b> area.`:'You appear to be outside the mapped Bortle zones — likely rural/dark.'}</div><div class="ds-popup-data"><span class="ddl">Coords</span><span class="ddv">${lat.toFixed(4)}, ${lng.toFixed(4)}</span><span class="ddl">Nearest dark site</span><span class="ddv">${site.name} (${distKm.toFixed(0)} km)</span></div>`).openPopup();
+      dsUpdateInfoPanel(lat, lng);
+      map.setView([lat, lng], 11);
+    }, () => { btn.textContent = 'Find Me'; alert('Could not get your location.'); }, { timeout:8000 });
+  });
+  map.fitBounds(DS_HAWAII_BOUNDS, { padding:[20,20] });
+  setTimeout(() => map.invalidateSize(), 100);
+}
+</script>
+
+<script>
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js')
-      .then(() => console.log('Service Worker registered'))
-      .catch(err => console.log('SW error:', err));
+    navigator.serviceWorker.register('/sw.js').then(()=>console.log('SW registered')).catch(err=>console.log('SW error:',err));
   }
 </script>
 <script src="constellation-highlight.js"></script>
