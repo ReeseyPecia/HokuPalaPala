@@ -141,6 +141,21 @@ nav{position:sticky;top:0;z-index:100;background:rgba(4,6,15,0.97);border-bottom
 .help-nav-btn{background:transparent;border:1px solid rgba(232,184,75,0.3);color:var(--gold);width:28px;height:28px;border-radius:50%;cursor:pointer;font-family:'Cinzel',serif;font-size:0.9rem;display:flex;align-items:center;justify-content:center;transition:all 0.2s;margin-left:10px}
 .help-nav-btn:hover{background:rgba(232,184,75,0.15);border-color:var(--gold)}
 @media(max-width:600px){.welcome-card{padding:28px 22px 22px}.welcome-title{font-size:1.3rem}.welcome-item{grid-template-columns:40px 1fr;padding:12px 14px}.welcome-icon{font-size:1.5rem}}
+/* ═══ Wave 4: Tonight from Hawaiʻi panel ═══ */
+.tonight-panel{background:linear-gradient(145deg,rgba(12,20,42,0.85),rgba(8,14,30,0.92));border:1px solid var(--border);border-radius:6px;padding:24px 28px;margin-bottom:28px;box-shadow:0 0 60px rgba(232,184,75,0.04);animation:fi 0.6s ease}
+.tonight-header{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:18px}
+.tonight-title{font-family:'Cinzel',serif;color:var(--gold);font-size:1.15rem;letter-spacing:0.08em;text-transform:uppercase}
+.tonight-subtitle{font-family:'Space Mono',monospace;font-size:0.62rem;color:var(--dim);letter-spacing:0.08em}
+.tonight-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:16px}
+.tonight-card{display:grid;grid-template-columns:40px 1fr;gap:14px;align-items:start;padding:14px 16px;background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.06);border-radius:4px;transition:all 0.2s}
+.tonight-card.clickable{cursor:pointer}
+.tonight-card.clickable:hover{border-color:var(--gold);background:rgba(232,184,75,0.05)}
+.tonight-card-icon{font-size:1.5rem;line-height:1;text-align:center;padding-top:2px}
+.tonight-card-title{font-family:'Cinzel',serif;color:var(--gold);font-size:0.92rem;margin-bottom:3px;letter-spacing:0.03em}
+.tonight-card-body{font-size:0.85rem;color:#b8c2cf;line-height:1.5}
+.tonight-card-body em{color:var(--pale);font-style:italic}
+.tonight-cta{text-align:center;font-family:'Space Mono',monospace;font-size:0.62rem;color:var(--dim);letter-spacing:0.1em;text-transform:uppercase;padding-top:12px;border-top:1px solid rgba(232,184,75,0.1);font-style:italic}
+@media(max-width:600px){.tonight-panel{padding:18px 18px}.tonight-cards{grid-template-columns:1fr}}
 .placeholder-pending{text-align:center;color:var(--dim);font-style:italic;padding:80px 20px;font-size:0.95rem;line-height:1.7}
 .placeholder-pending::before{content:'◐';display:block;font-size:2.2rem;color:var(--gold);opacity:0.5;margin-bottom:16px}
 .voy-grid{display:grid;grid-template-columns:1fr 360px;gap:28px;align-items:start}
@@ -365,6 +380,16 @@ nav{position:sticky;top:0;z-index:100;background:rgba(4,6,15,0.97);border-bottom
 <div class="section active" id="tab-sky">
   <div style="margin-top:32px">
     <div class="sec-head">Tonight's Sky <span class="help-ico" data-tip="A live map of stars visible from Hawaiʻi. Click any star to learn its Hawaiian name and what it meant to Polynesian navigators.">?</span></div>
+    <div class="tonight-panel" id="tonight-panel">
+      <div class="tonight-header">
+        <div class="tonight-title">Tonight from Hawaiʻi</div>
+        <div class="tonight-subtitle" id="tonight-date">—</div>
+      </div>
+      <div class="tonight-cards" id="tonight-cards">
+        <!-- populated by renderTonightPanel() -->
+      </div>
+      <div class="tonight-cta">↓ Explore the full sky below</div>
+    </div>
       <div style="font-style:italic;color:var(--dim);font-size:0.92rem;margin-bottom:22px;margin-top:-8px">Tap a star to hear its Hawaiian name and story</div>
       <div style="display:flex;flex-direction:column;align-items:center;gap:14px">
         <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
@@ -945,6 +970,119 @@ function updateSky() {
   const moonPhase = calcMoonPhaseRaw(dateVal ? new Date(dateVal) : new Date());
   infoEl.textContent = `Moon Phase: ${moonPhase.name} (${moonPhase.illumination}% illuminated) — ${moonPhase.illumination > 60 ? '⚠ Bright moon may reduce visibility' : '✓ Good for navigation stars'}`;
   renderSkyDome(currentMonth, layer, hour);
+  renderTonightPanel(hour, moonPhase);
+}
+
+// ═══ Wave 4: "Tonight from Hawaiʻi" panel ═══
+function renderTonightPanel(hour, moonPhase) {
+  const panel = document.getElementById('tonight-panel');
+  if (!panel || !STARS.length) return;
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
+  document.getElementById('tonight-date').textContent = dateStr.toUpperCase();
+
+  // Find stars currently visible AND near zenith (the "what's overhead now" story)
+  let zenithStar = null, zenithBest = 25; // degrees from zenith
+  // Find brightest navigation star visible
+  let brightestNav = null, brightestMag = 99;
+  // Check if Southern Cross or other special-to-Hawaii stars are visible
+  let southernCross = false;
+  STARS.forEach(s => {
+    if (!s.months.includes(currentMonth)) return;
+    const pos = getStarSkyPos(s, currentMonth, hour);
+    if (!pos) return;
+    const dx = pos.x - SKY_CX, dy = pos.y - SKY_CY;
+    const distFromCenter = Math.sqrt(dx*dx + dy*dy);
+    const angleFromZenith = (distFromCenter / SKY_R) * 90;
+    if (s.type === 'nav' && angleFromZenith < zenithBest) {
+      zenithBest = angleFromZenith;
+      zenithStar = s;
+    }
+    if (s.type === 'nav' && s.mag != null && s.mag < brightestMag) {
+      brightestMag = s.mag;
+      brightestNav = s;
+    }
+    if (s.id === 'hanaiakamalama' || s.h === 'Hānaiakamalama') southernCross = true;
+  });
+
+  const cards = [];
+
+  // Card 1: Star overhead (or rising prominently)
+  if (zenithStar && zenithBest < 20) {
+    cards.push({
+      icon:'🌟',
+      title:`${zenithStar.h} is overhead`,
+      body:`The star <em>${zenithStar.w}</em> is high in the sky right now. ${zenithStar.zenithLabel ? `It passes directly above <em>${zenithStar.zenithLabel}</em> — which is how navigators knew they had reached that latitude.` : 'Navigators used this star to find their way across the Pacific.'}`,
+      clickable:true,
+      action:() => selectStar(zenithStar)
+    });
+  } else if (brightestNav) {
+    cards.push({
+      icon:'🌟',
+      title:`${brightestNav.h} is visible`,
+      body:`Look for <em>${brightestNav.w}</em>, one of the brightest navigation stars tonight. Tap it on the sky map below to learn its story.`,
+      clickable:true,
+      action:() => selectStar(brightestNav)
+    });
+  }
+
+  // Card 2: Southern Cross
+  if (southernCross) {
+    cards.push({
+      icon:'⛵',
+      title:'The Southern Cross is visible',
+      body:`<em>Hānaiakamālama</em> — the Southern Cross — sits low in the southern sky. From Hawaiʻi it can only be seen part of the year. Polynesian navigators used its long axis to find true south.`
+    });
+  }
+
+  // Card 3: Moon
+  const moonIcon = moonPhase.illumination < 10 ? '🌑' :
+                   moonPhase.illumination < 40 ? '🌒' :
+                   moonPhase.illumination < 60 ? '🌓' :
+                   moonPhase.illumination < 85 ? '🌔' : '🌕';
+  let moonStory;
+  if (moonPhase.illumination < 25) {
+    moonStory = `The moon is only <em>${moonPhase.illumination}% full</em> — a dark sky tonight. Faint stars and the Milky Way are at their most visible.`;
+  } else if (moonPhase.illumination < 70) {
+    moonStory = `The moon is <em>${moonPhase.illumination}% full</em> — bright enough to see, but not so bright that it washes out the navigation stars.`;
+  } else {
+    moonStory = `The moon is <em>${moonPhase.illumination}% full</em> — bright enough to wash out the faintest stars. But the brightest navigation stars still shine clearly.`;
+  }
+  cards.push({
+    icon: moonIcon,
+    title: `${moonPhase.name}`,
+    body: moonStory
+  });
+
+  // Card 4: Season / cultural context
+  const m = currentMonth;
+  let seasonCard = null;
+  if (m === 10 || m === 11) {
+    seasonCard = { icon:'✨', title:'Watch for Makaliʻi', body:`The rising of <em>Makaliʻi</em> (the Pleiades) at sunset marks the start of <em>Makahiki</em> — the Hawaiian New Year. Look east just after sunset in November.` };
+  } else if (m >= 0 && m <= 2) {
+    seasonCard = { icon:'✨', title:"Hoʻoilo — the wet season", body:`This is the prime navigation season. The Milky Way arches overhead and the brightest winter stars dominate the sky. <em>Aʻā (Sirius)</em>, the brightest star in our sky, is high.` };
+  } else if (m >= 5 && m <= 7) {
+    seasonCard = { icon:'✨', title:'The Great Fishhook overhead', body:`In <em>Kau</em> (the dry season), <em>Kamakaunuiamāui</em> — the Great Fishhook of Māui — dominates the southern sky. Its curve traces through the Milky Way's center.` };
+  } else if (m >= 8 && m <= 9) {
+    seasonCard = { icon:'✨', title:'Quieter skies', body:`Between the rich summer Milky Way and the bright winter stars, fall skies are quieter. A good time to spot faint constellations and the <em>Andromeda Galaxy</em>.` };
+  } else if (m >= 3 && m <= 4) {
+    seasonCard = { icon:'✨', title:'Spring transitions', body:`Spring is when Northern and Southern Hemisphere skies meet. <em>Hōkūleʻa (Arcturus)</em> climbs toward zenith, and the Southern Cross begins its yearly appearance.` };
+  }
+  if (seasonCard) cards.push(seasonCard);
+
+  // Render cards (max 3)
+  const container = document.getElementById('tonight-cards');
+  container.innerHTML = cards.slice(0,3).map((c, i) => {
+    const onclick = c.clickable ? `onclick="__tonightAction${i}()"` : '';
+    if (c.action) window['__tonightAction' + i] = c.action;
+    return `<div class="tonight-card ${c.clickable?'clickable':''}" ${onclick}>
+      <div class="tonight-card-icon">${c.icon}</div>
+      <div>
+        <div class="tonight-card-title">${c.title}</div>
+        <div class="tonight-card-body">${c.body}</div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 function calcMoonPhaseRaw(date) {
