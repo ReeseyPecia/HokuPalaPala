@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<link rel="manifest" href="manifest.json">
+<link rel="manifest" href="manifest.json"
 <meta name="theme-color" content="#04060f">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hōkū Palapala — The Star Record</title>
@@ -115,6 +115,12 @@ nav{position:sticky;top:0;z-index:100;background:rgba(4,6,15,0.97);border-bottom
 .fi{animation:fi 0.6s ease forwards}
 .success-msg{background:rgba(74,181,160,0.1);border:1px solid var(--teal-border);color:var(--teal);padding:12px 16px;border-radius:3px;font-family:'Space Mono',monospace;font-size:0.7rem;margin-top:12px;display:none}
 #sky-svg .constellation-label{font-family:'Cinzel',serif;font-size:0.6rem;fill:#e8b84b;opacity:0.55;pointer-events:none}
+.help-ico{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;border:1px solid rgba(232,184,75,0.4);color:var(--gold);font-family:'Space Mono',monospace;font-size:0.55rem;font-weight:bold;cursor:help;margin-left:6px;background:rgba(232,184,75,0.05);transition:all 0.2s;vertical-align:middle;position:relative;text-transform:none;letter-spacing:0}
+.help-ico:hover{background:rgba(232,184,75,0.2);border-color:var(--gold);color:#fff}
+.help-ico::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:rgba(2,4,14,0.98);border:1px solid rgba(232,184,75,0.5);color:var(--pale);padding:10px 14px;border-radius:3px;font-family:'EB Garamond',serif;font-size:0.82rem;font-weight:normal;line-height:1.5;letter-spacing:0;text-transform:none;width:240px;text-align:left;white-space:normal;opacity:0;pointer-events:none;transition:opacity 0.2s;box-shadow:0 4px 20px rgba(0,0,0,0.6);z-index:10000}
+.help-ico:hover::after,.help-ico:active::after{opacity:1}
+@media(max-width:700px){.help-ico::after{width:200px;left:auto;right:0;transform:none}}
+.plain-label{font-family:'EB Garamond',serif;font-style:italic;color:var(--pale);font-size:0.95rem;text-transform:none;letter-spacing:0;margin-left:6px;opacity:0.7}
 .placeholder-pending{text-align:center;color:var(--dim);font-style:italic;padding:80px 20px;font-size:0.95rem;line-height:1.7}
 .placeholder-pending::before{content:'◐';display:block;font-size:2.2rem;color:var(--gold);opacity:0.5;margin-bottom:16px}
 .voy-grid{display:grid;grid-template-columns:1fr 360px;gap:28px;align-items:start}
@@ -295,8 +301,8 @@ nav{position:sticky;top:0;z-index:100;background:rgba(4,6,15,0.97);border-bottom
 <!-- SKY DOME TAB -->
 <div class="section active" id="tab-sky">
   <div style="margin-top:32px">
-    <div class="sec-head">Interactive Sky Dome — 20°N Latitude, Hawaiʻi</div>
-    <div class="sky-grid">
+    <div class="sec-head">Tonight's Sky <span class="help-ico" data-tip="A live map of stars visible from Hawaiʻi. Click any star to learn its Hawaiian name and what it meant to Polynesian navigators.">?</span></div>
+      <div style="font-style:italic;color:var(--dim);font-size:0.92rem;margin-bottom:22px;margin-top:-8px">Tap a star to hear its Hawaiian name and story</div>
       <div style="display:flex;flex-direction:column;align-items:center;gap:14px">
         <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
           <div class="ctrl-group" style="width:160px">
@@ -313,7 +319,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(4,6,15,0.97);border-bottom
             </select>
           </div>
           <div class="ctrl-group" style="width:160px">
-            <div class="ctrl-label">Show Layer</div>
+            <div class="ctrl-label">What to show <span class="help-ico" data-tip="Wayfinding Stars: the stars Polynesian navigators used to sail across the Pacific. Full Sky: everything visible tonight. Makahiki Sky: the Hawaiian New Year stars. Constellation: shapes connecting the stars.">?</span></div>
             <select class="ctrl-input" id="sky-layer" onchange="updateSky()">
               <option value="nav">Wayfinding Stars</option>
               <option value="all">Full Sky</option>
@@ -345,8 +351,8 @@ nav{position:sticky;top:0;z-index:100;background:rgba(4,6,15,0.97);border-bottom
 <!-- VOYAGE TAB -->
 <div class="section" id="tab-voyage">
   <div style="margin-top:32px">
-    <div class="sec-head">Hoʻokele — Voyage Simulation</div>
-    <div style="font-style:italic;color:var(--dim);font-size:0.92rem;margin-bottom:22px;margin-top:-8px">Sailing the latitudes our ancestors knew</div>
+    <div class="sec-head">Hoʻokele — Sail With the Ancestors <span class="help-ico" data-tip="Watch the night sky change as a canoe sails from Hawaiʻi south toward Tahiti or the Marquesas. This is how Polynesian navigators found their way: by reading the stars overhead and remembering which star sits directly above each island.">?</span></div>
+    <div style="font-style:italic;color:var(--dim);font-size:0.92rem;margin-bottom:22px;margin-top:-8px">Watch how the stars change as you sail south — the same way our ancestors did</div>
     <div class="voy-grid">
       <div>
         <div class="voy-dome-wrap">
@@ -380,7 +386,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(4,6,15,0.97);border-bottom
               <div class="voy-readout-sub" id="voy-readout-lat-sub">Kawaihae</div>
             </div>
             <div class="voy-readout">
-              <div class="voy-readout-label">Zenith Star</div>
+              <div class="voy-readout-label">Star Overhead <span class="help-ico" data-tip="The star directly above you. Each Polynesian island has a 'zenith star' that passes straight overhead at that island's latitude. When the right star sits directly above, you know you've reached the right latitude.">?</span></div>
               <div class="voy-readout-value compact" id="voy-readout-zenith">Hōkūleʻa</div>
               <div class="voy-readout-sub" id="voy-readout-zenith-sub">Arcturus · Hawaiʻi</div>
             </div>
@@ -415,8 +421,8 @@ nav{position:sticky;top:0;z-index:100;background:rgba(4,6,15,0.97);border-bottom
 <!-- DARK SKY TAB -->
 <div class="section" id="tab-darksky">
   <div style="margin-top:32px">
-    <div class="sec-head">Pō Lani — Dark Sky Map</div>
-    <div style="font-style:italic;color:var(--dim);font-size:0.92rem;margin-bottom:22px;margin-top:-8px">Where the stars are still bright across Hawaiʻi</div>
+    <div class="sec-head">Find Dark Skies <span class="help-ico" data-tip="A map showing how dark the night sky is across all the Hawaiian Islands. Tap any spot to estimate the sky brightness there, or tap 'Find Me' to check your own location.">?</span></div>
+    <div style="font-style:italic;color:var(--dim);font-size:0.92rem;margin-bottom:22px;margin-top:-8px">Where can you still see the stars in Hawaiʻi?</div>
     <div class="ds-grid">
       <div class="ds-map-wrap">
         <div id="ds-map"></div>
@@ -432,7 +438,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(4,6,15,0.97);border-bottom
         </div>
         <div class="ds-panel">
           <div class="ds-panel-label">
-            <span>Bortle Class Filter</span>
+            <span>Filter by Darkness <span class="help-ico" data-tip="Hide or show different brightness levels on the map. Use 'Only Dark' to find the best stargazing spots, or 'Urban' to see where light pollution is worst.">?</span></span>
             <div class="ds-right-actions">
               <button class="ds-tiny-btn" id="ds-cf-all">All</button>
               <button class="ds-tiny-btn" id="ds-cf-none">None</button>
@@ -470,16 +476,16 @@ nav{position:sticky;top:0;z-index:100;background:rgba(4,6,15,0.97);border-bottom
 <!-- BORTLE TAB -->
 <div class="section" id="tab-bortle">
   <div style="margin-top:32px">
-    <div class="sec-head">Sky Brightness Calculator</div>
+    <div class="sec-head">How Dark Is Your Sky? <span class="help-ico" data-tip="Find out how many stars you can see from where you are. Astronomers use a 1-to-9 scale called the Bortle Scale where 1 is a pristine sky like the Maunakea summit and 9 is a city center.">?</span></div>
     <div class="two-col">
       <div>
         <div class="panel">
-          <div class="ctrl-label" style="margin-bottom:12px">Select your Bortle Scale reading (1=darkest, 9=city)</div>
+          <div class="ctrl-label" style="margin-bottom:12px">How bright is the sky where you are? <span class="help-ico" data-tip="Tap a number from 1 (darkest, like a remote mountaintop) to 9 (brightest, like downtown). Most cities are 6-8. Most rural areas are 3-4. Maunakea is 1.">?</span></div>
           <div class="bortle-scale" id="bortle-scale"></div>
           <div class="nelm-display" id="nelm-val">6.5</div>
-          <div class="nelm-label">Naked-Eye Limiting Magnitude (NELM)</div>
+          <div class="nelm-label">Faintest star you can see <span class="help-ico" data-tip="Stars have brightness numbers (called magnitudes). Lower numbers = brighter stars. The faintest star a human eye can see in pristine darkness is about magnitude 6.5. In a city, only stars brighter than magnitude 3 are visible.">?</span></div>
           <div style="margin-top:20px">
-            <div class="data-row"><span class="dl">Sky Quality (SQM equiv.)</span><span class="dv hi" id="sqm-val">21.6 mag/arcsec²</span></div>
+            <div class="data-row"><span class="dl">Sky Quality <span class="help-ico" data-tip="A scientific measurement of how bright the night sky is. Higher numbers = darker sky. Maunakea's summit measures around 21.9. A city center measures around 14.">?</span></span><span class="dv hi" id="sqm-val">21.6 mag/arcsec²</span></div>
             <div class="data-row"><span class="dl">Bortle Class</span><span class="dv" id="bortle-class">Rural Sky</span></div>
             <div class="data-row"><span class="dl">Milky Way</span><span class="dv" id="mw-vis">Clearly visible, complex structure</span></div>
             <div class="data-row"><span class="dl">Maunakea Threat Level</span><span class="dv" id="threat-level">Low</span></div>
@@ -490,7 +496,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(4,6,15,0.97);border-bottom
           </div>
         </div>
         <div class="panel teal-border" style="margin-top:20px">
-          <div class="ctrl-label" style="margin-bottom:10px">How to take a NELM reading</div>
+          <div class="ctrl-label" style="margin-bottom:10px">How to check your sky at home</div>
           <div style="font-size:0.88rem;color:#a0aabb;line-height:1.7">
             <strong style="color:var(--pale)">1.</strong> Let your eyes adapt to darkness for 20 minutes — no phone screens.<br>
             <strong style="color:var(--pale)">2.</strong> Look toward a known star field (the Pleiades/Makaliʻi area works well).<br>
