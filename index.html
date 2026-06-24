@@ -1066,28 +1066,34 @@ function selectStar(star) {
     planet: '🪐 Planet (Hōkū ʻEleʻele)'
   }[star.type] || '🌟 Sky Object';
   const obsLabel = isPlanet ? 'Planets' : 'Observatory Connection';
-  const astroTitle = isPlanet ? 'Planetary Data' : 'Astrophysics — Maunakea Observatory Data';
+  const astroTitle = isPlanet ? 'Planetary Data' : 'Astrophysics Data';
   const distVal = star.dist != null ? (isPlanet ? `${star.dist} light-years (approx.)` : `${star.dist} light-years`) : '—';
+  const detailId = 'tech-' + (star.id || Math.random().toString(36).slice(2));
   p.innerHTML = `
     ${buildConstellationDiagram(star)}
     <div class="star-name-h">${star.h}</div>
     <div class="star-name-w">✦ ${star.w}</div>
     <div class="star-meaning">${star.meaning}</div>
-    <div class="data-sec">Navigation Role</div>
-    <div style="font-size:0.88rem;color:#a0aabb;line-height:1.7;margin-bottom:12px">${star.navRole}</div>
-    ${star.starLine ? `<div class="data-row"><span class="dl">Hawaiian Star Line</span><span class="dv hi">${star.starLine}</span></div>` : ''}
-    <div class="data-sec">${astroTitle}</div>
-    ${star.mag != null ? `<div class="data-row"><span class="dl">Apparent Magnitude</span><span class="dv hi">${star.mag}</span></div>` : ''}
-    ${star.dist != null ? `<div class="data-row"><span class="dl">Distance from Earth</span><span class="dv">${distVal}</span></div>` : ''}
-    <div class="data-row"><span class="dl">Spectral Type</span><span class="dv">${star.spec}</span></div>
-    ${star.rsun ? `<div class="data-row"><span class="dl">Radius (Solar)</span><span class="dv">${star.rsun} R☉</span></div>` : ''}
-    ${star.ra && star.ra !== 'varies' ? `<div class="data-row"><span class="dl">Right Ascension</span><span class="dv">${star.ra}</span></div>` : ''}
-    ${star.dec && star.dec !== 'varies' ? `<div class="data-row"><span class="dl">Declination</span><span class="dv">${star.dec}</span></div>` : ''}
-    <div class="data-row"><span class="dl">Rise House</span><span class="dv">${star.riseHouse}</span></div>
-    ${star.setHouse ? `<div class="data-row"><span class="dl">Set House</span><span class="dv">${star.setHouse}</span></div>` : ''}
-    <div class="data-sec">${obsLabel}</div>
-    <div style="font-size:0.82rem;color:#9099aa;line-height:1.6;margin-bottom:10px">${star.obsNote}</div>
+    <div class="data-sec">What This Star Meant</div>
+    <div style="font-size:0.92rem;color:#c0c8d4;line-height:1.75;margin-bottom:14px">${star.navRole}</div>
+    ${star.starLine ? `<div style="font-size:0.85rem;color:var(--gold);margin-bottom:14px;font-style:italic">Part of the Hawaiian star line: <strong>${star.starLine}</strong></div>` : ''}
     <span class="nav-badge ${badgeClass}">${badgeLabel}</span>
+    <div style="margin-top:20px">
+      <div onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block';this.querySelector('span').textContent=this.nextElementSibling.style.display==='block'?'− Hide technical info':'+ Show technical info'" style="cursor:pointer;font-family:'Space Mono',monospace;font-size:0.65rem;color:var(--teal);letter-spacing:0.1em;text-transform:uppercase;padding:10px 12px;border:1px solid var(--teal-border);border-radius:3px;background:rgba(74,181,160,0.06);transition:all 0.2s;text-align:center" onmouseover="this.style.background='rgba(74,181,160,0.12)'" onmouseout="this.style.background='rgba(74,181,160,0.06)'"><span>+ Show technical info</span></div>
+      <div id="${detailId}" style="display:none;margin-top:14px">
+        <div class="data-sec">${astroTitle}</div>
+        ${star.mag != null ? `<div class="data-row"><span class="dl">Brightness <span class="help-ico" data-tip="Astronomical magnitude. Lower numbers mean brighter stars. The Sun is -27, the full Moon is -13, the brightest stars are around 0 or negative, and the faintest visible to the naked eye is about 6.">?</span></span><span class="dv hi">${star.mag}</span></div>` : ''}
+        ${star.dist != null ? `<div class="data-row"><span class="dl">Distance from Earth</span><span class="dv">${distVal}</span></div>` : ''}
+        <div class="data-row"><span class="dl">Star Type <span class="help-ico" data-tip="A letter-and-number code telling you what kind of star this is. O and B stars are blue and very hot; G stars like our Sun are yellow; M stars are red and cool.">?</span></span><span class="dv">${star.spec}</span></div>
+        ${star.rsun ? `<div class="data-row"><span class="dl">Size (in suns) <span class="help-ico" data-tip="How big this star is compared to our Sun. A value of 25 means it's 25 times the size of the Sun.">?</span></span><span class="dv">${star.rsun} R☉</span></div>` : ''}
+        ${star.ra && star.ra !== 'varies' ? `<div class="data-row"><span class="dl">Sky Position (RA) <span class="help-ico" data-tip="Right Ascension — like longitude for the sky. It tells astronomers exactly where to point a telescope.">?</span></span><span class="dv">${star.ra}</span></div>` : ''}
+        ${star.dec && star.dec !== 'varies' ? `<div class="data-row"><span class="dl">Sky Position (Dec) <span class="help-ico" data-tip="Declination — like latitude for the sky. Stars with declination near 0 sit over the equator; stars near +90 sit over the North Pole.">?</span></span><span class="dv">${star.dec}</span></div>` : ''}
+        <div class="data-row"><span class="dl">Where it rises <span class="help-ico" data-tip="In the Hawaiian star compass, the horizon is divided into named 'houses'. Each star rises in one of these houses, which is how navigators could find direction without instruments.">?</span></span><span class="dv">${star.riseHouse}</span></div>
+        ${star.setHouse ? `<div class="data-row"><span class="dl">Where it sets</span><span class="dv">${star.setHouse}</span></div>` : ''}
+        <div class="data-sec">${obsLabel}</div>
+        <div style="font-size:0.82rem;color:#9099aa;line-height:1.6;margin-bottom:10px">${star.obsNote}</div>
+      </div>
+    </div>
   `;
 }
 
