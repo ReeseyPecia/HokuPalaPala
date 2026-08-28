@@ -527,7 +527,7 @@
     },
     {
       "id": "manaiakalani",
-      "h": "Mānaiakalani",
+      "h": "Hikianalia",
       "w": "Spica (α Virginis)",
       "meaning": "\"The Fishhook from the Heavens\" — the divine hook of Māui",
       "type": "nav",
@@ -541,7 +541,7 @@
       "riseHouse": "ʻĀina Hema (SE)",
       "setHouse": "ʻĀina Kona (SW)",
       "navRole": "Zenith star for the Marquesas Islands — when Spica is directly overhead, you are at the latitude of the Marquesas, the likely origin point of the Hawaiian migration. Anchor of the Ka Lupe o Kāwelo star line in the spring sky.",
-      "starLine": "Ka Lupe o Kāwelo",
+      "starLine": "Kaiwikuamoʻo",
       "obsNote": "A close binary system — the two blue giants orbit each other every four days, distorting each other into egg shapes.",
       "months": [
         2,
@@ -557,7 +557,7 @@
     },
     {
       "id": "hina_i_ele_ele",
-      "h": "Hinaʻeleʻele",
+      "h": "Meʻe",
       "w": "Corvus (the Crow constellation)",
       "meaning": "\"The Black Fish Trap\" — a dark southern constellation",
       "type": "cultural",
@@ -711,7 +711,7 @@
     },
     {
       "id": "lehua",
-      "h": "Lehua",
+      "h": "Lehuakona",
       "w": "Antares (α Scorpii)",
       "meaning": "\"The Sacred Lehua Blossom\" — red heart of the Fishhook",
       "type": "cultural",
