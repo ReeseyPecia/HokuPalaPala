@@ -863,7 +863,7 @@
     },
     {
       "id": "venus",
-      "h": "Hōkūhoʻokele Waʻa",
+      "h": "Hōkūloa",
       "w": "Venus",
       "meaning": "\"The Star That Steers the Canoe\" — the dawn and dusk navigator",
       "type": "planet",
@@ -898,7 +898,7 @@
     },
     {
       "id": "jupiter",
-      "h": "Mākali",
+      "h": "Kaʻāwela",
       "w": "Jupiter",
       "meaning": "\"The Chief\" — brightest of the wandering stars",
       "type": "planet",
@@ -968,7 +968,7 @@
     },
     {
       "id": "saturn",
-      "h": "Kaʻuopae",
+      "h": "Makulu",     
       "w": "Saturn",
       "meaning": "\"The Slow One\" — the patient wanderer",
       "type": "planet",
@@ -1003,9 +1003,9 @@
     },
     {
       "id": "milky_way",
-      "h": "Manaiakalani / Koʻa Loa",
+      "h": "Hōkūnohoaupuni",
       "w": "Milky Way (Te Ara o Tama-nui-te-rā / Māpunapuna)",
-      "meaning": "\"The Long Coral Reef in the Sky\" — the great river of stars",
+      "meaning": "\"Come from Heaven",
       "type": "seasonal",
       "color": "#c8d8ff",
       "mag": null,
@@ -1098,7 +1098,7 @@
     },
     {
       "id": "mercury",
-      "h": "Uaki",
+      "h": "Ukaliali'i",
       "w": "Mercury",
       "meaning": "\"Dawn\" — swiftest of the wandering stars",
       "type": "planet",
